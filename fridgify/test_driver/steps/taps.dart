@@ -10,6 +10,7 @@ class TapButtonByTooltipNTimesStep extends When2WithWorld<String, int, FlutterWo
   Future<void> executeStep(String input1, int input2) async {
     final locator = find.byTooltip(input1);
     for (var i = 0; i < input2; i++) {
+
       await FlutterDriverUtils.tap(world.driver, locator, timeout: timeout);
     }
   }
@@ -43,7 +44,7 @@ class TapButtonStep extends When1WithWorld<String, FlutterWorld> {
   }
 
   @override
-  RegExp get pattern => RegExp(r"I tap the {string} (button|label)");
+  RegExp get pattern => RegExp(r"I tap the {string} button");
 }
 
 class TapButtonNTimesStep extends When2WithWorld<String, int, FlutterWorld> {

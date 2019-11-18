@@ -13,7 +13,7 @@ Feature: Overview Screen
 
   Scenario: The User shares Fridge
     Given I see "overview"
-    When I hold the fridge for 3 seconds
+    When I hold the "fridge" for 3 seconds
     And I tap the "share" label
     Then I see popup "qr"
 
@@ -31,7 +31,7 @@ Feature: Overview Screen
 
   Scenario: The User Joins Fridge
     Given I see "overview"
-    When I tap the"join" label
+    When I tap the "join" label
     Then I see screen "join"
 
   Scenario: The User Creates a Fridge

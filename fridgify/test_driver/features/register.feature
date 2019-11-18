@@ -2,31 +2,30 @@ Feature: Register Screen
   The user is on the register screen and signs up
 
   Scenario: The User registers successfully
-    Given I see "register"
-    And I enter valid "email"
-    And I enter valid "password"
-    And I enter valid "repeatPassword"
-    When I tap the "register" button
-    Then I see screen "overview"
+    Given I see screen "register_screen"
+    When I fill the "emailfield" field with "invalid@dummy.com"
+    And I fill the "passfield" field with "dummypass"
+    And I fill the "rep_passfield" field with "dummypass"
+    Then I tap the "register_btn" button
+    And I see screen "overview"
 
   Scenario: The User enters used email
-    Given I see "register"
-    And I enter used "email"
-    And I enter valid "password"
-    And I enter valid "repeatPassword"
-    When I tap the "register" button
-    Then I see popup "mail exists"
+    Given I see screen "register_screen"
+    When I fill the "emailfield" field with "invalid@dummy.com"
+    And I fill the "passfield" field with "dummypass"
+    And I fill the "rep_passfield" field with "dummypass"
+    Then I tap the "register_btn" button
+    And I see popup "mail exists"
 
   Scenario: The User enters wrong password
-    Given I see "register"
-    And I enter valid "email"
-    And I enter valid "password"
-    And I enter dummy "repeatPassword"
-    When I tap the "register" button
-    Then I see popup "password no match"
+    Given I see screen "register_screen"
+    When I fill the "emailfield" field with "invalid@dummy.com"
+    And I fill the "passfield" field with "dummypass" "dummypass"
+    Then I tap the "register_btn" button
+    And I see popup "mail exists"
 
   Scenario: The User wants to login
-    Given I see "register"
+    Given I see screen "register_screen"
     When I tap the "login" label
-    Then I see screen "login"
+    Then I see screen "login_screen"
 

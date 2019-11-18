@@ -25,3 +25,15 @@ class GivenISeeScreen extends Given1WithWorld<String, FlutterWorld> {
   @override
   RegExp get pattern => RegExp(r"I see screen {string}");
 }
+
+class ThenISeePopup extends Given1WithWorld<String, FlutterWorld> {
+  @override
+  Future<void> executeStep(input1) async {
+    final locator = find.byTooltip(input1);
+    await FlutterDriverUtils.waitForFlutter(world.driver);
+    await FlutterDriverUtils.isPresent(locator, world.driver);
+  }
+
+  @override
+  RegExp get pattern => RegExp(r"I see popup {string}");
+}

@@ -35,7 +35,7 @@ class TapButtonByTooltipOnceStep extends When1WithWorld<String, FlutterWorld> {
 
 class TapButtonStep extends When1WithWorld<String, FlutterWorld> {
   TapButtonStep()
-   : super(StepDefinitionConfiguration()..timeout = Duration(seconds: 10));
+      : super(StepDefinitionConfiguration()..timeout = Duration(seconds: 1));
 
   @override
   Future<void> executeStep(String input1) async {
@@ -45,6 +45,20 @@ class TapButtonStep extends When1WithWorld<String, FlutterWorld> {
 
   @override
   RegExp get pattern => RegExp(r"I tap the {string} button");
+}
+
+class TapLabelStep extends When1WithWorld<String, FlutterWorld> {
+  TapLabelStep()
+      : super(StepDefinitionConfiguration()..timeout = Duration(seconds: 1));
+
+  @override
+  Future<void> executeStep(String input1) async {
+    final locator = find.byValueKey(input1);
+    await FlutterDriverUtils.tap(world.driver, locator, timeout: timeout);
+  }
+
+  @override
+  RegExp get pattern => RegExp(r"I tap the {string} label");
 }
 
 class TapButtonNTimesStep extends When2WithWorld<String, int, FlutterWorld> {

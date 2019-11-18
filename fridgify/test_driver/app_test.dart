@@ -7,8 +7,8 @@ import 'package:gherkin/gherkin.dart';
 
 Future<void> main() {
   final config = FlutterTestConfiguration()
-    ..features = [Glob(r"test_driver/features/login.feature")]
-    ..stepDefinitions = [GivenISeeScreen(), ThenISeeScreen(), TapButtonStep()]
+    ..features = [Glob(r"test_driver/features/login.feature"), Glob(r"test_driver/features/register.feature")]
+    ..stepDefinitions = [GivenISeeScreen(), ThenISeeScreen(), TapButtonStep(), ThenISeePopup()]
     ..reporters = [ProgressReporter(), TestRunSummaryReporter()]
     ..restartAppBetweenScenarios = true
     ..targetAppPath = "test_driver/app.dart"

@@ -3,19 +3,18 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fridgify/screens/register.dart';
 
 // Create a Form widget.
-class LoginForm extends StatefulWidget {
+class RegisterForm extends StatefulWidget {
   @override
-  LoginFormState createState() {
-    return LoginFormState();
+  RegisterFormState createState() {
+    return RegisterFormState();
   }
 }
 
 // Create a corresponding State class.
 // This class holds data related to the form.
-class LoginFormState extends State<LoginForm> {
+class RegisterFormState extends State<RegisterForm> {
   // Create a global key that uniquely identifies the Form widget
   // and allows validation of the form.
   //
@@ -34,7 +33,7 @@ class LoginFormState extends State<LoginForm> {
         child: Form(
           key: _formKey,
           child: Column(
-            key: new Key('login_screen'),
+            key: new Key('register_screen'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
@@ -69,10 +68,10 @@ class LoginFormState extends State<LoginForm> {
                 height: 50,
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: 'Password',
-                    filled: true,
-                    border: OutlineInputBorder(),
-                    fillColor: Color.fromARGB(255, 210, 210, 210)
+                      hintText: 'Password',
+                      filled: true,
+                      border: OutlineInputBorder(),
+                      fillColor: Color.fromARGB(255, 210, 210, 210)
                   ),
                   validator: (value) {
                     if (value.isEmpty) {
@@ -87,47 +86,55 @@ class LoginFormState extends State<LoginForm> {
                   focusNode: _secondInputFocusNode,
                 ),
               ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
+              ),
+              SizedBox(
+                height: 50,
+                child: TextFormField(
+                  decoration: InputDecoration(
+                      hintText: 'Repeat Password',
+                      filled: true,
+                      border: OutlineInputBorder(),
+                      fillColor: Color.fromARGB(255, 210, 210, 210)
+                  ),
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      Scaffold.of(context).showSnackBar(SnackBar(content: Text('Please enter a password')));
+                    }
+                    return null;
+                  },
+
+                  obscureText: true,
+                  key: new Key('rep_passfield'),
+                  keyboardType: TextInputType.visiblePassword,
+                  focusNode: _secondInputFocusNode,
+                ),
+              ),
               Container(
                 padding: EdgeInsets.fromLTRB(0, _size.height*.02, 0, 0),
                 child: RichText(
                     text: TextSpan(children: <TextSpan>[
                       TextSpan(
-                          text: 'Need an account?',
+                          text: 'Already own an account?',
                           style: TextStyle(
                               color: Colors.white,
                           ))])),
               ),
               GestureDetector(
-                key: new Key('register_lbl'),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Register())),
+                key: new Key('login_lbl'),
+                onTap: () => Navigator.pop(context),
                 child: Container(
                   child: RichText(
                       text: TextSpan(children: <TextSpan>[
                     TextSpan(
-                        text: 'Sign-Up here',
+                        text: 'Sign-In here',
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue,
                             decoration: TextDecoration.underline)),
                   ])),
                   padding: EdgeInsets.symmetric(vertical: _size.height*0.009),
-                ),
-              ),
-              GestureDetector(
-                key: new Key('forgot_lbl'),
-                onTap: () => Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text('Processing Data'))),
-                child: Container(
-                  child: RichText(
-                      text: TextSpan(children: <TextSpan>[
-                    TextSpan(
-                        text: 'Forgot your password?',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline)),
-                  ])),
-                  padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(context).size.height * 0.1),
                 ),
               ),
               Padding(
@@ -193,16 +200,16 @@ class LoginFormState extends State<LoginForm> {
         ));
   }
 }
-class Login extends StatefulWidget {
-  Login({Key key, this.title}) : super(key: key);
+class Register extends StatefulWidget {
+  Register({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _LoginState createState() => _LoginState();
+  _RegisterState createState() => _RegisterState();
 }
 
-class _LoginState extends State<Login> {
+class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +240,7 @@ class _LoginState extends State<Login> {
               backgroundColor: Colors.transparent,
               title: Text("Sign-In"),
             ),
-            LoginForm(),
+            RegisterForm(),
           ]),
     );
   }

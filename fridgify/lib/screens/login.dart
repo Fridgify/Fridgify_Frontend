@@ -18,6 +18,8 @@ class LoginFormState extends State<LoginForm> {
   // Note: This is a GlobalKey<FormState>,
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
+  final FocusNode _firstInputFocusNode = new FocusNode();
+  final FocusNode _secondInputFocusNode = new FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +36,7 @@ class LoginFormState extends State<LoginForm> {
                 height: 50,
                 child:
               TextFormField(
+                onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
                 decoration: InputDecoration(hintText: 'Enter your E-Mail'),
                 validator: (value) {
                   if (value.isEmpty) {
@@ -43,6 +46,7 @@ class LoginFormState extends State<LoginForm> {
                 },
                 key: new Key('emailfield'),
                 keyboardType: TextInputType.emailAddress,
+                focusNode: _firstInputFocusNode,
               ),
               ),
               SizedBox(
@@ -50,6 +54,9 @@ class LoginFormState extends State<LoginForm> {
                 child: TextFormField(
                   decoration: InputDecoration(
                     hintText: 'Password',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                    fillColor: Color.fromARGB(100, 188, 188, 188)
                   ),
                   validator: (value) {
                     if (value.isEmpty) {
@@ -57,9 +64,12 @@ class LoginFormState extends State<LoginForm> {
                     }
                     return null;
                   },
+
                   obscureText: true,
                   key: new Key('passfield'),
-                  keyboardType: TextInputType.visiblePassword),
+                  keyboardType: TextInputType.visiblePassword,
+                  focusNode: _secondInputFocusNode,
+                ),
               ),
               Container(
                 padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -101,7 +111,7 @@ class LoginFormState extends State<LoginForm> {
               ),
               Divider(),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, MediaQuery.of(context).size.height * 0.1, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, MediaQuery.of(context).size.height * 0.15, 0, 0),
                 child: Center(
                   child: SizedBox(
                     width: 75,

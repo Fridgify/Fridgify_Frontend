@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:fridgify/screens/login.dart';
 
@@ -9,9 +11,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Fridgify',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
-      home: MyHomePage(title: 'Fridgify'),
+      home: MyHomePage(title: 'Login'),
     );
   }
 }
@@ -30,10 +32,30 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBar (
+        backgroundColor: Colors.transparent,
         title: Text(widget.title),
       ),
-      body: LoginForm()
+      body:
+      Stack(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+
+            image: DecorationImage(
+            image: ExactAssetImage('assets/images/bg.jpg'),
+            fit: BoxFit.fill,
+        ),
+        ),
+            child: BackdropFilter(
+              filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+              child: new Container(
+                decoration: new BoxDecoration(color: Colors.white.withOpacity(0.0)),
+              ),
+            ),
+        ),
+        LoginForm()
+        ]),
     );
   }
 }

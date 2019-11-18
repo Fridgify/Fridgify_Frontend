@@ -30,6 +30,9 @@ class LoginFormState extends State<LoginForm> {
             key: new Key('login'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              SizedBox(
+                height: 50,
+                child:
               TextFormField(
                 decoration: InputDecoration(hintText: 'Enter your E-Mail'),
                 validator: (value) {
@@ -41,7 +44,10 @@ class LoginFormState extends State<LoginForm> {
                 key: new Key('emailfield'),
                 keyboardType: TextInputType.emailAddress,
               ),
-              TextFormField(
+              ),
+              SizedBox(
+                height: 50,
+                child: TextFormField(
                   decoration: InputDecoration(
                     hintText: 'Password',
                   ),
@@ -54,6 +60,7 @@ class LoginFormState extends State<LoginForm> {
                   obscureText: true,
                   key: new Key('passfield'),
                   keyboardType: TextInputType.visiblePassword),
+              ),
               Container(
                 padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
                 child: Text('Need an Account?'),
@@ -89,12 +96,12 @@ class LoginFormState extends State<LoginForm> {
                             color: Color.fromARGB(255, 0, 0, 255),
                             decoration: TextDecoration.underline)),
                   ])),
-                  padding: EdgeInsets.fromLTRB(0, 0, 0, 100),
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(context).size.height * 0.07),
                 ),
               ),
               Divider(),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 170, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, MediaQuery.of(context).size.height * 0.1, 0, 0),
                 child: Center(
                   child: SizedBox(
                     width: 75,

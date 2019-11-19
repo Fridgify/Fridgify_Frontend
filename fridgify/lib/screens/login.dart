@@ -29,11 +29,14 @@ class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final FocusNode _firstInputFocusNode = new FocusNode();
   final FocusNode _secondInputFocusNode = new FocusNode();
+  String password = "";
+  String mail = "";
+  Auth auth;
+
 
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
-    Auth _auth = Auth();
     // Build a Form widget using the _formKey created above.
     return Container(
         padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
@@ -47,13 +50,12 @@ class LoginFormState extends State<LoginForm> {
                   padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
               ),
               SizedBox(
-                height: 50,
+                height: _size.height * 0.12,
                 child:
               TextFormField(
-                onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
-                onFieldSubmitted: (text) => _auth.mail = text,
+                onFieldSubmitted: (text) => mail = text,
                 decoration: InputDecoration(
-                    hintText: 'Enter your E-Mail',
+                    hintText: 'E-Mail',
                     filled: true,
                     border: OutlineInputBorder(),
                     fillColor: Color.fromARGB(255, 210, 210, 210)
@@ -70,9 +72,10 @@ class LoginFormState extends State<LoginForm> {
                 padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
               ),
               SizedBox(
-                height: 50,
+                height: _size.height * 0.12,
                 child: TextFormField(
-                  onFieldSubmitted: (text)  { _auth.password = text; if(_auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview())); },
+                  onEditingComplete: () => null,
+                  onFieldSubmitted: (text) => password = text,
                   decoration: InputDecoration(
                     hintText: 'Password',
                     filled: true,
@@ -90,7 +93,6 @@ class LoginFormState extends State<LoginForm> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.fromLTRB(0, _size.height*.02, 0, 0),
                 child: RichText(
                     text: TextSpan(children: <TextSpan>[
                       TextSpan(
@@ -132,28 +134,29 @@ class LoginFormState extends State<LoginForm> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, _size.height * 0.06, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, _size.height * 0.09, 0, 0),
                 child: Center(
                   child: SizedBox(
-                    width: 75,
-                    height: 75,
+                    width: _size.width * 0.22,
+                    height: _size.height * 0.13,
                     child: RaisedButton(
                       onPressed: () {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
-                          if(_auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
+                          auth = new Auth(mail, password);
+                          if(auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                         }
                       },
                       color: Colors.green,
                       key: new Key("login_btn"),
                       child: Icon(
                         Icons.play_arrow,
-                        size: 50,
+                        size: _size.height * 0.09,
                         color: Colors.white,
                       ),
                       padding: EdgeInsets.fromLTRB(0, 0, _size.width*0.008, 0),
                       shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(75)),
+                          borderRadius: new BorderRadius.circular(_size.height * 0.13)),
                     ),
                   ),
                 ),

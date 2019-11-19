@@ -10,10 +10,9 @@ class Auth {
   DateTime death;
 
 
-  Auth() ;
-
-  Auth.staticToken(String sToken) {
-    this.staticToken = sToken;
+  Auth(String mail, String password) {
+    this.mail = mail;
+    this.password = password;
   }
 
 
@@ -32,7 +31,7 @@ class Auth {
   }
 
   bool login() {
-    return true;
+    return false;
     // TODO:
     // Call to /login/ endpoint returns static token body: email pass OR header auth: static token to validate
     // Call to /token/ endpoints with static token in header

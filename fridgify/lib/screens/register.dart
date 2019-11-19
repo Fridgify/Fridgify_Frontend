@@ -29,11 +29,12 @@ class RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final FocusNode _firstInputFocusNode = new FocusNode();
   final FocusNode _secondInputFocusNode = new FocusNode();
+  var mail = "";
+  var password = "";
 
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
-    Auth _auth = Auth();
     // Build a Form widget using the _formKey created above.
     return Container(
         padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
@@ -47,32 +48,32 @@ class RegisterFormState extends State<RegisterForm> {
                   padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
               ),
               SizedBox(
-                height: 50,
+                height: _size.height * 0.12,
                 child:
-              TextFormField(
-                onEditingComplete: () => FocusScope.of(context).requestFocus(_firstInputFocusNode),
-                onFieldSubmitted: (text) => _auth.mail = text,
-                decoration: InputDecoration(
-                    hintText: 'Enter your E-Mail',
-                    filled: true,
-                    border: OutlineInputBorder(),
-                    fillColor: Color.fromARGB(255, 210, 210, 210)
+                TextFormField(
+                  onEditingComplete: () => FocusScope.of(context).requestFocus(_firstInputFocusNode),
+                  onFieldSubmitted: (text) => mail = text,
+                  decoration: InputDecoration(
+                      hintText: 'E-Mail',
+                      filled: true,
+                      border: OutlineInputBorder(),
+                      fillColor: Color.fromARGB(255, 210, 210, 210)
+                  ),
+                  validator: (value) {
+                    return Validator.validateMail(value);
+                  },
+                  key: new Key('emailfield'),
+                  keyboardType: TextInputType.emailAddress,
                 ),
-                validator: (value) {
-                  return Validator.validateMail(value);
-                },
-                key: new Key('emailfield'),
-                keyboardType: TextInputType.emailAddress,
-              ),
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
               ),
               SizedBox(
-                height: 50,
+                height: _size.height * 0.12,
                 child: TextFormField(
                   onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
-                  onFieldSubmitted: (text) => _auth.password = text,
+                  onFieldSubmitted: (text) => password = text,
                   decoration: InputDecoration(
                       hintText: 'Password',
                       filled: true,
@@ -94,9 +95,8 @@ class RegisterFormState extends State<RegisterForm> {
                 padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
               ),
               SizedBox(
-                height: 50,
+                height: _size.height * 0.12,
                 child: TextFormField(
-                  onFieldSubmitted: (text) { if(_auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview())); },
                   decoration: InputDecoration(
                       hintText: 'Repeat Password',
                       filled: true,
@@ -107,7 +107,7 @@ class RegisterFormState extends State<RegisterForm> {
                     if (value.isEmpty) {
                       return 'Please repeat the password';
                     }
-                    else if (value != _auth.password) {
+                    else if (value != password) {
                       return 'Passwords do not match';
                     }
                     return null;
@@ -120,7 +120,6 @@ class RegisterFormState extends State<RegisterForm> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.fromLTRB(0, _size.height*.02, 0, 0),
                 child: RichText(
                     text: TextSpan(children: <TextSpan>[
                       TextSpan(
@@ -149,23 +148,26 @@ class RegisterFormState extends State<RegisterForm> {
                 padding: EdgeInsets.fromLTRB(0, _size.height * 0.105, 0, 0),
                 child: Center(
                   child: SizedBox(
-                    width: 75,
-                    height: 75,
+                    width: _size.width * 0.22,
+                    height: _size.height * 0.13,
                     child: RaisedButton(
                       onPressed: () {
                         // Validate returns true if the form is valid, or false
-                        if(_auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
+                        if (_formKey.currentState.validate()) {
+                          Auth auth = new Auth(mail, password);
+                          if(auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
+                          }
                       },
                       color: Colors.green,
                       key: new Key("register_btn"),
                       child: Icon(
                         Icons.play_arrow,
-                        size: 50,
+                        size: _size.height * 0.09,
                         color: Colors.white,
                       ),
                       padding: EdgeInsets.fromLTRB(0, 0, _size.width*0.008, 0),
                       shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(75)),
+                          borderRadius: new BorderRadius.circular(_size.height * 0.13)),
                     ),
                   ),
                 ),
@@ -184,10 +186,12 @@ class RegisterFormState extends State<RegisterForm> {
                             } else {
                               throw 'Could not launch $url';
                             }
-                          },                          style: TextStyle(
+                          },
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
-                              decoration: TextDecoration.underline)),
+                              decoration: TextDecoration.underline)
+                      ),
                       TextSpan(
                           text: ' | ',
                           style: TextStyle(

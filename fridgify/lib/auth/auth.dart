@@ -45,6 +45,7 @@ class Auth {
 
 
   bool register() {
+    return false;
     this.staticToken = _fetchStaticToken();
     this.staticToken = fetchToken(this.staticToken);
     if(this.staticToken != null && this.fetchedToken != null)

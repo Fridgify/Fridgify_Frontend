@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/auth/auth.dart';
 import 'package:fridgify/screens/register.dart';
+import 'package:fridgify/utils/validator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'overview.dart';
@@ -58,10 +59,7 @@ class LoginFormState extends State<LoginForm> {
                     fillColor: Color.fromARGB(255, 210, 210, 210)
                 ),
                 validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter an E-Mail';
-                  }
-                  return null;
+                  return Validator.validateMail(value);
                 },
                 key: new Key('emailfield'),
                 keyboardType: TextInputType.emailAddress,
@@ -82,10 +80,7 @@ class LoginFormState extends State<LoginForm> {
                     fillColor: Color.fromARGB(255, 210, 210, 210)
                   ),
                   validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    return null;
+                    return value.isEmpty ? "Please enter a password" : null;
                   },
 
                   obscureText: true,

@@ -5,6 +5,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/auth/auth.dart';
 import 'package:fridgify/screens/register.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'overview.dart';
 
 // Create a Form widget.
 class LoginForm extends StatefulWidget {
@@ -56,7 +59,7 @@ class LoginFormState extends State<LoginForm> {
                 ),
                 validator: (value) {
                   if (value.isEmpty) {
-                    Scaffold.of(context).showSnackBar(SnackBar(content: Text('Please enter an E-Mail')));
+                    return 'Please enter an E-Mail';
                   }
                   return null;
                 },
@@ -71,7 +74,7 @@ class LoginFormState extends State<LoginForm> {
               SizedBox(
                 height: 50,
                 child: TextFormField(
-                  onFieldSubmitted: (text) => _auth.password = text,
+                  onFieldSubmitted: (text)  { _auth.password = text; if(_auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview())); },
                   decoration: InputDecoration(
                     hintText: 'Password',
                     filled: true,
@@ -80,7 +83,7 @@ class LoginFormState extends State<LoginForm> {
                   ),
                   validator: (value) {
                     if (value.isEmpty) {
-                      Scaffold.of(context).showSnackBar(SnackBar(content: Text('Please enter a password')));
+                      return 'Please enter a password';
                     }
                     return null;
                   },
@@ -103,7 +106,7 @@ class LoginFormState extends State<LoginForm> {
               ),
               GestureDetector(
                 key: new Key('register_lbl'),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Register())),
+                onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Register())),
                 child: Container(
                   child: RichText(
                       text: TextSpan(children: <TextSpan>[
@@ -119,8 +122,7 @@ class LoginFormState extends State<LoginForm> {
               ),
               GestureDetector(
                 key: new Key('forgot_lbl'),
-                onTap: () => Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text('Processing Data'))),
+                onTap: () { print("t"); },
                 child: Container(
                   child: RichText(
                       text: TextSpan(children: <TextSpan>[
@@ -144,7 +146,7 @@ class LoginFormState extends State<LoginForm> {
                       onPressed: () {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
-                          _auth.login();
+                          if(_auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                         }
                       },
                       color: Colors.green,
@@ -168,7 +170,14 @@ class LoginFormState extends State<LoginForm> {
                     text: TextSpan(children: <TextSpan>[
                       TextSpan(
                           text: 'Read our Blog',
-                          recognizer: new TapGestureRecognizer()..onTap = () => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Pressed'),)),
+                          recognizer: new TapGestureRecognizer()..onTap = () async {
+                            const url = 'https://fridgify.donkz.dev/';
+                            if (await canLaunch(url)) {
+                              await launch(url);
+                            } else {
+                              throw 'Could not launch $url';
+                            }
+                          },
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -209,7 +218,6 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
     return Scaffold(
       body:
       Stack(

@@ -3,6 +3,11 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fridgify/auth/auth.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'login.dart';
+import 'overview.dart';
 
 // Create a Form widget.
 class RegisterForm extends StatefulWidget {
@@ -27,6 +32,7 @@ class RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
+    Auth _auth = Auth();
     // Build a Form widget using the _formKey created above.
     return Container(
         padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
@@ -43,7 +49,8 @@ class RegisterFormState extends State<RegisterForm> {
                 height: 50,
                 child:
               TextFormField(
-                onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
+                onEditingComplete: () => FocusScope.of(context).requestFocus(_firstInputFocusNode),
+                onFieldSubmitted: (text) => _auth.mail = text,
                 decoration: InputDecoration(
                     hintText: 'Enter your E-Mail',
                     filled: true,
@@ -52,13 +59,12 @@ class RegisterFormState extends State<RegisterForm> {
                 ),
                 validator: (value) {
                   if (value.isEmpty) {
-                    Scaffold.of(context).showSnackBar(SnackBar(content: Text('Please enter an E-Mail')));
+                    return 'Please enter an E-Mail';
                   }
                   return null;
                 },
                 key: new Key('emailfield'),
                 keyboardType: TextInputType.emailAddress,
-                focusNode: _firstInputFocusNode,
               ),
               ),
               Padding(
@@ -67,6 +73,8 @@ class RegisterFormState extends State<RegisterForm> {
               SizedBox(
                 height: 50,
                 child: TextFormField(
+                  onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
+                  onFieldSubmitted: (text) => _auth.password = text,
                   decoration: InputDecoration(
                       hintText: 'Password',
                       filled: true,
@@ -75,7 +83,7 @@ class RegisterFormState extends State<RegisterForm> {
                   ),
                   validator: (value) {
                     if (value.isEmpty) {
-                      Scaffold.of(context).showSnackBar(SnackBar(content: Text('Please enter a password')));
+                      return 'Please enter a password';
                     }
                     return null;
                   },
@@ -83,7 +91,7 @@ class RegisterFormState extends State<RegisterForm> {
                   obscureText: true,
                   key: new Key('passfield'),
                   keyboardType: TextInputType.visiblePassword,
-                  focusNode: _secondInputFocusNode,
+                  focusNode: _firstInputFocusNode,
                 ),
               ),
               Padding(
@@ -92,6 +100,7 @@ class RegisterFormState extends State<RegisterForm> {
               SizedBox(
                 height: 50,
                 child: TextFormField(
+                  onFieldSubmitted: (text) { if(_auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview())); },
                   decoration: InputDecoration(
                       hintText: 'Repeat Password',
                       filled: true,
@@ -100,7 +109,10 @@ class RegisterFormState extends State<RegisterForm> {
                   ),
                   validator: (value) {
                     if (value.isEmpty) {
-                      Scaffold.of(context).showSnackBar(SnackBar(content: Text('Please enter a password')));
+                      return 'Please repeat the password';
+                    }
+                    else if (value != _auth.password) {
+                      return 'Passwords do not match';
                     }
                     return null;
                   },
@@ -123,7 +135,7 @@ class RegisterFormState extends State<RegisterForm> {
               ),
               GestureDetector(
                 key: new Key('login_lbl'),
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login())),
                 child: Container(
                   child: RichText(
                       text: TextSpan(children: <TextSpan>[
@@ -138,7 +150,7 @@ class RegisterFormState extends State<RegisterForm> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, _size.height * 0.06, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, _size.height * 0.105, 0, 0),
                 child: Center(
                   child: SizedBox(
                     width: 75,
@@ -146,10 +158,7 @@ class RegisterFormState extends State<RegisterForm> {
                     child: RaisedButton(
                       onPressed: () {
                         // Validate returns true if the form is valid, or false
-                        if (_formKey.currentState.validate()) {
-                          Scaffold.of(context).showSnackBar(
-                              SnackBar(content: Text('Processing Data')));
-                        }
+                        if(_auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                       },
                       color: Colors.green,
                       key: new Key("login_btn"),
@@ -172,8 +181,14 @@ class RegisterFormState extends State<RegisterForm> {
                     text: TextSpan(children: <TextSpan>[
                       TextSpan(
                           text: 'Read our Blog',
-                          recognizer: new TapGestureRecognizer()..onTap = () => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Pressed'),)),
-                          style: TextStyle(
+                          recognizer: new TapGestureRecognizer()..onTap = () async {
+                            const url = 'https://fridgify.donkz.dev/';
+                            if (await canLaunch(url)) {
+                              await launch(url);
+                            } else {
+                              throw 'Could not launch $url';
+                            }
+                          },                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                               decoration: TextDecoration.underline)),
@@ -213,7 +228,6 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    final Size _size = MediaQuery.of(context).size;
     return Scaffold(
       body:
       Stack(
@@ -238,7 +252,7 @@ class _RegisterState extends State<Register> {
             ),
             AppBar (
               backgroundColor: Colors.transparent,
-              title: Text("Sign-In"),
+              title: Text("Sign-Up"),
             ),
             RegisterForm(),
           ]),

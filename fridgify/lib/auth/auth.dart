@@ -1,21 +1,19 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:http/http.dart';
 
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class Auth {
   String mail;
   String password;
-  String static_token;
-  String fetched_token;
+  String staticToken;
+  String fetchedToken;
+  DateTime death;
 
 
   Auth() ;
 
   Auth.staticToken(String sToken) {
-    this.static_token = sToken;
+    this.staticToken = sToken;
   }
 
 
@@ -26,15 +24,31 @@ class Auth {
   }
 
   static String fetchToken(String staticToken) {
+    // TODO:
+    // Call to /login/ validate staticToken
+    // Call to /token/ fetch new Token
+    // Time it
     return null;
   }
 
   bool login() {
-    this.static_token = _fetchStaticToken();
-    this.fetched_token = fetchToken(this.static_token);
-    if(this.static_token != null && this.fetched_token != null)
+    return true;
+    // TODO:
+    // Call to /login/ endpoint returns static token body: email pass OR header auth: static token to validate
+    // Call to /token/ endpoints with static token in header
+    this.staticToken = _fetchStaticToken();
+    this.staticToken = fetchToken(this.staticToken);
+    if(this.staticToken != null && this.fetchedToken != null)
       return true;
     return false;
+  }
 
+
+  bool register() {
+    this.staticToken = _fetchStaticToken();
+    this.staticToken = fetchToken(this.staticToken);
+    if(this.staticToken != null && this.fetchedToken != null)
+      return true;
+    return false;
   }
 }

@@ -161,7 +161,7 @@ class RegisterFormState extends State<RegisterForm> {
                         if(_auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                       },
                       color: Colors.green,
-                      key: new Key("login_btn"),
+                      key: new Key("register_btn"),
                       child: Icon(
                         Icons.play_arrow,
                         size: 50,

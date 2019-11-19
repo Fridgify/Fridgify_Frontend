@@ -35,7 +35,7 @@ class TapButtonByTooltipOnceStep extends When1WithWorld<String, FlutterWorld> {
 
 class TapButtonStep extends When1WithWorld<String, FlutterWorld> {
   TapButtonStep()
-      : super(StepDefinitionConfiguration()..timeout = Duration(seconds: 1));
+      : super(StepDefinitionConfiguration()..timeout = Duration(seconds: 5));
 
   @override
   Future<void> executeStep(String input1) async {
@@ -49,7 +49,7 @@ class TapButtonStep extends When1WithWorld<String, FlutterWorld> {
 
 class TapLabelStep extends When1WithWorld<String, FlutterWorld> {
   TapLabelStep()
-      : super(StepDefinitionConfiguration()..timeout = Duration(seconds: 1));
+      : super(StepDefinitionConfiguration()..timeout = Duration(seconds: 5));
 
   @override
   Future<void> executeStep(String input1) async {

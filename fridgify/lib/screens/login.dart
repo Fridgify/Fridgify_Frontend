@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fridgify/auth/auth.dart';
 import 'package:fridgify/screens/register.dart';
 
 // Create a Form widget.
@@ -28,6 +29,7 @@ class LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
+    Auth _auth = Auth();
     // Build a Form widget using the _formKey created above.
     return Container(
         padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
@@ -45,6 +47,7 @@ class LoginFormState extends State<LoginForm> {
                 child:
               TextFormField(
                 onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
+                onFieldSubmitted: (text) => _auth.mail = text,
                 decoration: InputDecoration(
                     hintText: 'Enter your E-Mail',
                     filled: true,
@@ -68,6 +71,7 @@ class LoginFormState extends State<LoginForm> {
               SizedBox(
                 height: 50,
                 child: TextFormField(
+                  onFieldSubmitted: (text) => _auth.password = text,
                   decoration: InputDecoration(
                     hintText: 'Password',
                     filled: true,
@@ -140,8 +144,7 @@ class LoginFormState extends State<LoginForm> {
                       onPressed: () {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
-                          Scaffold.of(context).showSnackBar(
-                              SnackBar(content: Text('Processing Data')));
+                          _auth.login();
                         }
                       },
                       color: Colors.green,

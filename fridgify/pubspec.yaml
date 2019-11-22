@@ -30,6 +30,7 @@ dependencies:
   path: "^1.6.2"
   sqflite: "^1.1.0"
   url_launcher: "^5.2.5"
+  dcdg: "^2.0.1"
 
 dev_dependencies:
   flutter_test:
@@ -39,7 +40,7 @@ dev_dependencies:
   test: any
 
 
-# For information on the generic Dart part of this file, see the
+# For information on the generic Dart part of this file.plantuml, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.

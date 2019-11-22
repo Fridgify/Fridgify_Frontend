@@ -1,0 +1,108 @@
+@startuml
+
+set namespaceSeparator ::
+
+class "fridgify::auth::auth.dart::Auth" {
+  +String mail
+  +String password
+  +String staticToken
+  +String fetchedToken
+  +DateTime death
+  -String _fetchStaticToken()
+  {static} +String fetchToken()
+  +bool login()
+  +bool register()
+}
+
+class "fridgify::main.dart::MyApp" {
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "fridgify::main.dart::MyApp"
+
+class "fridgify::screens::login.dart::LoginForm" {
+  +LoginFormState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::screens::login.dart::LoginForm"
+
+class "fridgify::screens::login.dart::LoginFormState" {
+  -GlobalKey<FormState> _formKey
+  -FocusNode _firstInputFocusNode
+  -FocusNode _secondInputFocusNode
+  +String password
+  +String mail
+  +Auth auth
+  +Widget build()
+}
+
+"fridgify::screens::login.dart::LoginFormState" o-- "flutter::src::widgets::framework.dart::GlobalKey<FormState>"
+"fridgify::screens::login.dart::LoginFormState" o-- "flutter::src::widgets::focus_manager.dart::FocusNode"
+"fridgify::screens::login.dart::LoginFormState" o-- "fridgify::auth::auth.dart::Auth"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::screens::login.dart::LoginFormState"
+
+class "fridgify::screens::login.dart::Login" {
+  +String title
+  +_LoginState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::screens::login.dart::Login"
+
+class "fridgify::screens::login.dart::_LoginState" {
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::screens::login.dart::_LoginState"
+
+class "fridgify::screens::overview.dart::Overview" {
+  +String title
+  +_OverviewState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::screens::overview.dart::Overview"
+
+class "fridgify::screens::overview.dart::_OverviewState" {
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::screens::overview.dart::_OverviewState"
+
+class "fridgify::screens::register.dart::RegisterForm" {
+  +RegisterFormState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::screens::register.dart::RegisterForm"
+
+class "fridgify::screens::register.dart::RegisterFormState" {
+  -GlobalKey<FormState> _formKey
+  -FocusNode _firstInputFocusNode
+  -FocusNode _secondInputFocusNode
+  +String mail
+  +String password
+  +Widget build()
+}
+
+"fridgify::screens::register.dart::RegisterFormState" o-- "flutter::src::widgets::framework.dart::GlobalKey<FormState>"
+"fridgify::screens::register.dart::RegisterFormState" o-- "flutter::src::widgets::focus_manager.dart::FocusNode"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::screens::register.dart::RegisterFormState"
+
+class "fridgify::screens::register.dart::Register" {
+  +String title
+  +_RegisterState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::screens::register.dart::Register"
+
+class "fridgify::screens::register.dart::_RegisterState" {
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::screens::register.dart::_RegisterState"
+
+class "fridgify::utils::validator.dart::Validator" {
+  {static} +String validateMail()
+  {static} +String validatePassword()
+}
+
+
+@enduml

@@ -29,13 +29,16 @@ class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final FocusNode _firstInputFocusNode = new FocusNode();
   final FocusNode _secondInputFocusNode = new FocusNode();
+  TextEditingController _textInputController_mail = TextEditingController();
+  TextEditingController _textInputController_pass = TextEditingController();
   String password = "";
   String mail = "";
   Auth auth;
 
-
   @override
   Widget build(BuildContext context) {
+    _textInputController_pass.text = "password";
+    _textInputController_mail.text = "dummy_name";
     final Size _size = MediaQuery.of(context).size;
     // Build a Form widget using the _formKey created above.
     return Container(
@@ -47,19 +50,21 @@ class LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
+                  //padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
                   padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
               ),
               SizedBox(
                 height: _size.height * 0.12,
                 child:
               TextFormField(
-                onFieldSubmitted: (text) => mail = text,
+                onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
                 decoration: InputDecoration(
-                    hintText: 'E-Mail',
+                    hintText: 'E-Mail/Username',
                     filled: true,
                     border: OutlineInputBorder(),
                     fillColor: Color.fromARGB(255, 210, 210, 210)
                 ),
+                controller: _textInputController_mail,
                 validator: (value) {
                   return Validator.validateMail(value);
                 },
@@ -74,14 +79,13 @@ class LoginFormState extends State<LoginForm> {
               SizedBox(
                 height: _size.height * 0.12,
                 child: TextFormField(
-                  onEditingComplete: () => null,
-                  onFieldSubmitted: (text) => password = text,
                   decoration: InputDecoration(
                     hintText: 'Password',
                     filled: true,
                     border: OutlineInputBorder(),
                     fillColor: Color.fromARGB(255, 210, 210, 210)
                   ),
+                  controller: _textInputController_pass,
                   validator: (value) {
                     return value.isEmpty ? "Please enter a password" : null;
                   },
@@ -119,7 +123,7 @@ class LoginFormState extends State<LoginForm> {
               ),
               GestureDetector(
                 key: new Key('forgot_lbl'),
-                onTap: () { print("t"); },
+                onTap: () {},
                 child: Container(
                   child: RichText(
                       text: TextSpan(children: <TextSpan>[
@@ -140,11 +144,11 @@ class LoginFormState extends State<LoginForm> {
                     width: _size.width * 0.22,
                     height: _size.height * 0.13,
                     child: RaisedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
-                          auth = new Auth(mail, password);
-                          if(auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
+                          auth = new Auth(_textInputController_mail.text, _textInputController_pass.text);
+                          if(await auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                         }
                       },
                       color: Colors.green,
@@ -205,6 +209,7 @@ class LoginFormState extends State<LoginForm> {
 }
 class Login extends StatefulWidget {
   Login({Key key, this.title}) : super(key: key);
+
 
   final String title;
 

@@ -1,17 +1,27 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:fridgify/auth/auth.dart';
 
 class Overview extends StatefulWidget {
-  Overview({Key key, this.title}) : super(key: key);
+  Auth auth;
 
+  Overview({Key key, this.title, this.token}) : super(key: key) {
+    auth = new Auth.withToken(token);
+  }
+  final String token;
   final String title;
 
   @override
-  _OverviewState createState() => _OverviewState();
+  _OverviewState createState() => _OverviewState(auth);
 }
 
 class _OverviewState extends State<Overview> {
+  Auth auth;
+  _OverviewState(Auth auth) {
+    this.auth = auth;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +52,12 @@ class _OverviewState extends State<Overview> {
               backgroundColor: Colors.transparent,
               title: Text("Overview"),
             ),
+            GestureDetector(
+              onTap: () => this.auth.fetchToken(),
+              child: Center(
+                child: Text("Press me"),
+              ),
+            )
           ]),
     );
   }

@@ -35,6 +35,8 @@ class RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
+    TextEditingController _textInputController_mail = TextEditingController();
+    TextEditingController _textInputController_pass = TextEditingController();
     // Build a Form widget using the _formKey created above.
     return Container(
         padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
@@ -59,6 +61,7 @@ class RegisterFormState extends State<RegisterForm> {
                       border: OutlineInputBorder(),
                       fillColor: Color.fromARGB(255, 210, 210, 210)
                   ),
+                  controller: _textInputController_mail,
                   validator: (value) {
                     return Validator.validateMail(value);
                   },
@@ -80,6 +83,7 @@ class RegisterFormState extends State<RegisterForm> {
                       border: OutlineInputBorder(),
                       fillColor: Color.fromARGB(255, 210, 210, 210)
                   ),
+                  controller: _textInputController_mail,
                   validator: (value) {
                     return Validator.validatePassword(value);
 
@@ -107,7 +111,7 @@ class RegisterFormState extends State<RegisterForm> {
                     if (value.isEmpty) {
                       return 'Please repeat the password';
                     }
-                    else if (value != password) {
+                    else if (value != _textInputController_pass.text) {
                       return 'Passwords do not match';
                     }
                     return null;
@@ -154,8 +158,8 @@ class RegisterFormState extends State<RegisterForm> {
                       onPressed: () {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
-                          Auth auth = new Auth(mail, password);
-                          if(auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
+                          Auth auth = new Auth(_textInputController_mail.text, _textInputController_pass.text);
+                            if(auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                           }
                       },
                       color: Colors.green,

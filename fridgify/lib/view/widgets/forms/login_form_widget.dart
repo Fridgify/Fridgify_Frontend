@@ -3,14 +3,15 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fridgify/auth/auth.dart';
-import 'package:fridgify/screens/register.dart';
+import 'package:fridgify/config.dart';
+import 'package:fridgify/controller/auth.controller.dart';
 import 'package:fridgify/utils/validator.dart';
+import 'package:fridgify/view/screens/overview.view.dart';
+import 'package:fridgify/view/screens/register.view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'overview.dart';
 
-// Create a Form widget.
+
 class LoginForm extends StatefulWidget {
   @override
   LoginFormState createState() {
@@ -29,16 +30,16 @@ class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final FocusNode _firstInputFocusNode = new FocusNode();
   final FocusNode _secondInputFocusNode = new FocusNode();
-  TextEditingController _textInputController_mail = TextEditingController();
-  TextEditingController _textInputController_pass = TextEditingController();
+  TextEditingController _textInputControllerMail = TextEditingController();
+  TextEditingController _textInputControllerPass = TextEditingController();
   String password = "";
   String mail = "";
   Auth auth;
 
   @override
   Widget build(BuildContext context) {
-    _textInputController_pass.text = "password";
-    _textInputController_mail.text = "dummy_name";
+    _textInputControllerPass.text = "password";
+    _textInputControllerMail.text = "dummy_name";
     final Size _size = MediaQuery.of(context).size;
     // Build a Form widget using the _formKey created above.
     return Container(
@@ -50,28 +51,28 @@ class LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                  //padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
+                //padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
                   padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
               ),
               SizedBox(
                 height: _size.height * 0.12,
                 child:
-              TextFormField(
-                onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
-                decoration: InputDecoration(
-                    hintText: 'E-Mail/Username',
-                    filled: true,
-                    border: OutlineInputBorder(),
-                    fillColor: Color.fromARGB(255, 210, 210, 210)
+                TextFormField(
+                  onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
+                  decoration: InputDecoration(
+                      hintText: 'E-Mail/Username',
+                      filled: true,
+                      border: OutlineInputBorder(),
+                      fillColor: Color.fromARGB(255, 210, 210, 210)
+                  ),
+                  controller: _textInputControllerMail,
+                  validator: (value) {
+                    return Validator.validateMail(value);
+                  },
+                  key: new Key('emailfield'),
+                  keyboardType: TextInputType.emailAddress,
+                  focusNode: _firstInputFocusNode,
                 ),
-                controller: _textInputController_mail,
-                validator: (value) {
-                  return Validator.validateMail(value);
-                },
-                key: new Key('emailfield'),
-                keyboardType: TextInputType.emailAddress,
-                focusNode: _firstInputFocusNode,
-              ),
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
@@ -80,12 +81,12 @@ class LoginFormState extends State<LoginForm> {
                 height: _size.height * 0.12,
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: 'Password',
-                    filled: true,
-                    border: OutlineInputBorder(),
-                    fillColor: Color.fromARGB(255, 210, 210, 210)
+                      hintText: 'Password',
+                      filled: true,
+                      border: OutlineInputBorder(),
+                      fillColor: Color.fromARGB(255, 210, 210, 210)
                   ),
-                  controller: _textInputController_pass,
+                  controller: _textInputControllerPass,
                   validator: (value) {
                     return value.isEmpty ? "Please enter a password" : null;
                   },
@@ -102,7 +103,7 @@ class LoginFormState extends State<LoginForm> {
                       TextSpan(
                           text: 'Need an account?',
                           style: TextStyle(
-                              color: Colors.white,
+                            color: Colors.white,
                           ))])),
               ),
               GestureDetector(
@@ -111,13 +112,13 @@ class LoginFormState extends State<LoginForm> {
                 child: Container(
                   child: RichText(
                       text: TextSpan(children: <TextSpan>[
-                    TextSpan(
-                        text: 'Sign-Up here',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline)),
-                  ])),
+                        TextSpan(
+                            text: 'Sign-Up here',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline)),
+                      ])),
                   padding: EdgeInsets.symmetric(vertical: _size.height*0.009),
                 ),
               ),
@@ -127,13 +128,13 @@ class LoginFormState extends State<LoginForm> {
                 child: Container(
                   child: RichText(
                       text: TextSpan(children: <TextSpan>[
-                    TextSpan(
-                        text: 'Forgot your password?',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline)),
-                  ])),
+                        TextSpan(
+                            text: 'Forgot your password?',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline)),
+                      ])),
                   padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(context).size.height * 0.1),
                 ),
               ),
@@ -147,7 +148,7 @@ class LoginFormState extends State<LoginForm> {
                       onPressed: () async {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
-                          auth = new Auth(_textInputController_mail.text, _textInputController_pass.text);
+                          auth = new Auth(_textInputControllerMail.text, _textInputControllerPass.text);
                           if(await auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                         }
                       },
@@ -169,33 +170,33 @@ class LoginFormState extends State<LoginForm> {
                 child: Align(
                   alignment: FractionalOffset.bottomCenter,
                   child: RichText(
-                    text: TextSpan(children: <TextSpan>[
-                      TextSpan(
-                          text: 'Read our Blog',
-                          recognizer: new TapGestureRecognizer()..onTap = () async {
-                            const url = 'https://fridgify.donkz.dev/';
-                            if (await canLaunch(url)) {
-                              await launch(url);
-                            } else {
-                              throw 'Could not launch $url';
-                            }
-                          },
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              decoration: TextDecoration.underline)),
-                      TextSpan(
-                          text: ' | ',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold
-                          )),
+                      text: TextSpan(children: <TextSpan>[
                         TextSpan(
-                        text: 'Read the AGBs',
-                        recognizer: new TapGestureRecognizer()..onTap = () => print('Tap Here onTap'),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            decoration: TextDecoration.underline)),
+                            text: 'Read our Blog',
+                            recognizer: new TapGestureRecognizer()..onTap = () async {
+                              const url = 'https://fridgify.donkz.dev/';
+                              if (await canLaunch(url)) {
+                                await launch(url);
+                              } else {
+                                throw 'Could not launch $url';
+                              }
+                            },
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                decoration: TextDecoration.underline)),
+                        TextSpan(
+                            text: ' | ',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold
+                            )),
+                        TextSpan(
+                            text: 'Read the AGBs',
+                            recognizer: new TapGestureRecognizer()..onTap = () => print('Tap Here onTap'),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                decoration: TextDecoration.underline)),
                       ])),
                 ),
               ),
@@ -205,50 +206,5 @@ class LoginFormState extends State<LoginForm> {
             ],
           ),
         ));
-  }
-}
-class Login extends StatefulWidget {
-  Login({Key key, this.title}) : super(key: key);
-
-
-  final String title;
-
-  @override
-  _LoginState createState() => _LoginState();
-}
-
-class _LoginState extends State<Login> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body:
-      Stack(
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-
-                image: DecorationImage(
-                  image: ExactAssetImage('assets/images/bg.jpg'),
-                  fit: BoxFit.fitHeight,
-                ),
-              ),
-              child: BackdropFilter(
-                filter: new ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
-                child: new Container(
-                  decoration: new BoxDecoration(color: Colors.white.withOpacity(0.0)),
-                ),
-              ),
-            ),
-            Container(
-              color: Color.fromARGB(100, 0, 0, 0),
-            ),
-            AppBar (
-              backgroundColor: Colors.transparent,
-              title: Text("Sign-In"),
-            ),
-            LoginForm(),
-          ]),
-    );
   }
 }

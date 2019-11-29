@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: Overview(title: 'Overview', token: jsonDecode((cache as FileInfo).file.readAsStringSync())['token']),
+        home: Overview(title: 'Overview', token: (cache as FileInfo).file.readAsStringSync()),
       );
     else
       return MaterialApp(

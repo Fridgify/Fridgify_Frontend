@@ -25,16 +25,19 @@ class RegisterFormState extends State<RegisterForm> {
   // Note: This is a GlobalKey<FormState>,
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
+  final FocusNode _zeroInputFocusNode = new FocusNode();
   final FocusNode _firstInputFocusNode = new FocusNode();
   final FocusNode _secondInputFocusNode = new FocusNode();
   var mail = "";
   var password = "";
+  var username = "";
+  TextEditingController _textInputControllerMail = TextEditingController();
+  TextEditingController _textInputControllerPass = TextEditingController();
+  TextEditingController _textInputControllerUser = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final Size _size = MediaQuery.of(context).size;
-    TextEditingController _textInputControllerMail = TextEditingController();
-    TextEditingController _textInputControllerPass = TextEditingController();
     // Build a Form widget using the _formKey created above.
     return Container(
         padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
@@ -46,6 +49,26 @@ class RegisterFormState extends State<RegisterForm> {
             children: <Widget>[
               Padding(
                   padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
+              ),
+              SizedBox(
+                height: _size.height * 0.12,
+                child:
+                TextFormField(
+                  onEditingComplete: () => FocusScope.of(context).requestFocus(_zeroInputFocusNode),
+                  onFieldSubmitted: (text) => username = text,
+                  decoration: InputDecoration(
+                      hintText: 'Username',
+                      filled: true,
+                      border: OutlineInputBorder(),
+                      fillColor: Color.fromARGB(255, 210, 210, 210)
+                  ),
+                  controller: _textInputControllerUser,
+                  validator: (value) {
+                    return Validator.validateMail(value);
+                  },
+                  key: new Key('username'),
+                  keyboardType: TextInputType.text,
+                ),
               ),
               SizedBox(
                 height: _size.height * 0.12,
@@ -65,6 +88,7 @@ class RegisterFormState extends State<RegisterForm> {
                   },
                   key: new Key('emailfield'),
                   keyboardType: TextInputType.emailAddress,
+                  focusNode: _zeroInputFocusNode,
                 ),
               ),
               Padding(
@@ -81,7 +105,7 @@ class RegisterFormState extends State<RegisterForm> {
                       border: OutlineInputBorder(),
                       fillColor: Color.fromARGB(255, 210, 210, 210)
                   ),
-                  controller: _textInputControllerMail,
+                  controller: _textInputControllerPass,
                   validator: (value) {
                     return Validator.validatePassword(value);
 
@@ -94,114 +118,6 @@ class RegisterFormState extends State<RegisterForm> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
-              ),
-              SizedBox(
-                height: _size.height * 0.12,
-                child: TextFormField(
-                  decoration: InputDecoration(
-                      hintText: 'Repeat Password',
-                      filled: true,
-                      border: OutlineInputBorder(),
-                      fillColor: Color.fromARGB(255, 210, 210, 210)
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please repeat the password';
-                    }
-                    else if (value != _textInputControllerPass.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-
-                  obscureText: true,
-                  key: new Key('rep_passfield'),
-                  keyboardType: TextInputType.visiblePassword,
-                  focusNode: _secondInputFocusNode,
-                ),
-              ),              Padding(
-                padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
-              ),
-              SizedBox(
-                height: _size.height * 0.12,
-                child: TextFormField(
-                  decoration: InputDecoration(
-                      hintText: 'Repeat Password',
-                      filled: true,
-                      border: OutlineInputBorder(),
-                      fillColor: Color.fromARGB(255, 210, 210, 210)
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please repeat the password';
-                    }
-                    else if (value != _textInputControllerPass.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-
-                  obscureText: true,
-                  key: new Key('rep_passfield'),
-                  keyboardType: TextInputType.visiblePassword,
-                  focusNode: _secondInputFocusNode,
-                ),
-              ),              Padding(
-                padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
-              ),
-              SizedBox(
-                height: _size.height * 0.12,
-                child: TextFormField(
-                  decoration: InputDecoration(
-                      hintText: 'Repeat Password',
-                      filled: true,
-                      border: OutlineInputBorder(),
-                      fillColor: Color.fromARGB(255, 210, 210, 210)
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please repeat the password';
-                    }
-                    else if (value != _textInputControllerPass.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-
-                  obscureText: true,
-                  key: new Key('rep_passfield'),
-                  keyboardType: TextInputType.visiblePassword,
-                  focusNode: _secondInputFocusNode,
-                ),
-              ),              Padding(
-                padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
-              ),
-              SizedBox(
-                height: _size.height * 0.12,
-                child: TextFormField(
-                  decoration: InputDecoration(
-                      hintText: 'Repeat Password',
-                      filled: true,
-                      border: OutlineInputBorder(),
-                      fillColor: Color.fromARGB(255, 210, 210, 210)
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please repeat the password';
-                    }
-                    else if (value != _textInputControllerPass.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-
-                  obscureText: true,
-                  key: new Key('rep_passfield'),
-                  keyboardType: TextInputType.visiblePassword,
-                  focusNode: _secondInputFocusNode,
-                ),
-              ),              Padding(
                 padding: EdgeInsets.fromLTRB(0, _size.height*.01, 0, 0),
               ),
               SizedBox(
@@ -255,16 +171,16 @@ class RegisterFormState extends State<RegisterForm> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0, _size.height * 0.105, 0, 0),
+                padding: EdgeInsets.fromLTRB(0, 0.1, 0, 0),
                 child: Center(
                   child: SizedBox(
-                    width: _size.width * 0.22,
-                    height: _size.height * 0.13,
+                    width: 100,
+                    height: 100,
                     child: RaisedButton(
                       onPressed: () async {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
-                          Auth auth = new Auth(_textInputControllerMail.text, _textInputControllerPass.text);
+                          Auth auth = new Auth.withRegister(_textInputControllerUser.text, _textInputControllerPass.text, _textInputControllerMail.text, "dummy", "dummy", "1990-01-01");
                           if(await auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
                         }
                       },

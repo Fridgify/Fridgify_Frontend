@@ -38,8 +38,6 @@ class LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    _textInputControllerPass.text = "password";
-    _textInputControllerMail.text = "dummy_name";
     final Size _size = MediaQuery.of(context).size;
     // Build a Form widget using the _formKey created above.
     return Container(
@@ -142,8 +140,8 @@ class LoginFormState extends State<LoginForm> {
                 padding: EdgeInsets.fromLTRB(0, _size.height * 0.09, 0, 0),
                 child: Center(
                   child: SizedBox(
-                    width: _size.width * 0.22,
-                    height: _size.height * 0.13,
+                    width: 100,
+                    height: 100,
                     child: RaisedButton(
                       onPressed: () async {
                         // Validate returns true if the form is valid, or false

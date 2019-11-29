@@ -1,8 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:fridgify/config.dart';
 import 'package:fridgify/controller/auth.controller.dart';
+import 'package:fridgify/controller/fridge.controller.dart';
+import 'package:fridgify/utils/fridges.dart';
+import 'package:fridgify/view/widgets/fridge_frame.dart';
 
 class Overview extends StatefulWidget {
   Auth auth;
@@ -10,6 +14,7 @@ class Overview extends StatefulWidget {
   Overview({Key key, this.title, this.token}) : super(key: key) {
     Config.logger.i("Overview opened Client-Token: $token");
     auth = new Auth.withToken(token);
+    Config.logger.i("Created Auth in Overview with Cached Token: ${auth.clientToken}");
   }
   final String token;
   final String title;
@@ -54,11 +59,27 @@ class _OverviewState extends State<Overview> {
               backgroundColor: Colors.transparent,
               title: Text("Overview"),
             ),
+            Container(
+            padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+            child: GridView.count(
+                crossAxisCount: 2,
+                childAspectRatio: 1.0,
+                padding: const EdgeInsets.all(4.0),
+                mainAxisSpacing: 4.0,
+                crossAxisSpacing: 4.0,
+                children: <FridgeFrame>[
+
+                  FridgeFrame(new Fridges(1, "Hi", "Dummy", "Dummy")),
+                ].map((FridgeFrame f) {
+                  return GridTile(
+                      child: f);
+                }).toList()),
+            ),
             GestureDetector(
-              onTap: () => this.auth.setApiToken(),
-              child: Center(
-                child: Text("Press me"),
-              ),
+              onTap: () {
+                Fridge fridge = new Fridge(this.auth);
+                fridge.fetchFridgesOverview();
+              },
             )
           ]),
     );

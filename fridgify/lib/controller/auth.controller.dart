@@ -52,6 +52,8 @@ class Auth {
   }
 
   Future setClientToken() async {
+
+    this.clientToken = this.clientToken ?? await readFromCache("auth.json");
     try {
       this.clientToken =
       await model.fetchClientTokenLogin(this.user, this.password);
@@ -87,6 +89,11 @@ class Auth {
     f.writeAsStringSync(token);
     DefaultCacheManager().putFile(file, f.readAsBytesSync(), maxAge: d);
     Config.logger.i("File in Cache ${DefaultCacheManager().getFileFromCache(file)}");
+  }
+
+  Future<String> readFromCache(String f) async {
+    var cache = await DefaultCacheManager().getFileFromCache(f);
+    return cache.file.readAsStringSync();
   }
 
   Future<bool> login() async {

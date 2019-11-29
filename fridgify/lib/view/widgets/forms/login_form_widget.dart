@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fridgify/config.dart';
 import 'package:fridgify/controller/auth.controller.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/screens/overview.view.dart';
@@ -49,7 +48,6 @@ class LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                //padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
                   padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
               ),
               SizedBox(

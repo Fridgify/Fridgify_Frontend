@@ -1,0 +1,3 @@
+class FailedToFetchFridgesException implements Exception {
+
+}

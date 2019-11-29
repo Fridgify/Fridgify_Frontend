@@ -11,5 +11,7 @@ class Config {
 
   static const String FRIDGE = "/fridge/";
 
+  static const String CREATE_FRIDGE = "/fridge/management/create/";
+
   static Logger logger = Logger();
 }

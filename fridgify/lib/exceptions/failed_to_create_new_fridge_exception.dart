@@ -1,0 +1,3 @@
+class FailedToCreateNewFridgeException implements Exception {
+
+}

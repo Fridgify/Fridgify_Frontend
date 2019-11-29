@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/auth.controller.dart';
+import 'package:fridgify/controller/fridge.controller.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/screens/login.view.dart';
 import 'package:fridgify/view/screens/overview.view.dart';
@@ -181,7 +182,11 @@ class RegisterFormState extends State<RegisterForm> {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
                           Auth auth = new Auth.withRegister(_textInputControllerUser.text, _textInputControllerPass.text, _textInputControllerMail.text, "dummy", "dummy", "1990-01-01");
-                          if(await auth.register()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
+                          await auth.register();
+                          Fridge f = Fridge(auth);
+                          List<Widget> frames = await f.fetchFridgesOverview();
+                          if(await auth.validateToken()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview(token: auth.clientToken, frames: frames)));
+
                         }
                       },
                       color: Colors.green,

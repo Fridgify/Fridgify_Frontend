@@ -2,24 +2,24 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/utils/fridges.dart';
 
-class FridgeFrame extends StatefulWidget {
+class FridgeOverviewButton extends StatefulWidget {
   Fridges fridge;
-  FridgeFrame(Fridges f) {
+  FridgeOverviewButton(Fridges f) {
     this.fridge = f;
   }
 
   @override
-  FridgeFrameState createState() {
-    return FridgeFrameState(this.fridge);
+  FridgeOverviewButtonState createState() {
+    return FridgeOverviewButtonState(this.fridge);
   }
 }
 
 
 // Create a corresponding State class.
 // This class holds data related to the form.
-class FridgeFrameState extends State<FridgeFrame> {
+class FridgeOverviewButtonState extends State<FridgeOverviewButton> {
   Fridges fridge;
-  FridgeFrameState(Fridges f) {
+  FridgeOverviewButtonState(Fridges f) {
     this.fridge = f;
   }
 

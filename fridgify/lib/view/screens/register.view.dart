@@ -1,32 +1,24 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fridgify/auth/auth.dart';
+import 'package:fridgify/view/widgets/forms/register_form_widget.dart';
 
-class Overview extends StatefulWidget {
-  Auth auth;
 
-  Overview({Key key, this.title, this.token}) : super(key: key) {
-    auth = new Auth.withToken(token);
-  }
-  final String token;
+class Register extends StatefulWidget {
+  Register({Key key, this.title}) : super(key: key);
+
   final String title;
 
   @override
-  _OverviewState createState() => _OverviewState(auth);
+  _RegisterState createState() => _RegisterState();
 }
 
-class _OverviewState extends State<Overview> {
-  Auth auth;
-  _OverviewState(Auth auth) {
-    this.auth = auth;
-  }
-
+class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: new Key('overview'),
       body:
       Stack(
           children: <Widget>[
@@ -50,14 +42,9 @@ class _OverviewState extends State<Overview> {
             ),
             AppBar (
               backgroundColor: Colors.transparent,
-              title: Text("Overview"),
+              title: Text("Sign-Up"),
             ),
-            GestureDetector(
-              onTap: () => this.auth.fetchToken(),
-              child: Center(
-                child: Text("Press me"),
-              ),
-            )
+            RegisterForm(),
           ]),
     );
   }

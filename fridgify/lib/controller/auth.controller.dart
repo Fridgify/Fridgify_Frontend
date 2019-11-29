@@ -56,20 +56,19 @@ class Auth {
       this.clientToken =
       await model.fetchClientTokenLogin(this.user, this.password);
     } catch(e) {
-      Config.logger.e(e.errMessage());
+      Config.logger.e(e);
     }
     await writeToCache(this.clientToken, "auth.json", new Duration(days: 14));
   }
 
   Future setClientTokenRegister() async {
     try {
-      this.clientToken =
-      await model.fetchClientTokenRegister(this.user, this.password, this.email,
-                                            this.name, this.surname, this.date);
+      if(await model.fetchRegister(this.user, this.password, this.email,
+                                            this.name, this.surname, this.date))
+        this.clientToken = await model.fetchClientTokenLogin(this.user, this.password);
     } catch(e) {
-      Config.logger.e(e.errMessage());
+      Config.logger.e(e);
     }
-    await writeToCache(this.clientToken, "auth.json", new Duration(days: 14));
   }
 
   Future setApiToken() async {

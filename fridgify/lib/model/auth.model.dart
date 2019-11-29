@@ -19,20 +19,20 @@ class AuthModel {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"username": user, "password": password}),
         encoding: utf8);
-    Config.logger.i('Fetching Client token: $response');
+    Config.logger.i('Fetching Client token: ${response.body}');
     if(response.statusCode == 200)
       return jsonDecode(response.body)["token"];
     throw new FailedToFetchClientTokenException();
   }
 
-  Future<String> fetchClientTokenRegister(String user, String password, String email, String name, String surname, String date) async {
+  Future<bool> fetchRegister(String user, String password, String email, String name, String surname, String date) async {
     var response = await post(Config.API + Config.REGISTER,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"username": user, "password": password, "email": email,
-          "name": name, "surname": surname, "birthdate": date}), encoding: utf8);
+        body: jsonEncode({"username": user, "password": password,
+          "name": name, "surname": surname, "email": email, "birthdate": date}), encoding: utf8);
     Config.logger.i('Fetching Client token: ${response.body}');
     if(response.statusCode == 201)
-      return jsonDecode(response.body)["token"];
+      return true;
     throw new FailedToFetchClientTokenException();
   }
 

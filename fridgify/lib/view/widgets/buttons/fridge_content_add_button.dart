@@ -5,14 +5,13 @@ import 'package:fridgify/view/widgets/forms/add_content_form.dart';
 import 'package:fridgify/view/widgets/forms/add_fridge_form.dart';
 
 class FridgeContentAddButton extends StatefulWidget {
-  Fridge fridge;
 
-  FridgeContentAddButton(this.fridge);
+  FridgeContentAddButton();
 
 
   @override
   FridgeContentAddButtonState createState() {
-    return FridgeContentAddButtonState(this.fridge);
+    return FridgeContentAddButtonState();
   }
 }
 
@@ -20,9 +19,8 @@ class FridgeContentAddButton extends StatefulWidget {
 // This class holds data related to the form.
 class FridgeContentAddButtonState extends State<FridgeContentAddButton> {
   final _formKey = GlobalKey<FormState>();
-  Fridge fridge;
 
-  FridgeContentAddButtonState(this.fridge);
+  FridgeContentAddButtonState();
 
   @override
   Widget build(BuildContext context) {

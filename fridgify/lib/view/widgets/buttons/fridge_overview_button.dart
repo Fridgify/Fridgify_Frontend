@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content.controller.dart';
 import 'package:fridgify/utils/fridges.dart';
+import 'package:fridgify/view/screens/content.view.dart';
 
 import '../../../config.dart';
 
@@ -34,7 +35,9 @@ class FridgeOverviewButtonState extends State<FridgeOverviewButton> {
         onTap: () async {
           Config.logger.i("Auth ${this.fridge.auth}");
           ContentController c = ContentController(this.fridge.auth, this.fridge.id);
-          await c.getContent();
+          List<Widget> con =  await c.getContent();
+          Navigator.push(context, MaterialPageRoute(builder: (context) => ContentView(this.fridge.auth, this.fridge.id, con)));
+
         },
         child: Center(
         child: Column(

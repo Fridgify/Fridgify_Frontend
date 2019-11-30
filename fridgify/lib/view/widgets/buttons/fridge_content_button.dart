@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fridgify/controller/content.controller.dart';
 import 'package:fridgify/controller/fridge.controller.dart';
 import 'package:fridgify/utils/content.dart';
+import 'package:fridgify/view/screens/content.view.dart';
 import 'package:fridgify/view/widgets/forms/add_fridge_form.dart';
 
 class FridgeContentButton extends StatefulWidget {
@@ -37,7 +39,18 @@ class FridgeContentButtonState extends State<FridgeContentButton> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
+                      RaisedButton(
+                        child: Text("Remove Item"),
+                        onPressed: () async {
+                          ContentController con = ContentController(c.auth, c.fId);
+                          List<Widget> cont = await con.getContent();
+                          con.removeContent(c.id);
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ContentView(c.auth, c.fId, cont)));
 
+                        },
+                      )
                     ],
                   ),
                 ),
@@ -47,7 +60,7 @@ class FridgeContentButtonState extends State<FridgeContentButton> {
       child: Row(
         children: <Widget>[
           Text(c.name),
-          Text("$c.amount"),
+          Text("${c.amount}"),
           Text(c.unit),
         ],
       )

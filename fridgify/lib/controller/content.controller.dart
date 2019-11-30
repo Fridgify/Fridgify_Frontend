@@ -25,9 +25,17 @@ class ContentController {
 
     for(var i in jsonDecode(await model.getContent(this.auth.apiToken, this.id)))
       {
-          content.add(FridgeContentAddButton(Content.withId(i["item_id"], i["item__name"], i["store"], i["description"], i["amount"], i["unit"], i[""], i["expiration_date"])))
+        Config.logger.i("Adding Content with id ${i["item_id"]}");
+          content.add(FridgeContentButton(Content.withId(i["item_id"], i["item__name"], i["description"], i["amount"], i["unit"], i["expiration_date"], this.auth, this.id)));
       }
 
-    print(await model.getContent(this.auth.apiToken, this.id));
+    content.add(FridgeContentAddButton());
+
+    return content;
+  }
+
+  Future<void> removeContent(int itId) async {
+    Config.logger.i("Removing Content with id: $itId");
+    await model.removeContent(this.auth.apiToken, this.id, itId);
   }
 }

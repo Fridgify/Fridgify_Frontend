@@ -1,6 +1,8 @@
 
 import 'dart:convert';
 
+import 'package:fridgify/controller/auth.controller.dart';
+
 class Content {
   int id;
   int amount;
@@ -9,10 +11,12 @@ class Content {
   String store;
   String unit;
   DateTime buyDate;
-  DateTime expirationDate;
+  String expirationDate;
+  Auth auth;
+  int fId;
 
-  Content.withId(this.id, this.name, this.store, this.description, this.amount, this.unit, this.buyDate,
-      this.expirationDate);
+  Content.withId(this.id, this.name, this.description, this.amount, this.unit,
+      this.expirationDate, this.auth, this.fId);
 
   Content(this.name, this.store, this.description, this.amount, this.unit, this.buyDate,
       this.expirationDate);

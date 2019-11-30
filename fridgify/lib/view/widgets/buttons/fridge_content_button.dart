@@ -43,8 +43,8 @@ class FridgeContentButtonState extends State<FridgeContentButton> {
                         child: Text("Remove Item"),
                         onPressed: () async {
                           ContentController con = ContentController(c.auth, c.fId);
+                          await con.removeContent(c.id);
                           List<Widget> cont = await con.getContent();
-                          con.removeContent(c.id);
                           Navigator.pop(context);
                           Navigator.pop(context);
                           Navigator.push(context, MaterialPageRoute(builder: (context) => ContentView(c.auth, c.fId, cont)));

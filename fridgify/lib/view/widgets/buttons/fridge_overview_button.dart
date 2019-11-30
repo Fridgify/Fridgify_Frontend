@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' as prefix0;
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content.controller.dart';
 import 'package:fridgify/utils/fridges.dart';
@@ -29,16 +30,16 @@ class FridgeOverviewButtonState extends State<FridgeOverviewButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: GestureDetector(
-        onTap: () async {
-          Config.logger.i("Auth ${this.fridge.auth}");
-          ContentController c = ContentController(this.fridge.auth, this.fridge.id);
-          List<Widget> con =  await c.getContent();
-          Navigator.push(context, MaterialPageRoute(builder: (context) => ContentView(this.fridge.auth, this.fridge.id, con)));
+    return GestureDetector(
+      onTap: () async {
+        Config.logger.i("Auth ${this.fridge.auth}");
+        ContentController c = ContentController(this.fridge.auth, this.fridge.id);
+        List<Widget> con =  await c.getContent();
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ContentView(this.fridge.auth, this.fridge.id, con)));
 
-        },
+      },
+      child: Container(
+        color: Colors.white,
         child: Center(
         child: Column(
         children: <Widget>[

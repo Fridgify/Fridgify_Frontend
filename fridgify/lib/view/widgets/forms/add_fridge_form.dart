@@ -85,8 +85,7 @@ class AddFridgeFormState extends State<AddFridgeForm> {
                       Auth auth = fridge.auth;
 
                       // Needed better way of refreshing
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Overview(token: auth.clientToken, frames: frames)));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview(token: auth.clientToken, frames: frames)));
 
                     }
                   },

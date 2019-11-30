@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 class Content {
+  int id;
   int amount;
   String name;
   String description;
@@ -9,6 +10,9 @@ class Content {
   String unit;
   DateTime buyDate;
   DateTime expirationDate;
+
+  Content.withId(this.id, this.name, this.store, this.description, this.amount, this.unit, this.buyDate,
+      this.expirationDate);
 
   Content(this.name, this.store, this.description, this.amount, this.unit, this.buyDate,
       this.expirationDate);

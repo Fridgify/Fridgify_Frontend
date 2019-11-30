@@ -23,10 +23,10 @@ class Fridge {
   Future<List<Widget>> fetchFridgesOverview() async {
     var fridges = jsonDecode(await model.fetchFridges())["fridges"];
     var frames = List<Widget>();
-    Config.logger.i("Creating Fridge Overviews with ${frames.length}");
+    Config.logger.i("Creating Fridge Overviews with ${frames.length} and $auth");
 
     for(var f in fridges)
-      frames.add(FridgeOverviewButton(Fridges(f["id"], f["name"], f["description"], f["content"])));
+      frames.add(FridgeOverviewButton(Fridges(f["id"], f["name"], f["description"], f["content"], this.auth)));
 
     frames.add(FridgeOverviewAddButton(this));
     return frames;

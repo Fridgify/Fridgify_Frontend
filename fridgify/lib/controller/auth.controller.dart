@@ -93,7 +93,9 @@ class Auth {
 
   Future<String> readFromCache(String f) async {
     var cache = await DefaultCacheManager().getFileFromCache(f);
-    return cache.file.readAsStringSync();
+    if(cache != null)
+      return cache.file.readAsStringSync();
+    return null;
   }
 
   Future<bool> login() async {

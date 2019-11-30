@@ -9,11 +9,13 @@ import 'controller/fridge.controller.dart';
 
 Future main() async  {
     var cache = await DefaultCacheManager().getFileFromCache("auth.json");
-    var token = cache.file.readAsStringSync();
+    var token;
     Config.logger.i("Starting app with token: $token");
     Auth auth;
     Fridge fridge;
     List<Widget> frames;
+    if(cache != null)
+      token = cache.file.readAsStringSync();
     if(token != null)
     {
       //Needs better way of passing Token/Frames!

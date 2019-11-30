@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fridgify/controller/content.controller.dart';
 import 'package:fridgify/utils/fridges.dart';
+
+import '../../../config.dart';
 
 class FridgeOverviewButton extends StatefulWidget {
   Fridges fridge;
@@ -28,6 +31,11 @@ class FridgeOverviewButtonState extends State<FridgeOverviewButton> {
     return Container(
       color: Colors.white,
       child: GestureDetector(
+        onTap: () async {
+          Config.logger.i("Auth ${this.fridge.auth}");
+          ContentController c = ContentController(this.fridge.auth, this.fridge.id);
+          await c.getContent();
+        },
         child: Center(
         child: Column(
         children: <Widget>[

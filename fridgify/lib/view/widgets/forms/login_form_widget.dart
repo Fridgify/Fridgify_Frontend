@@ -10,6 +10,8 @@ import 'package:fridgify/view/screens/overview.view.dart';
 import 'package:fridgify/view/screens/register.view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../config.dart';
+
 
 
 class LoginForm extends StatefulWidget {
@@ -148,6 +150,7 @@ class LoginFormState extends State<LoginForm> {
                           //Needs better way of passing Token/Frames!
                           //Needs better way of passing Token/Frames!
                           //Needs better way of passing Token/Frames!
+
                           auth = new Auth(_textInputControllerMail.text, _textInputControllerPass.text);
                           await auth.login();
                           Fridge f = Fridge(auth);

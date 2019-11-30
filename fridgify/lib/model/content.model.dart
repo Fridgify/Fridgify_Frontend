@@ -9,8 +9,8 @@ import 'package:http/http.dart';
 import '../config.dart';
 
 class ContentModel {
-  Future<String> getContent(String token, String id) async {
-    var response = await get(Config.API + Config.GET_CONTENT + id,
+  Future<String> getContent(String token, int id) async {
+    var response = await get(Config.API + Config.GET_CONTENT + "$id",
                   headers: { "Authorization": token});
 
     if(response.statusCode < 400)
@@ -19,11 +19,11 @@ class ContentModel {
     throw new FailedToFetchContentException();
   }
 
-  Future<void> addContent(String token, String id, Content c) async {
+  Future<void> addContent(String token, int id, Content c) async {
     Config.logger.i("Adding Content ${c.getJson}");
 
 
-    var response = await post(Config.API + Config.GET_CONTENT + id + "/",
+    var response = await post(Config.API + Config.GET_CONTENT + "$id" + "/",
                     headers: { "Authorization": token },
                     body: c.getJson()
                     );
@@ -33,11 +33,11 @@ class ContentModel {
 
   }
 
-  Future<void> removeContent(String token, String fId, String itemId )
+  Future<void> removeContent(String token, int fId, int itemId )
   async {
     Config.logger.i("Removing Content $itemId from $fId");
 
-    var response = await delete(Config.API + Config.GET_CONTENT + fId + "/" + itemId,
+    var response = await delete(Config.API + Config.GET_CONTENT + "$fId" + "/" + "$itemId",
                                 headers: {"Authorization": token } );
 
     if(!(response.statusCode < 400))

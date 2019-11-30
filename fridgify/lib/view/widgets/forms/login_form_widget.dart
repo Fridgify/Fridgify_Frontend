@@ -3,12 +3,14 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fridgify/config.dart';
 import 'package:fridgify/controller/auth.controller.dart';
+import 'package:fridgify/controller/fridge.controller.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/screens/overview.view.dart';
 import 'package:fridgify/view/screens/register.view.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../config.dart';
 
 
 
@@ -49,7 +51,6 @@ class LoginFormState extends State<LoginForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                //padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
                   padding: EdgeInsets.fromLTRB(0, _size.height*0.15, 0, 0)
               ),
               SizedBox(
@@ -146,8 +147,15 @@ class LoginFormState extends State<LoginForm> {
                       onPressed: () async {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
+                          //Needs better way of passing Token/Frames!
+                          //Needs better way of passing Token/Frames!
+                          //Needs better way of passing Token/Frames!
+
                           auth = new Auth(_textInputControllerMail.text, _textInputControllerPass.text);
-                          if(await auth.login()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview()));
+                          await auth.login();
+                          Fridge f = Fridge(auth);
+                          List<Widget> frames = await f.fetchFridgesOverview();
+                          if(await auth.validateToken()) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Overview(token: auth.clientToken, frames: frames)));
                         }
                       },
                       color: Colors.green,

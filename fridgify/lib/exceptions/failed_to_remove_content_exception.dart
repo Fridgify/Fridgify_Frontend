@@ -1,0 +1,3 @@
+class FailedToRemoveContentException implements Exception {
+
+}

@@ -9,5 +9,11 @@ class Config {
 
   static const String TOKEN = "/auth/token/";
 
+  static const String FRIDGE = "/fridge/";
+
+  static const String CREATE_FRIDGE = "/fridge/management/create/";
+
+  static const String GET_CONTENT = "/fridge/content/";
+
   static Logger logger = Logger();
 }

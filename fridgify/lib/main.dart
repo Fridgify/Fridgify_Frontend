@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:fridgify/view/screens/login.view.dart';
@@ -18,7 +16,10 @@ Future main() async  {
     List<Widget> frames;
     if(token != null)
     {
-        auth = Auth.withToken(token);
+      //Needs better way of passing Token/Frames!
+      //Needs better way of passing Token/Frames!
+      //Needs better way of passing Token/Frames!
+      auth = Auth.withToken(token);
         fridge = Fridge(auth);
         frames = await fridge.fetchFridgesOverview();
 

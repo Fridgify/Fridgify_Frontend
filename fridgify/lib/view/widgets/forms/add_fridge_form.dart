@@ -77,9 +77,14 @@ class AddFridgeFormState extends State<AddFridgeForm> {
                   child: Text("Add Fridge"),
                   onPressed: () async {
                     if (_formKey.currentState.validate()) {
+                      //Needs better way of passing Token/Frames!
+                      //Needs better way of passing Token/Frames!
+                      //Needs better way of passing Token/Frames!
                       await this.fridge.createFridge(_textInputControllerName.text, _textInputControllerDesc.text);
                       List<Widget> frames = await fridge.fetchFridgesOverview();
                       Auth auth = fridge.auth;
+
+                      // Needed better way of refreshing
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => Overview(token: auth.clientToken, frames: frames)));
 

@@ -145,6 +145,9 @@ class LoginFormState extends State<LoginForm> {
                       onPressed: () async {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
+                          //Needs better way of passing Token/Frames!
+                          //Needs better way of passing Token/Frames!
+                          //Needs better way of passing Token/Frames!
                           auth = new Auth(_textInputControllerMail.text, _textInputControllerPass.text);
                           await auth.login();
                           Fridge f = Fridge(auth);

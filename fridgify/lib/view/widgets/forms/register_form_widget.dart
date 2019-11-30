@@ -181,6 +181,9 @@ class RegisterFormState extends State<RegisterForm> {
                       onPressed: () async {
                         // Validate returns true if the form is valid, or false
                         if (_formKey.currentState.validate()) {
+                          //Needs better way of passing Token/Frames!
+                          //Needs better way of passing Token/Frames!
+                          //Needs better way of passing Token/Frames!
                           Auth auth = new Auth.withRegister(_textInputControllerUser.text, _textInputControllerPass.text, _textInputControllerMail.text, "dummy", "dummy", "1990-01-01");
                           await auth.register();
                           Fridge f = Fridge(auth);

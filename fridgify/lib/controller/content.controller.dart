@@ -29,7 +29,7 @@ class ContentController {
           content.add(FridgeContentButton(Content.withId(i["item_id"], i["item__name"], i["description"], i["amount"], i["unit"], i["expiration_date"], this.auth, this.id)));
       }
 
-    content.add(FridgeContentAddButton());
+    content.add(FridgeContentAddButton(this));
 
     return content;
   }
@@ -37,5 +37,11 @@ class ContentController {
   Future<void> removeContent(int itId) async {
     Config.logger.i("Removing Content with id: $itId");
     await model.removeContent(this.auth.apiToken, this.id, itId);
+  }
+
+  Future<void> addContent(String item, String store, String desc, int amount, String unit, String date) async {
+    Content c = Content(item, store, desc, amount, unit, DateTime.now().toString().split(" ")[0], date);
+    Config.logger.i("Adding Item ${c.getJson()} to $id");
+    await model.addContent(auth.apiToken, this.id, c);
   }
 }

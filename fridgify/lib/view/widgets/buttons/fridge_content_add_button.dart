@@ -1,17 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fridgify/controller/content.controller.dart';
 import 'package:fridgify/controller/fridge.controller.dart';
 import 'package:fridgify/view/widgets/forms/add_content_form.dart';
 import 'package:fridgify/view/widgets/forms/add_fridge_form.dart';
 
 class FridgeContentAddButton extends StatefulWidget {
-
-  FridgeContentAddButton();
+  ContentController c;
+  FridgeContentAddButton(this.c);
 
 
   @override
   FridgeContentAddButtonState createState() {
-    return FridgeContentAddButtonState();
+    return FridgeContentAddButtonState(this.c);
   }
 }
 
@@ -19,8 +20,8 @@ class FridgeContentAddButton extends StatefulWidget {
 // This class holds data related to the form.
 class FridgeContentAddButtonState extends State<FridgeContentAddButton> {
   final _formKey = GlobalKey<FormState>();
-
-  FridgeContentAddButtonState();
+  ContentController c;
+  FridgeContentAddButtonState(this.c);
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,7 @@ class FridgeContentAddButtonState extends State<FridgeContentAddButton> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      AddContentForm(),
+                      AddContentForm(this.c),
                     ],
                   ),
                 ),

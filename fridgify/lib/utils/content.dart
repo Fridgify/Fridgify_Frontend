@@ -10,7 +10,7 @@ class Content {
   String description;
   String store;
   String unit;
-  DateTime buyDate;
+  String buyDate;
   String expirationDate;
   Auth auth;
   int fId;
@@ -28,8 +28,8 @@ class Content {
       "store": this.store,
       "amount": this.amount,
       "unit": this.unit,
-      "buy_date": this.buyDate.toString(),
-      "expiration_date": this.expirationDate.toString()
+      "buy_date": this.buyDate,
+      "expiration_date": this.expirationDate
     });
   }
 }

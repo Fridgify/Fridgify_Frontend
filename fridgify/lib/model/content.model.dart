@@ -20,14 +20,14 @@ class ContentModel {
   }
 
   Future<void> addContent(String token, int id, Content c) async {
-    Config.logger.i("Adding Content ${c.getJson}");
-
-
-    var response = await post(Config.API + Config.GET_CONTENT + "$id" + "/",
+    String url = "${Config.API}${Config.GET_CONTENT}$id/";
+    print("URL: $url Token: $token");
+    Config.logger.i("Adding Content ${c.getJson} to $url");
+    var response = await post(url ,
                     headers: { "Authorization": token },
                     body: c.getJson()
                     );
-
+    Config.logger.i("Content Adding: " + response.body);
     if(!(response.statusCode < 400))
       throw new FailedToAddContentException();
 

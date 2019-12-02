@@ -31,6 +31,7 @@ class FridgeOverviewButtonState extends State<FridgeOverviewButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      key: new Key("fridgeBtn"),
       onTap: () async {
         Config.logger.i("Auth ${this.fridge.auth}");
         ContentController c = ContentController(this.fridge.auth, this.fridge.id);

@@ -29,6 +29,7 @@ class _ContentViewState extends State<ContentView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: new Key("content"),
       body:
       Stack(
           children: <Widget>[

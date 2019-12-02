@@ -43,6 +43,7 @@ class AddFridgeFormState extends State<AddFridgeForm> {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextFormField(
+                  key: new Key("f_name"),
                   onEditingComplete: () => FocusScope.of(context).requestFocus(_firstInputFocusNode),
 
                   decoration: InputDecoration(
@@ -59,6 +60,7 @@ class AddFridgeFormState extends State<AddFridgeForm> {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextFormField(
+                  key: new Key("f_desc"),
                   decoration: InputDecoration(
                       hintText: "Description"
                   ),
@@ -75,6 +77,7 @@ class AddFridgeFormState extends State<AddFridgeForm> {
                 padding: const EdgeInsets.all(8.0),
                 child: RaisedButton(
                   child: Text("Add Fridge"),
+                  key: new Key("addFBtn"),
                   onPressed: () async {
                     if (_formKey.currentState.validate()) {
                       //Needs better way of passing Token/Frames!

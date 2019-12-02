@@ -67,7 +67,7 @@ class RegisterFormState extends State<RegisterForm> {
                   validator: (value) {
                     return Validator.validateMail(value);
                   },
-                  key: new Key('username'),
+                  key: new Key('usernamefield'),
                   keyboardType: TextInputType.text,
                 ),
               ),

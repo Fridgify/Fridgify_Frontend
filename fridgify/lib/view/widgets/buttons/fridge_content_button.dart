@@ -29,6 +29,7 @@ class FridgeContentButtonState extends State<FridgeContentButton> {
   @override
   Widget build(BuildContext context) {
     return RaisedButton(
+        key: new Key("milk"),
       onPressed: () {
         showDialog(
             context: context,
@@ -40,6 +41,7 @@ class FridgeContentButtonState extends State<FridgeContentButton> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       RaisedButton(
+                        key: new Key("removeButton"),
                         child: Text("Remove Item"),
                         onPressed: () async {
                           ContentController con = ContentController(c.auth, c.fId);

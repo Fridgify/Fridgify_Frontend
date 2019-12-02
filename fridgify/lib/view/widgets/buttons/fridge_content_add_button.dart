@@ -26,6 +26,7 @@ class FridgeContentAddButtonState extends State<FridgeContentAddButton> {
   @override
   Widget build(BuildContext context) {
     return RaisedButton(
+      key: new Key("add_content"),
       onPressed: () {
         showDialog(
             context: context,

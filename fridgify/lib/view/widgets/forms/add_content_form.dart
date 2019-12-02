@@ -54,6 +54,7 @@ class AddContentFormState extends State<AddContentForm> {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextFormField(
+                  key: new Key("name"),
                   onEditingComplete: () => FocusScope.of(context).requestFocus(_firstInputFocusNode),
 
                   decoration: InputDecoration(
@@ -70,6 +71,7 @@ class AddContentFormState extends State<AddContentForm> {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextFormField(
+                  key: new Key("store"),
                   onEditingComplete: () => FocusScope.of(context).requestFocus(_secondInputFocusNode),
                   decoration: InputDecoration(
                       hintText: "Store"
@@ -81,6 +83,7 @@ class AddContentFormState extends State<AddContentForm> {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextFormField(
+                  key: new Key("desc"),
                   onEditingComplete: () => FocusScope.of(context).requestFocus(_thirdInputFocusNode),
                   decoration: InputDecoration(
                       hintText: "Description"
@@ -97,6 +100,7 @@ class AddContentFormState extends State<AddContentForm> {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextFormField(
+                  key: new Key("amount"),
                   onEditingComplete: () => FocusScope.of(context).requestFocus(_fourthInputFocusNode),
                   decoration: InputDecoration(
                       hintText: "Amount"
@@ -114,6 +118,7 @@ class AddContentFormState extends State<AddContentForm> {
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextFormField(
+                  key: new Key("unit"),
                   decoration: InputDecoration(
                       hintText: "Unit"
                   ),
@@ -130,32 +135,24 @@ class AddContentFormState extends State<AddContentForm> {
                 padding: EdgeInsets.all(8.0),
                 child: GestureDetector(
                   child: TextFormField(
+                      key: new Key("exp"),
                       decoration: InputDecoration(
                           hintText: "Expiration Date"
                       ),
                     focusNode: null,
                     controller: _textInputControllerDate,
-                    onTap: () {
-                      DatePicker.showDatePicker(context,
-                          showTitleActions: true,
-                          minTime: DateTime.now(),
-                          onConfirm: (date) {
-                            _textInputControllerDate.text = date.toString().split(" ")[0];
-                          },
-                          currentTime: DateTime.now(),
-                          locale: LocaleType.de);
-                    })
+                    )
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: RaisedButton(
+                  key: new Key("add_con"),
                   child: Text("Add Content"),
                   onPressed: () async {
                     if (_formKey.currentState.validate()) {
                       await c.addContent(_textInputControllerName.text, _textInputControllerStore.text, _textInputControllerDesc.text, int.parse(_textInputControllerAmount.text), _textInputControllerUnit.text, _textInputControllerDate.text);
                       List<Widget> cont = await c.getContent();
-                      Navigator.pop(context);
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => ContentView(c.auth, c.id, cont)));
 

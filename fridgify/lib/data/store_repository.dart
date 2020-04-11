@@ -26,10 +26,8 @@ class StoreRepository implements Repository<Store> {
 
   @override
   Future<int> add(Store store) async {
-    var token = Repository.getToken();
-
     var response = await http.post(storeApi,
-        headers: {"Content-Type": "application/json", "Authorization": token},
+        headers: Repository.getHeaders(),
         body: jsonEncode({
           "name": store.name,
         }),
@@ -58,12 +56,9 @@ class StoreRepository implements Repository<Store> {
 
   @override
   Future<Map<int, Store>> fetchAll() async {
-    var token = Repository.getToken();
-
     logger.i('StoreRepository => FETCHING FROM URL: $storeApi');
 
-    var response = await http.get(storeApi,
-        headers: {"Content-Type": "application/json", "Authorization": token});
+    var response = await http.get(storeApi, headers: Repository.getHeaders());
 
     logger.i('StoreRepository => FETCHING STORES: ${response.body}');
 

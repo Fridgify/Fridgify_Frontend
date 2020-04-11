@@ -46,12 +46,9 @@ class ItemRepository implements Repository<Item> {
 
   @override
   Future<Map<int, Item>> fetchAll() async {
-    var token = Repository.getToken();
-
     logger.i('ItemRepository => FETCHIN FROM URL: $itemApi');
 
-    var response = await http.get(itemApi,
-        headers: {"Content-Type": "application/json", "Authorization": token});
+    var response = await http.get(itemApi, headers: Repository.getHeaders());
 
     logger.i('ItemRepository => FETCHING ITEMS: ${response.body}');
 

@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:fridgify/data/item_repository.dart';
@@ -13,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class ContentRepository implements Repository<Content> {
-
   Logger logger = Repository.logger;
 
   Fridge fridge;
@@ -29,26 +27,21 @@ class ContentRepository implements Repository<Content> {
   }
 
   @override
-  Future<int> add (Content content) async {
+  Future<int> add(Content content) async {
     var date = DateTime.now();
-
-    var token = Repository.getToken();
     var body = jsonEncode({
-      "name": content.item.name, "description": content.item.description,
+      "name": content.item.name,
+      "description": content.item.description,
       "buy_date": "${date.year}-${date.month}-${date.day}",
       "expiration_date": content.expirationDate,
       "amount": content.amount,
-      "unit": content.unit, "store": content.item.store.name,
+      "unit": content.unit,
+      "store": content.item.store.name,
     });
     logger.i('ContentRepository => Requesting $contentApi with $body');
 
-    var response = await http.post(
-        contentApi, headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    }, body: body,
-      encoding: utf8
-    );
+    var response = await http.post(contentApi,
+        headers: Repository.getHeaders(), body: body, encoding: utf8);
 
     logger.i('ContentRepository => CREATING CONTENT: ${response.body}');
 
@@ -65,15 +58,11 @@ class ContentRepository implements Repository<Content> {
 
   @override
   Future<bool> delete(int id) async {
-    var token = Repository.getToken();
+    var response =
+        await http.delete("$contentApi$id", headers: Repository.getHeaders());
 
-    var response = await http.delete(
-        "$contentApi$id", headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    });
-
-    logger.i('ContentRepository => DELETING CONTENT: ${response.body} ON URL $contentApi$id');
+    logger.i(
+        'ContentRepository => DELETING CONTENT: ${response.body} ON URL $contentApi$id');
 
     if (response.statusCode == 200) {
       logger.i('FridgeRepository => DELETED CONTENT');
@@ -86,34 +75,29 @@ class ContentRepository implements Repository<Content> {
 
   @override
   Future<Map<int, Content>> fetchAll() async {
-    var token = Repository.getToken();
-
     logger.i('ContentRepository => FETCHIN FROM URL: $contentApi');
 
-    var response = await http.get(
-        contentApi, headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    });
+    var response = await http.get(contentApi, headers: Repository.getHeaders());
 
     logger.i('ContentRepository => FETCHING CONTENT: ${response.body}');
 
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       var contents = jsonDecode(response.body);
 
       logger.i('ContentRepository => $contents');
 
-
-      for(var content in contents) {
-        Content c = Content(expirationDate: content['expiration_date'], amount: content['amount'],
+      for (var content in contents) {
+        Content c = Content(
+            expirationDate: content['expiration_date'],
+            amount: content['amount'],
             unit: content['unit'],
-            fridge: this.fridge, item: itemRepository.get(content['item_id']));
+            fridge: this.fridge,
+            item: itemRepository.get(content['item_id']));
         this.contents[c.item.itemId] = c;
       }
 
       logger.i("ContentRepository => FETCHED ${this.contents.length} CONTENTS");
       return this.contents;
-
     }
     throw new FailedToFetchContentException();
   }
@@ -128,25 +112,19 @@ class ContentRepository implements Repository<Content> {
     return this.contents;
   }
 
-  Future<Content> update(Content content, dynamic attribute, String parameter) async {
-    var token = Repository.getToken();
+  Future<Content> update(
+      Content content, dynamic attribute, String parameter) async {
+    logger.i(
+        'ContentRepository => UPDATING CONTENT $parameter with $attribute FROM URL: $contentApi');
 
-    logger.i('ContentRepository => UPDATING CONTENT $parameter with $attribute FROM URL: $contentApi');
-
-    var response = await http.patch(
-        '$contentApi${content.item.itemId}', headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    },
-    body: jsonEncode({
-        parameter: attribute
-      }),
-      encoding: utf8
-    );
+    var response = await http.patch('$contentApi${content.item.itemId}',
+        headers: Repository.getHeaders(),
+        body: jsonEncode({parameter: attribute}),
+        encoding: utf8);
 
     logger.i('ContentRepository => PATCHING CONTENT: ${response.body}');
 
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       var contents = jsonDecode(response.body);
 
       logger.i('ContentRepository => UPDATED SUCCESSFUL $contents');
@@ -155,7 +133,5 @@ class ContentRepository implements Repository<Content> {
       return content;
     }
     throw new FailedToFetchContentException();
-
   }
-
 }

@@ -2,6 +2,8 @@ import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:http/http.dart';
+
 abstract class Repository<Item> {
   static const baseURL = "https://fridgapi-dev.donkz.dev/";
   static SharedPreferences sharedPreferences;
@@ -14,6 +16,12 @@ abstract class Repository<Item> {
       throw FailedToFetchApiTokenException();
     }
     return token;
+  }
+
+  static Map<String, String> getHeaders() {
+    var token = getToken();
+
+    return {"Content-Type": "application/json", "Authorization": token};
   }
 
   Future<Map<int, Item>> fetchAll() async {

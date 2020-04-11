@@ -30,10 +30,8 @@ class FridgeRepository implements Repository<Fridge> {
 
   @override
   Future<int> add(Fridge f) async {
-    var token = Repository.getToken();
-
     var response = await http.post("${fridgeAPI}management/create/",
-        headers: {"Content-Type": "application/json", "Authorization": token},
+        headers: Repository.getHeaders(),
         body: jsonEncode({
           "fridge_id": f.fridgeId,
           "name": f.name,
@@ -61,10 +59,8 @@ class FridgeRepository implements Repository<Fridge> {
 
   @override
   Future<bool> delete(int id) async {
-    var token = Repository.getToken();
-
     var response = await http.delete("$fridgeAPI/management/$id/",
-        headers: {"Content-Type": "application/json", "Authorization": token});
+        headers: Repository.getHeaders());
 
     logger.i('FridgeRepository => DELETING FRIDGE: ${response.body}');
 
@@ -79,11 +75,7 @@ class FridgeRepository implements Repository<Fridge> {
 
   @override
   Future<Map<int, Fridge>> fetchAll() async {
-    var token = Repository.getToken();
-
-    var response = await http.get(fridgeAPI,
-        headers: {"Content-Type": "application/json", "Authorization": token});
-
+    var response = await http.get(fridgeAPI, headers: Repository.getHeaders());
     logger.i('FridgeRepository => FETCHING FRIDGES: ${response.body}');
 
     if (response.statusCode == 200) {

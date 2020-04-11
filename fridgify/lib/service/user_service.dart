@@ -25,12 +25,9 @@ class UserService {
   UserService._internal();
 
   Future<User> fetchUser() async {
-    var token = Repository.getToken();
-
     logger.i('UserService => FETCHING USER FROM URL: $userApi');
 
-    var response = await http.get(userApi,
-        headers: {"Content-Type": "application/json", "Authorization": token});
+    var response = await http.get(userApi, headers: Repository.getHeaders());
 
     logger.i('UserService => FETCHING USER DATA: ${response.body}');
 
@@ -54,13 +51,11 @@ class UserService {
   }
 
   Future<List<User>> getUsersForFridge(int fridgeId) async {
-    var token = Repository.getToken();
     List<User> usersList = List();
 
     logger.i('UserService => FETCHING USERS FROM URL: $userApi$fridgeId/');
 
-    var response = await http.get('$userApi$fridgeId/',
-        headers: {"Content-Type": "application/json", "Authorization": token});
+    var response = await http.get('$userApi$fridgeId/', headers: Repository.getHeaders());
 
     logger.i(
         'UserService => FETCHING USERS FOR FRIDGE $fridgeId: ${response.body}');
@@ -90,13 +85,11 @@ class UserService {
   }
 
   Future<User> update(User user, String parameter, dynamic attribute) async {
-    var token = Repository.getToken();
-
     logger.i(
         'UserService => UPDATING $parameter with $attribute FROM URL: $userApi');
 
     var response = await http.patch(userApi,
-        headers: {"Content-Type": "application/json", "Authorization": token},
+        headers: Repository.getHeaders(),
         body: jsonEncode({parameter: attribute}),
         encoding: utf8);
 

@@ -1,9 +1,7 @@
-
 import 'dart:convert';
 
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
-import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/store.dart';
 import 'package:logger/logger.dart';
@@ -11,8 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class StoreRepository implements Repository<Store> {
-
-  Logger logger = Logger();
+  Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
 
   static const storeApi = "${Repository.baseURL}stores/";
@@ -29,17 +26,14 @@ class StoreRepository implements Repository<Store> {
 
   @override
   Future<int> add(Store store) async {
-    var token = getToken();
+    var token = Repository.getToken();
 
-    var response = await http.post(
-        storeApi, headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    }, body: jsonEncode({
-        "name": store.name,
-      }),
-        encoding: utf8
-    );
+    var response = await http.post(storeApi,
+        headers: {"Content-Type": "application/json", "Authorization": token},
+        body: jsonEncode({
+          "name": store.name,
+        }),
+        encoding: utf8);
 
     logger.i('StoreRepository => ADDING STORE: ${response.body}');
 
@@ -63,16 +57,13 @@ class StoreRepository implements Repository<Store> {
   }
 
   @override
-  Future<Map<int, Store>> fetchAll() async{
-    var token = getToken();
+  Future<Map<int, Store>> fetchAll() async {
+    var token = Repository.getToken();
 
     logger.i('StoreRepository => FETCHING FROM URL: $storeApi');
 
-    var response = await http.get(
-        storeApi, headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    });
+    var response = await http.get(storeApi,
+        headers: {"Content-Type": "application/json", "Authorization": token});
 
     logger.i('StoreRepository => FETCHING STORES: ${response.body}');
 
@@ -102,14 +93,5 @@ class StoreRepository implements Repository<Store> {
   @override
   Map<int, Store> getAll() {
     return this.stores;
-  }
-
-  dynamic getToken() {
-    var token = sharedPreferences.get("apiToken") ?? null;
-    if(token == null) {
-      logger.e("StoreRepository => NO API TOKEN FOUND IN CACHE");
-      throw FailedToFetchApiTokenException();
-    }
-    return token;
   }
 }

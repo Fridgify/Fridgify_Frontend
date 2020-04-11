@@ -8,11 +8,10 @@ class Item {
   String description;
   Store store;
 
-  Item({
-    @required this.itemId,
-    @required this.barcode,
-    @required this.name,
-    @required this.description,
-    @required this.store
-  });
+  Item(
+      {@required this.itemId,
+      @required this.barcode,
+      @required this.name,
+      @required this.description,
+      @required this.store});
 }

@@ -5,11 +5,9 @@ class Store {
   String name;
 
   Store({
-   @required this.storeId,
-   @required this.name,
+    @required this.storeId,
+    @required this.name,
   });
 
-  Store.create({
-    @required this.name
-  });
+  Store.create({@required this.name});
 }

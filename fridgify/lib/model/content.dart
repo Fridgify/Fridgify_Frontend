@@ -27,10 +27,8 @@ class Content {
 
   @override
   String toString() {
-    // TODO: implement toString
     return "expirationDate: ${this.expirationDate}, amount: ${this.amount}, "
         "unit: ${this.unit}"
         "fridgeId: ${this.fridge}";
   }
-
 }

@@ -1,8 +1,20 @@
+import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-abstract class Repository <Item> {
+abstract class Repository<Item> {
   static const baseURL = "https://fridgapi-dev.donkz.dev/";
   static SharedPreferences sharedPreferences;
+  static Logger logger = Logger();
+
+  static dynamic getToken() {
+    var token = sharedPreferences.get("apiToken") ?? null;
+    if (token == null) {
+      logger.e("FridgeRepository => NO API TOKEN FOUND IN CACHE");
+      throw FailedToFetchApiTokenException();
+    }
+    return token;
+  }
 
   Future<Map<int, Item>> fetchAll() async {
     throw Exception("Not Implented");

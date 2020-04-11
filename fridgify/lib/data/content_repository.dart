@@ -3,20 +3,18 @@ import 'dart:convert';
 
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
-import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
-import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/model/item.dart';
+
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class ContentRepository implements Repository<Content> {
 
-  Logger logger = Logger();
+  Logger logger = Repository.logger;
 
   Fridge fridge;
   SharedPreferences pref = Repository.sharedPreferences;
@@ -32,14 +30,17 @@ class ContentRepository implements Repository<Content> {
 
   @override
   Future<int> add (Content content) async {
-    var token = getToken();
+    var date = DateTime.now();
+
+    var token = Repository.getToken();
     var body = jsonEncode({
       "name": content.item.name, "description": content.item.description,
-      "buy_date": "2020-04-04", "expiration_date": content.expirationDate,
+      "buy_date": "${date.year}-${date.month}-${date.day}",
+      "expiration_date": content.expirationDate,
       "amount": content.amount,
       "unit": content.unit, "store": content.item.store.name,
     });
-    logger.i('ContentRepository => Requesting $contentApi with $body}');
+    logger.i('ContentRepository => Requesting $contentApi with $body');
 
     var response = await http.post(
         contentApi, headers: {
@@ -53,10 +54,8 @@ class ContentRepository implements Repository<Content> {
 
     if (response.statusCode == 201) {
       var c = jsonDecode(response.body);
-      //var content = Content.create(fridgeId: f[""], name: f["name"], description: f["description"]);
-      logger.i("ContentRepository => CREATED SUCCESSFUL $c");
 
-      //this.contents[content] = fridge;
+      logger.i("ContentRepository => CREATED SUCCESSFUL $c");
 
       return fridge.fridgeId;
     }
@@ -66,7 +65,7 @@ class ContentRepository implements Repository<Content> {
 
   @override
   Future<bool> delete(int id) async {
-    var token = getToken();
+    var token = Repository.getToken();
 
     var response = await http.delete(
         "$contentApi$id", headers: {
@@ -87,7 +86,7 @@ class ContentRepository implements Repository<Content> {
 
   @override
   Future<Map<int, Content>> fetchAll() async {
-    var token = getToken();
+    var token = Repository.getToken();
 
     logger.i('ContentRepository => FETCHIN FROM URL: $contentApi');
 
@@ -130,7 +129,7 @@ class ContentRepository implements Repository<Content> {
   }
 
   Future<Content> update(Content content, dynamic attribute, String parameter) async {
-    var token = getToken();
+    var token = Repository.getToken();
 
     logger.i('ContentRepository => UPDATING CONTENT $parameter with $attribute FROM URL: $contentApi');
 
@@ -150,9 +149,6 @@ class ContentRepository implements Repository<Content> {
     if(response.statusCode == 200) {
       var contents = jsonDecode(response.body);
 
-      //Item i = Item(itemId: contents['item_id'], name: contents['name'],
-      //  store: , description: , barcode: ,)
-
       logger.i('ContentRepository => UPDATED SUCCESSFUL $contents');
 
       this.contents[content.item.itemId] = content;
@@ -161,15 +157,5 @@ class ContentRepository implements Repository<Content> {
     throw new FailedToFetchContentException();
 
   }
-
-  dynamic getToken() {
-    var token = pref.get("apiToken") ?? null;
-    if(token == null) {
-      logger.e("ContentRepository => NO API TOKEN FOUND IN CACHE");
-      throw FailedToFetchApiTokenException();
-    }
-    return token;
-  }
-
 
 }

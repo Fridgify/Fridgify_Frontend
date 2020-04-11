@@ -35,11 +35,9 @@ class User {
     @required this.birthDate,
   });
 
-
   @override
   String toString() {
     return "username: $username, password: $password, name: $name, surname: $surname,"
         "email: $email, birthDate: $birthDate";
   }
-
 }

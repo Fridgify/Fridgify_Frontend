@@ -11,7 +11,6 @@ import 'package:http/http.dart';
 /// This Authentication Service handles login, registration and token fetching
 /// It works with the cache "SharedPreferences" and keeps it all time updated
 class AuthenticationService {
-
   static const String authAPI = "${Repository.baseURL}auth/";
 
   User user;
@@ -22,16 +21,20 @@ class AuthenticationService {
 
   /// Constructor for the registration use case -> needs all data for user model
   AuthenticationService.register(
-      String username,
-      String password,
-      String name,
-      String surname,
-      String email,
-      String birthDate,
-      ) {
-    Logger.level = Level.info;
-    user = User.newUser(username: username, password: password, name: name,
-        surname: surname, email: email, birthDate: birthDate);
+    String username,
+    String password,
+    String name,
+    String surname,
+    String email,
+    String birthDate,
+  ) {
+    user = User.newUser(
+        username: username,
+        password: password,
+        name: name,
+        surname: surname,
+        email: email,
+        birthDate: birthDate);
     logger.i("AuthService => NEW USER: ${user.toString()}");
   }
 
@@ -45,13 +48,19 @@ class AuthenticationService {
   Future<String> register() async {
     var response = await post("$authAPI/register/",
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"username": user.username, "password": user.password,
-          "name": user.name, "surname": user.surname, "email": user.email,
-          "birth_date": user.birthDate}), encoding: utf8);
+        body: jsonEncode({
+          "username": user.username,
+          "password": user.password,
+          "name": user.name,
+          "surname": user.surname,
+          "email": user.email,
+          "birth_date": user.birthDate
+        }),
+        encoding: utf8);
 
     logger.i('AuthService => REGISTER: ${response.body}');
 
-    if(response.statusCode == 201) {
+    if (response.statusCode == 201) {
       logger.i('AuthService => REGISTER SUCCESSFUL ${response.statusCode}');
 
       return await login();
@@ -62,15 +71,15 @@ class AuthenticationService {
 
   /// Login call to fetch client token
   Future<String> login() async {
-
     var response = await post("$authAPI/login/",
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"username": user.username, "password": user.password}),
+        body:
+            jsonEncode({"username": user.username, "password": user.password}),
         encoding: utf8);
 
     logger.i('AuthService => LOGGING IN: ${response.body}');
 
-    if(response.statusCode == 200) {
+    if (response.statusCode == 200) {
       var token = jsonDecode(response.body)["token"];
 
       logger.i('AuthService => FETCHED CLIENTTOKEN $token');
@@ -86,9 +95,11 @@ class AuthenticationService {
 
   /// Logout by cleaning cache
   Future<bool> logout() async {
-    bool cacheClear = await prefs.remove("clientToken") && await prefs.remove("apiToken");
+    bool cacheClear =
+        await prefs.remove("clientToken") && await prefs.remove("apiToken");
 
-    logger.i("AuthService => LOGGING OUT BY CLEARING CACHE FROM TOKENS: $cacheClear");
+    logger.i(
+        "AuthService => LOGGING OUT BY CLEARING CACHE FROM TOKENS: $cacheClear");
 
     return cacheClear;
   }
@@ -97,23 +108,25 @@ class AuthenticationService {
   Future<String> fetchApiToken() async {
     final clientToken = prefs.getString("clientToken") ?? null;
 
-    if(clientToken == null) {
+    if (clientToken == null) {
       logger.e("AuthService => NO CLIENT TOKEN FOUND IN CACHE");
       throw FailedToFetchClientTokenException();
     }
-    
-    var response = await get("$authAPI/token/", headers: {"Authorization": clientToken});
+
+    var response =
+        await get("$authAPI/token/", headers: {"Authorization": clientToken});
 
     logger.i('AuthService => FETCHING API TOKEN ${response.body}');
 
-    if(response.statusCode == 201) {
+    if (response.statusCode == 201) {
       var token = jsonDecode(response.body)["token"];
       var timer = jsonDecode(response.body)["validation_time"];
 
       logger.i("AuthService => FETCHED TOKEN: $token");
 
       await prefs.setString("apiToken", token);
-      logger.i("AuthService => WROTE TO CACHE - STARTING TIMER OF $timer SECONDS");
+      logger.i(
+          "AuthService => WROTE TO CACHE - STARTING TIMER OF $timer SECONDS");
 
       /*
         Starting timer with the Token live time and fetch a new token if timer
@@ -121,7 +134,7 @@ class AuthenticationService {
        */
       Timer(Duration(seconds: timer), () async {
         logger.i("AuthService => API TOKEN DIED FETCH NEW");
-        if(await prefs.remove("apiToken")) {
+        if (await prefs.remove("apiToken")) {
           await fetchApiToken();
         }
       });
@@ -134,12 +147,13 @@ class AuthenticationService {
   Future<bool> validateToken() async {
     final clientToken = prefs.getString("clientToken") ?? null;
 
-    if(clientToken == null) {
+    if (clientToken == null) {
       logger.e("AuthService => NO CLIENT TOKEN FOUND IN CACHE");
       throw FailedToFetchClientTokenException();
     }
 
-    var response = await post("$authAPI/login/", headers: {"Authorization": clientToken});
+    var response =
+        await post("$authAPI/login/", headers: {"Authorization": clientToken});
     logger.i('Validating token: ${response.body}');
     return response.body == "invalid token" ? false : true;
   }

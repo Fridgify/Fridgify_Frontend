@@ -2,18 +2,17 @@ import 'dart:convert';
 
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/data/store_repository.dart';
-import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
+
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ItemRepository implements Repository<Item> {
-
   Fridge fridge;
-  Logger logger = Logger();
+  Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   StoreRepository storeRepository = StoreRepository();
 
@@ -47,15 +46,12 @@ class ItemRepository implements Repository<Item> {
 
   @override
   Future<Map<int, Item>> fetchAll() async {
-    var token = getToken();
+    var token = Repository.getToken();
 
     logger.i('ItemRepository => FETCHIN FROM URL: $itemApi');
 
-    var response = await http.get(
-        itemApi, headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    });
+    var response = await http.get(itemApi,
+        headers: {"Content-Type": "application/json", "Authorization": token});
 
     logger.i('ItemRepository => FETCHING ITEMS: ${response.body}');
 
@@ -66,8 +62,12 @@ class ItemRepository implements Repository<Item> {
 
       for (var item in items) {
         logger.i("ItemRepository => FETCHED ITEMS: ${item.toString()}");
-        Item i = Item(itemId: item['item_id'], barcode: item['barcode'],
-            name: item['name'], description: item['description'], store: storeRepository.get(item['store']));
+        Item i = Item(
+            itemId: item['item_id'],
+            barcode: item['barcode'],
+            name: item['name'],
+            description: item['description'],
+            store: storeRepository.get(item['store']));
         this.items[i.itemId] = i;
       }
 
@@ -86,14 +86,4 @@ class ItemRepository implements Repository<Item> {
   Map<int, Item> getAll() {
     return this.items;
   }
-
-  dynamic getToken() {
-    var token = sharedPreferences.get("apiToken") ?? null;
-    if(token == null) {
-      logger.e("ItemRepository => NO API TOKEN FOUND IN CACHE");
-      throw FailedToFetchApiTokenException();
-    }
-    return token;
-  }
-
 }

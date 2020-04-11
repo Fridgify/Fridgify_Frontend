@@ -1,0 +1,3 @@
+class FailedToAddContentException implements Exception {
+
+}

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fridgify/data/fridge_repository.dart';
+import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
+import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/model/user.dart';
@@ -9,7 +12,7 @@ import 'package:logger/logger.dart';
 import 'package:http/http.dart';
 
 /// This Authentication Service handles login, registration and token fetching
-/// It works with the cache "SharedPreferences" and keeps it all time updated
+/// It works with the cache "Repository.sharedPreferences" and keeps it all time updated
 class AuthenticationService {
   static const String authAPI = "${Repository.baseURL}auth/";
 
@@ -17,7 +20,7 @@ class AuthenticationService {
 
   Logger logger = Logger();
 
-  final prefs = Repository.sharedPreferences;
+  //Repository.sharedPreferences Repository.sharedPreferences = Repository.Repository.sharedPreferences;
 
   /// Constructor for the registration use case -> needs all data for user model
   AuthenticationService.register(
@@ -43,6 +46,8 @@ class AuthenticationService {
     user = User.loginUser(username: username, password: password);
     logger.i("AuthService => LOGIN: ${user.toString()}");
   }
+
+  AuthenticationService() ;
 
   /// Register call
   Future<String> register() async {
@@ -84,19 +89,20 @@ class AuthenticationService {
 
       logger.i('AuthService => FETCHED CLIENTTOKEN $token');
 
-      await prefs.setString("clientToken", token);
+      await Repository.sharedPreferences.setString("clientToken", token);
       logger.i('AuthService => WROTE TO CACHE');
 
       return token;
     }
 
-    throw FailedToFetchClientTokenException();
+    String err = jsonDecode(response.body)["detail"];
+    throw FailedToFetchClientTokenException.withErr(err);
   }
 
   /// Logout by cleaning cache
   Future<bool> logout() async {
     bool cacheClear =
-        await prefs.remove("clientToken") && await prefs.remove("apiToken");
+        await Repository.sharedPreferences.remove("clientToken") && await Repository.sharedPreferences.remove("apiToken");
 
     logger.i(
         "AuthService => LOGGING OUT BY CLEARING CACHE FROM TOKENS: $cacheClear");
@@ -106,7 +112,7 @@ class AuthenticationService {
 
   // Fetch API token
   Future<String> fetchApiToken() async {
-    final clientToken = prefs.getString("clientToken") ?? null;
+    final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
 
     if (clientToken == null) {
       logger.e("AuthService => NO CLIENT TOKEN FOUND IN CACHE");
@@ -124,7 +130,7 @@ class AuthenticationService {
 
       logger.i("AuthService => FETCHED TOKEN: $token");
 
-      await prefs.setString("apiToken", token);
+      await Repository.sharedPreferences.setString("apiToken", token);
       logger.i(
           "AuthService => WROTE TO CACHE - STARTING TIMER OF $timer SECONDS");
 
@@ -134,7 +140,7 @@ class AuthenticationService {
        */
       Timer(Duration(seconds: timer), () async {
         logger.i("AuthService => API TOKEN DIED FETCH NEW");
-        if (await prefs.remove("apiToken")) {
+        if (await Repository.sharedPreferences.remove("apiToken")) {
           await fetchApiToken();
         }
       });
@@ -145,7 +151,8 @@ class AuthenticationService {
   }
 
   Future<bool> validateToken() async {
-    final clientToken = prefs.getString("clientToken") ?? null;
+    print(Repository.sharedPreferences.toString());
+    final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
 
     if (clientToken == null) {
       logger.e("AuthService => NO CLIENT TOKEN FOUND IN CACHE");
@@ -156,5 +163,27 @@ class AuthenticationService {
         await post("$authAPI/login/", headers: {"Authorization": clientToken});
     logger.i('Validating token: ${response.body}');
     return response.body == "invalid token" ? false : true;
+  }
+
+  Future<bool> initiateRepositories() async {
+    StoreRepository storeRepository = StoreRepository();
+    ItemRepository itemRepository = ItemRepository();
+    FridgeRepository fridgeRepository = FridgeRepository();
+
+    try {
+      logger.i('MainController => FETCHING ALL REPOSITORIES');
+      Future.wait(
+          [
+            fridgeRepository.fetchAll(),
+            storeRepository.fetchAll(),
+            itemRepository.fetchAll(),
+          ]
+      );
+    }
+    catch(exception) {
+      logger.e('MainController => FAILED TO FETCH REPOSITORY $exception');
+      return false;
+    }
+    return true;
   }
 }

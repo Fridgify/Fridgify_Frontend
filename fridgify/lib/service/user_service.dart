@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
+import 'package:fridgify/exception/not_unique_exception.dart';
 import 'package:fridgify/model/user.dart';
+import 'package:fridgify/utils/validator.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,5 +113,29 @@ class UserService {
       return u;
     }
     throw new FailedToFetchContentException();
+  }
+
+  Future<void> checkUsernameEmail(String user, String mail) async {
+    logger.i(
+        'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
+
+    var response = await http.post("${userApi}duplicate/",
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "username": user,
+          "mail": mail
+        }),
+        encoding: utf8);
+
+    logger.i('UserService => CHECKING FOR DUPLICATE USER: ${response.body}');
+    Map<String, dynamic> res = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      logger.i('UserService => EMAIL USER UNIQUE ${response.body}');
+
+      return;
+    }
+
+    throw new NotUniqueException(user: res.containsKey('username'), mail: res.containsKey('email'));
   }
 }

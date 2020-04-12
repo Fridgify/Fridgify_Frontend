@@ -84,8 +84,8 @@ class RegisterController {
     }
 
     Navigator.of(context, rootNavigator: true).pop();
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ContentMenuPage()));
+
+    await Navigator.pushNamedAndRemoveUntil(context, '/menu', (route) => false);
   }
 
   Future<bool> validateFirstForm(

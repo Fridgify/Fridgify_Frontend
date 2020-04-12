@@ -10,6 +10,7 @@ import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/view/screens/content_menu_screen.dart';
 import 'package:fridgify/view/screens/login_screen.dart';
+import 'package:fridgify/view/screens/register_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +25,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Fridgify',
+        routes: <String, WidgetBuilder> {
+          '/login': (BuildContext context) => new LoginPage(),
+          '/register' : (BuildContext context) => new RegisterPage(),
+          '/menu' : (BuildContext context) => new ContentMenuPage(),
+          '/startup' : (BuildContext context) => new MyHomePage()
+        },
         theme: ThemeData(
           // This is the theme of your application.
           //
@@ -123,11 +130,11 @@ class _MyHomePageState extends State<MyHomePage> {
       Loader.showLoadingDialog(context);
       bool cached = await _controller.initialLaunch(context);
       if (cached) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ContentMenuPage()));
+
+        await Navigator.pushNamedAndRemoveUntil(context, '/menu', (route) => false);
       } else {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => LoginPage()));
+
+        await Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
     });
   }

@@ -9,15 +9,15 @@ class Validator {
     RegExp regex = new RegExp(pattern);
 
     if(text.isEmpty) {
-      return 'Please enter an E-Mail';
+      return 'Please enter an email';
     }
 
     if( (!regex.hasMatch(text))) {
-      return 'Please enter a valid E-Mail';
+      return 'Please enter a valid email';
     }
 
     if(mailNotUnique) {
-      return 'E-Mail already used';
+      return 'Email already used';
     }
     //RegExp exp = new RegExp(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)");
     //if(!exp.hasMatch(text))
@@ -27,7 +27,7 @@ class Validator {
 
   static String validateUser(String text) {
     if(text.isEmpty) {
-      return 'Please enter an Username';
+      return 'Please enter an username';
     }
     if(userNotUnique) {
       return 'Username already used';
@@ -37,37 +37,28 @@ class Validator {
 
   static String validateName(String text) {
     if(text.isEmpty) {
-      return 'Please enter an Name';
-    }
-    if(userNotUnique) {
-      return 'Username already used';
+      return 'Please enter a last name';
     }
     return null;
   }
 
   static String validateFirst(String text) {
     if(text.isEmpty) {
-      return 'Please enter an First Name';
-    }
-    if(userNotUnique) {
-      return 'Username already used';
+      return 'Please enter a first name';
     }
     return null;
   }
 
   static String validateDate(String text) {
     if(text.isEmpty) {
-      return 'Please enter an Birthdate';
-    }
-    if(userNotUnique) {
-      return 'Username already used';
+      return 'Please enter a birthdate';
     }
     return null;
   }
 
   static String validatePassword(String text) {
     if(text.isEmpty) {
-      return 'Please enter a Password!';
+      return 'Please enter a password';
     }
     if(text.length < 6)
       return 'Your password is too short';
@@ -76,10 +67,10 @@ class Validator {
 
   static String repeatValidatePassword(String text) {
     if(text.isEmpty) {
-      return 'Please repeat the Password!';
+      return 'Please repeat the password';
     }
     if(doNotMatch) {
-      return 'Password do not match!';
+      return 'Password doesn\'t match';
     }
     return null;
   }

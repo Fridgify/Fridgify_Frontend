@@ -1,39 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:fridgify/controller/main_controller.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/data/store_repository.dart';
+import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/model/store.dart';
-import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/service/user_service.dart';
+import 'package:fridgify/view/screens/content_menu_screen.dart';
+import 'package:fridgify/view/screens/login_screen.dart';
+import 'package:fridgify/view/screens/register_screen.dart';
+import 'package:fridgify/view/widgets/loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'model/content.dart';
-
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+        title: 'Fridgify',
+        routes: <String, WidgetBuilder> {
+          '/login': (BuildContext context) => new LoginPage(),
+          '/register' : (BuildContext context) => new RegisterPage(),
+          '/menu' : (BuildContext context) => new ContentMenuPage(),
+          '/startup' : (BuildContext context) => new MyHomePage()
+        },
+        theme: ThemeData(
+          // This is the theme of your application.
+          //
+          // Try running your application with "flutter run". You'll see the
+          // application has a blue toolbar. Then, without quitting the app, try
+          // changing the primarySwatch below to Colors.green and then invoke
+          // "hot reload" (press "r" in the console where you ran "flutter run",
+          // or simply save your changes to "hot reload" in a Flutter IDE).
+          // Notice that the counter didn't reset back to zero; the application
+          // is not restarted.
+          backgroundColor: Colors.white,
+          primarySwatch: Colors.purple,
+        ),
+        home: MyHomePage(
+          title: 'Fridgify',
+        ));
   }
 }
 
@@ -58,17 +71,19 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  MainController _controller = MainController();
+
   void _incrementCounter() async {
     //var authService = AuthenticationService.register("dennis", "pw", "dennis", "rein", "testmail", "2000-04-25");
     //await authService.register();
 
     Repository.sharedPreferences = await SharedPreferences.getInstance();
 
-    AuthenticationService authService = AuthenticationService.login("testUser", "password");
+    AuthenticationService authService =
+        AuthenticationService.login("testUser", "password");
     await authService.login();
     await authService.fetchApiToken();
     await authService.validateToken();
-
 
     UserService userService = UserService();
     FridgeRepository fridgeRepository = FridgeRepository();
@@ -105,6 +120,22 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      Loader.showLoadingDialog(context);
+      bool cached = await _controller.initialLaunch(context);
+      if (cached) {
+
+        await Navigator.pushNamedAndRemoveUntil(context, '/menu', (route) => false);
+      } else {
+
+        await Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      }
     });
   }
 

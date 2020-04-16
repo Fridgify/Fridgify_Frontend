@@ -24,16 +24,19 @@ class LoginController {
       return;
     }
 
-    Loader.showLoadingDialog(context);
+    Loader.showSimpleLoadingDialog(context);
 
     try {
       await _authService.login();
       await _authService.fetchApiToken();
     } catch (exception) {
       logger.e("LoginController => FAILED TO LOG IN ${exception.toString()}");
+      Navigator.of(context, rootNavigator: true).pop();
       if (exception is FailedToFetchClientTokenException) {
-        Navigator.of(context, rootNavigator: true).pop();
         return Popups.errorPopup(context, exception.errMsg());
+      }
+      else {
+        return Popups.errorPopup(context, exception.toString());
       }
     }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -8,6 +9,7 @@ import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/model/user.dart';
+import 'package:fridgify/view/widgets/popup.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart';
 
@@ -20,17 +22,19 @@ class AuthenticationService {
 
   Logger logger = Logger();
 
+  Client client;
+
   //Repository.sharedPreferences Repository.sharedPreferences = Repository.Repository.sharedPreferences;
 
   /// Constructor for the registration use case -> needs all data for user model
   AuthenticationService.register(
-    String username,
-    String password,
-    String name,
-    String surname,
-    String email,
-    String birthDate,
-  ) {
+      String username,
+      String password,
+      String name,
+      String surname,
+      String email,
+      String birthDate,
+      ) {
     user = User.newUser(
         username: username,
         password: password,
@@ -38,20 +42,28 @@ class AuthenticationService {
         surname: surname,
         email: email,
         birthDate: birthDate);
+    this.client = Client();
     logger.i("AuthService => NEW USER: ${user.toString()}");
   }
 
   /// Constructor for login use case
   AuthenticationService.login(String username, String password) {
     user = User.loginUser(username: username, password: password);
+    this.client = Client();
     logger.i("AuthService => LOGIN: ${user.toString()}");
   }
 
-  AuthenticationService() ;
+  AuthenticationService([Client client]) {
+    if(client != null) {
+      this.client = client;
+    } else {
+      this.client = Client();
+    }
+  }
 
   /// Register call
   Future<String> register() async {
-    var response = await post("$authAPI/register/",
+    var response = await client.post("$authAPI/register/",
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": user.username,
@@ -76,10 +88,11 @@ class AuthenticationService {
 
   /// Login call to fetch client token
   Future<String> login() async {
-    var response = await post("$authAPI/login/",
+    logger.i('AuthService => LOGGING');
+    var response = await client.post("$authAPI/login/",
         headers: {"Content-Type": "application/json"},
         body:
-            jsonEncode({"username": user.username, "password": user.password}),
+        jsonEncode({"username": user.username, "password": user.password}),
         encoding: utf8);
 
     logger.i('AuthService => LOGGING IN: ${response.body}');
@@ -107,6 +120,7 @@ class AuthenticationService {
     logger.i(
         "AuthService => LOGGING OUT BY CLEARING CACHE FROM TOKENS: $cacheClear");
 
+
     return cacheClear;
   }
 
@@ -120,7 +134,7 @@ class AuthenticationService {
     }
 
     var response =
-        await get("$authAPI/token/", headers: {"Authorization": clientToken});
+    await client.get("$authAPI/token/", headers: {"Authorization": clientToken});
 
     logger.i('AuthService => FETCHING API TOKEN ${response.body}');
 
@@ -151,7 +165,6 @@ class AuthenticationService {
   }
 
   Future<bool> validateToken() async {
-    print(Repository.sharedPreferences.toString());
     final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
 
     if (clientToken == null) {
@@ -160,9 +173,15 @@ class AuthenticationService {
     }
 
     var response =
-        await post("$authAPI/login/", headers: {"Authorization": clientToken});
-    logger.i('Validating token: ${response.body}');
-    return response.body == "invalid token" ? false : true;
+    await client.post("$authAPI/login/", headers: {"Authorization": clientToken});
+
+    logger.i('AuthService => VALIDATING TOKEN: ${response.body}');
+
+    if(response.statusCode == 200) {
+      return true;
+    }
+
+    return false;
   }
 
   Future<bool> initiateRepositories() async {
@@ -172,18 +191,22 @@ class AuthenticationService {
 
     try {
       logger.i('MainController => FETCHING ALL REPOSITORIES');
-      Future.wait(
+      fridgeRepository.fridges = Map();
+      storeRepository.stores = Map();
+      itemRepository.items = Map();
+
+      await Future.wait(
           [
             fridgeRepository.fetchAll(),
             storeRepository.fetchAll(),
             itemRepository.fetchAll(),
           ]
       );
+      return true;
     }
     catch(exception) {
       logger.e('MainController => FAILED TO FETCH REPOSITORY $exception');
       return false;
     }
-    return true;
   }
 }

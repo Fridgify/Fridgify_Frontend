@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -8,6 +9,7 @@ import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/model/user.dart';
+import 'package:fridgify/view/widgets/popup.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart';
 
@@ -100,12 +102,13 @@ class AuthenticationService {
   }
 
   /// Logout by cleaning cache
-  Future<bool> logout() async {
+  Future<bool> logout(BuildContext context) async {
     bool cacheClear =
         await Repository.sharedPreferences.remove("clientToken") && await Repository.sharedPreferences.remove("apiToken");
 
     logger.i(
         "AuthService => LOGGING OUT BY CLEARING CACHE FROM TOKENS: $cacheClear");
+
 
     return cacheClear;
   }
@@ -172,18 +175,22 @@ class AuthenticationService {
 
     try {
       logger.i('MainController => FETCHING ALL REPOSITORIES');
-      Future.wait(
+      fridgeRepository.fridges = Map();
+      storeRepository.stores = Map();
+      itemRepository.items = Map();
+
+      await Future.wait(
           [
             fridgeRepository.fetchAll(),
             storeRepository.fetchAll(),
             itemRepository.fetchAll(),
           ]
       );
+      return true;
     }
     catch(exception) {
       logger.e('MainController => FAILED TO FETCH REPOSITORY $exception');
       return false;
     }
-    return true;
   }
 }

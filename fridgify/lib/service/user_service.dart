@@ -123,7 +123,7 @@ class UserService {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": user,
-          "mail": mail
+          "email": mail
         }),
         encoding: utf8);
 

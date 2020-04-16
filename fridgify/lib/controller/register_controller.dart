@@ -21,6 +21,9 @@ class RegisterController {
   TextEditingController textInputControllerName = TextEditingController();
   TextEditingController textInputControllerDate = TextEditingController();
 
+  FocusNode focusNodePas = FocusNode();
+  FocusNode focusNodeFirst = FocusNode();
+
   List<Widget> interactiveForm = [];
 
   AuthenticationService _authService;
@@ -55,12 +58,12 @@ class RegisterController {
     _authService = AuthenticationService.register(
         textInputControllerUser.text,
         textInputControllerPass.text,
-        textInputControllerMail.text,
         textInputControllerSur.text,
         textInputControllerName.text,
+        textInputControllerMail.text,
         textInputControllerDate.text);
 
-    Loader.showLoadingDialog(context);
+    Loader.showSimpleLoadingDialog(context);
 
     try {
       await _authService.register();
@@ -100,7 +103,7 @@ class RegisterController {
       return false;
     }
 
-    Loader.showLoadingDialog(context);
+    Loader.showSimpleLoadingDialog(context);
 
     try {
       await _userService.checkUsernameEmail(
@@ -116,6 +119,7 @@ class RegisterController {
         key.currentState.validate();
       } else {
         _logger.e('RegisterController => EXCEPTION $exception');
+        Popups.errorPopup(context, exception.toString());
       }
       Navigator.of(context, rootNavigator: true).pop();
       return false;
@@ -153,17 +157,17 @@ class RegisterController {
         FormElements.textField(
           style: this.style,
           obscureText: false,
-          controller: textInputControllerName,
-          hintText: "Last Name",
-          validator: Validator.validateName,
+          controller: textInputControllerSur,
+          hintText: "First Name",
+          validator: Validator.validateFirst,
         ),
         SizedBox(height: 25.0),
         FormElements.textField(
           style: this.style,
           obscureText: false,
-          controller: textInputControllerSur,
-          hintText: "First Name",
-          validator: Validator.validateFirst,
+          controller: textInputControllerName,
+          hintText: "Last Name",
+          validator: Validator.validateName,
         ),
         SizedBox(height: 25.0),
         FormElements.datePickerText(
@@ -176,6 +180,7 @@ class RegisterController {
         ),
         SizedBox(height: 25.0),
       ];
+      focusNodeFirst.requestFocus();
       _phase++;
       return;
     }
@@ -197,6 +202,7 @@ class RegisterController {
             validator: Validator.repeatValidatePassword,
             controller: textInputControllerRepeatPass)
       ];
+      focusNodePas.requestFocus();
       _phase++;
       return;
     }

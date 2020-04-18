@@ -4,75 +4,74 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
+import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/auth_service.dart';
+import 'package:fridgify/service/user_service.dart';
 import 'package:http/http.dart' show Response, Request;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/testing.dart';
 
 void main() async {
 
-  AuthenticationService authService;
+  UserService userService;
+  UserServiceTestUtil testUtil;
   MockClient mockClient;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
+    testUtil = UserServiceTestUtil();
 
     mockClient = new MockClient((request) async {
-      var handler = ResponseHandlers();
 
       switch(request.method) {
         case "GET":
-          return handler.handleGETRequest(request);
+          return testUtil.handleGETRequest(request);
         case 'POST':
-          return handler.handlePOSTRequest(request);
+          return testUtil.handlePOSTRequest(request);
         case 'PATCH':
-          return handler.handlePATCHRequest(request);
+          return testUtil.handlePATCHRequest(request);
         default:
           return Response('Not implemented', 201);
       }
     });
 
-    authService = AuthenticationService(mockClient);
-    authService.user = User.newUser(
-        username: 'Mr. Mock',
-        password: 'secret',
-        name: 'Dieter',
-        surname: 'Mock',
-        email: 'dieter.mock@miau.de',
-        birthDate: '01.01.1969'
-    );
+    userService = UserService(mockClient);
   });
 
-  group('Validate Token', () {
+  group('fetch user', () {
 
-    test('doesnt find a chached token', () async {
-      expect(() async => completion(await authService.validateToken()), throwsA(predicate((error) => error is FailedToFetchClientTokenException)));
+    test('throws an error', () async {
+      await Repository.sharedPreferences.setString('apiToken', 'Error case fetch user');
+
+      expect(() async => completion(await userService.fetchUser()), throwsA(predicate((error) => error is FailedToFetchContentException)));
     });
 
-    test('successfully validates the chached token', () async {
-      await Repository.sharedPreferences.setString('clientToken', 'Token valid');
+    test('gets an user', () async {
+      await Repository.sharedPreferences.setString('apiToken', 'Return user');
 
-      expect(Future.value(true), completion(await authService.validateToken()));
-    });
-
-    test('unsuccessfully validates the chached token', () async {
-      await Repository.sharedPreferences.setString('clientToken', 'Token invalid');
-
-      expect(Future.value(false), completion(await authService.validateToken()));
+      var user = await userService.fetchUser();
+      expect(testUtil.createUser().toString(), user.toString());
     });
 
   });
 
 }
 
-class ResponseHandlers {
+class UserServiceTestUtil {
 
-  ResponseHandlers();
+  UserServiceTestUtil();
 
   Response handleGETRequest(Request request) {
-    return Response('No register', 402);
+    switch(request.headers.remove('Authorization')) {
+      case 'Error case fetch user':
+        return Response('Error case fetch user', 404);
+      case 'Return user':
+        return Response(json.encode(createUserObject()), 200);
+      default:
+        return Response('Not implemented', 500);
+    }
   }
 
   Response handlePOSTRequest(Request request) {
@@ -109,6 +108,28 @@ class ResponseHandlers {
       default:
         return Response('Not implemented', 500);
     }
+  }
+
+  User createUser() {
+    return User.newUser(
+        username: 'Mr. Mock',
+        password: 'secret',
+        name: 'Dieter',
+        surname: 'Mock',
+        email: 'dieter.mock@gmail.de',
+        birthDate: '01.01.1969'
+    );
+  }
+
+  Object createUserObject() {
+    return {
+      'username': 'Mr. Mock',
+      'password': 'secret',
+      'name': 'Dieter',
+      'surname': 'Mock',
+      'email': 'dieter.mock@gmail.de',
+      'birth_date': '01.01.1969'
+    };
   }
 
 }

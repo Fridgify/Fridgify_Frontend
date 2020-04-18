@@ -49,7 +49,13 @@ class AuthenticationService {
     logger.i("AuthService => LOGIN: ${user.toString()}");
   }
 
-  AuthenticationService(this.client) ;
+  AuthenticationService([Client client]) {
+    if(client != null) {
+      this.client = client;
+    } else {
+      this.client = Client();
+    }
+  }
 
   /// Register call
   Future<String> register() async {

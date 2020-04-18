@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class MainController {
   Logger logger = Logger();
 
-  AuthenticationService _authService = AuthenticationService(Client());
+  AuthenticationService _authService = AuthenticationService();
 
 
   Future<bool> initialLaunch(BuildContext context) async {

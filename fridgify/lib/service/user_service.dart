@@ -5,12 +5,15 @@ import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/exception/not_unique_exception.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/utils/validator.dart';
+import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   static const String userApi = "${Repository.baseURL}users/";
+
+  Client client;
 
   User user;
 
@@ -20,7 +23,12 @@ class UserService {
 
   static final UserService _userService = UserService._internal();
 
-  factory UserService() {
+  factory UserService([Client client]) {
+    if(client != null) {
+      _userService.client = client;
+    } else {
+      _userService.client = Client();
+    }
     return _userService;
   }
 

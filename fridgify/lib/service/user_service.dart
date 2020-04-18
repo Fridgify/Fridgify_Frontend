@@ -37,7 +37,7 @@ class UserService {
   Future<User> fetchUser() async {
     logger.i('UserService => FETCHING USER FROM URL: $userApi');
 
-    var response = await http.get(userApi, headers: Repository.getHeaders());
+    var response = await client.get(userApi, headers: Repository.getHeaders());
 
     logger.i('UserService => FETCHING USER DATA: ${response.body}');
 
@@ -65,7 +65,7 @@ class UserService {
 
     logger.i('UserService => FETCHING USERS FROM URL: $userApi$fridgeId/');
 
-    var response = await http.get('$userApi$fridgeId/', headers: Repository.getHeaders());
+    var response = await client.get('$userApi$fridgeId/', headers: Repository.getHeaders());
 
     logger.i(
         'UserService => FETCHING USERS FOR FRIDGE $fridgeId: ${response.body}');
@@ -98,7 +98,7 @@ class UserService {
     logger.i(
         'UserService => UPDATING $parameter with $attribute FROM URL: $userApi');
 
-    var response = await http.patch(userApi,
+    var response = await client.patch(userApi,
         headers: Repository.getHeaders(),
         body: jsonEncode({parameter: attribute}),
         encoding: utf8);
@@ -127,7 +127,7 @@ class UserService {
     logger.i(
         'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
 
-    var response = await http.post("${userApi}duplicate/",
+    var response = await client.post("${userApi}duplicate/",
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": user,

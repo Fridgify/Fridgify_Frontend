@@ -46,12 +46,31 @@ void main() async {
     );
   });
 
+  group('Validate Token', () {
+
+    test('doesnt find a chached token', () async {
+      expect(() async => completion(await authService.validateToken()), throwsA(predicate((error) => error is FailedToFetchClientTokenException)));
+    });
+
+    test('successfully validates the chached token', () async {
+      await Repository.sharedPreferences.setString('clientToken', 'Token valid');
+
+      expect(Future.value(true), completion(await authService.validateToken()));
+    });
+
+    test('unsuccessfully validates the chached token', () async {
+      await Repository.sharedPreferences.setString('clientToken', 'Token invalid');
+
+      expect(Future.value(false), completion(await authService.validateToken()));
+    });
+
+  });
+
   group('Login', () {
 
     test('gets a return type other than 201', () async {
       authService.user.username = 'error';
       expect(() async => completion(await authService.login()), throwsA(predicate((error) => error is FailedToFetchClientTokenException && error.err == 'Error. Login failed')));
-      authService.user.username = 'Mr. Mock';
     });
 
     test('gets a api token', () async {
@@ -92,7 +111,7 @@ void main() async {
     
   });
 
-  group('fetchApiToken', () {
+  group('Fetch api token', () {
 
     test('doesnt find a cached token', () async {
       expect(() async => completion(await authService.fetchApiToken()), throwsA(predicate((error) => error is FailedToFetchClientTokenException)));
@@ -124,6 +143,18 @@ class ResponseHandlers {
   }
 
   Response handleLoginRequest(Request request) {
+
+    if(request.headers.containsKey('Authorization')) {
+      switch(request.headers.remove('Authorization')) {
+        case 'Token valid':
+          return Response('valid token', 200);
+        case 'Token invalid':
+          return Response('invalid token', 401);
+        default:
+          return Response('Not implemented', 500);
+      }
+    }
+
     var name = json.decode(request.body)['username'];
 
     if (name == 'error') {

@@ -6,10 +6,10 @@ import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
+import 'package:http/http.dart';
 
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class ContentRepository implements Repository<Content> {
   Logger logger = Repository.logger;
@@ -17,13 +17,20 @@ class ContentRepository implements Repository<Content> {
   Fridge fridge;
   SharedPreferences pref = Repository.sharedPreferences;
   ItemRepository itemRepository = ItemRepository();
+  Client client;
 
   Map<int, Content> contents = Map();
 
   var contentApi;
 
-  ContentRepository(this.pref, this.fridge) {
+  ContentRepository(this.pref, this.fridge, [Client client]) {
     contentApi = "${Repository.baseURL}fridge/content/${this.fridge.fridgeId}/";
+
+    if(client != null) {
+      this.client = client;
+    } else {
+      this.client = Client();
+    }
   }
 
   @override
@@ -40,7 +47,7 @@ class ContentRepository implements Repository<Content> {
     });
     logger.i('ContentRepository => Requesting $contentApi with $body');
 
-    var response = await http.post(contentApi,
+    var response = await client.post(contentApi,
         headers: Repository.getHeaders(), body: body, encoding: utf8);
 
     logger.i('ContentRepository => CREATING CONTENT: ${response.body}');
@@ -59,7 +66,7 @@ class ContentRepository implements Repository<Content> {
   @override
   Future<bool> delete(int id) async {
     var response =
-        await http.delete("$contentApi$id", headers: Repository.getHeaders());
+        await client.delete("$contentApi$id", headers: Repository.getHeaders());
 
     logger.i(
         'ContentRepository => DELETING CONTENT: ${response.body} ON URL $contentApi$id');
@@ -77,7 +84,7 @@ class ContentRepository implements Repository<Content> {
   Future<Map<int, Content>> fetchAll() async {
     logger.i('ContentRepository => FETCHIN FROM URL: $contentApi');
 
-    var response = await http.get(contentApi, headers: Repository.getHeaders());
+    var response = await client.get(contentApi, headers: Repository.getHeaders());
 
     logger.i('ContentRepository => FETCHING CONTENT: ${response.body}');
 
@@ -117,7 +124,7 @@ class ContentRepository implements Repository<Content> {
     logger.i(
         'ContentRepository => UPDATING CONTENT $parameter with $attribute FROM URL: $contentApi');
 
-    var response = await http.patch('$contentApi${content.item.itemId}',
+    var response = await client.patch('$contentApi${content.item.itemId}',
         headers: Repository.getHeaders(),
         body: jsonEncode({parameter: attribute}),
         encoding: utf8);

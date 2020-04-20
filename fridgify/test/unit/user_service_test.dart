@@ -115,8 +115,8 @@ void main() async {
   });
 
   group('check username email', () {
+      // TODO: Test this when it is refactored
 
-    
   });
 
 

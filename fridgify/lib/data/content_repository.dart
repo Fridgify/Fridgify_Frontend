@@ -7,7 +7,6 @@ import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:http/http.dart';
-
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,7 +25,7 @@ class ContentRepository implements Repository<Content> {
   ContentRepository(this.pref, this.fridge, [Client client]) {
     contentApi = "${Repository.baseURL}fridge/content/${this.fridge.fridgeId}/";
 
-    if(client != null) {
+    if (client != null) {
       this.client = client;
     } else {
       this.client = Client();
@@ -84,7 +83,8 @@ class ContentRepository implements Repository<Content> {
   Future<Map<int, Content>> fetchAll() async {
     logger.i('ContentRepository => FETCHIN FROM URL: $contentApi');
 
-    var response = await client.get(contentApi, headers: Repository.getHeaders());
+    var response =
+        await client.get(contentApi, headers: Repository.getHeaders());
 
     logger.i('ContentRepository => FETCHING CONTENT: ${response.body}');
 
@@ -136,6 +136,8 @@ class ContentRepository implements Repository<Content> {
 
       logger.i('ContentRepository => UPDATED SUCCESSFUL $contents');
 
+      // TODO: This doesnt work. Well it doesnt throw an error because the
+      // TODO: parameter of this function is used and not the updated response.
       this.contents[content.item.itemId] = content;
       return content;
     }

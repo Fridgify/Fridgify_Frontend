@@ -102,18 +102,20 @@ void main() {
 
   group('Validate password', () {
     test('should return empty message', () {
-      expect(Validator.repeatValidatePassword(''), 'Please repeat the password');
+      expect(
+          Validator.repeatValidatePassword(''), 'Please repeat the password');
     });
 
     test('should return too short message', () {
       Validator.doNotMatch = true;
-      expect(Validator.repeatValidatePassword('Brrrrrr'), 'Password doesn\'t match');
+      expect(Validator.repeatValidatePassword('Brrrrrr'),
+          'Password doesn\'t match');
       Validator.doNotMatch = false;
     });
 
     test('should return null', () {
-      expect(Validator.repeatValidatePassword('TestWithMoreThan6Characters'), null);
+      expect(Validator.repeatValidatePassword('TestWithMoreThan6Characters'),
+          null);
     });
   });
-
 }

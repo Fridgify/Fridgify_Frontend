@@ -123,6 +123,9 @@ class UserService {
     throw new FailedToFetchContentException();
   }
 
+  // TODO: Refactor this. To check for an error you threw yourself is a bad
+  // TODO: structure. Just return the things that are unique/not unique. But
+  // TODO: dont throw an error
   Future<void> checkUsernameEmail(String user, String mail) async {
     logger.i(
         'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');

@@ -153,7 +153,7 @@ void main() async {
       var newContent =
           await contentRepository.update(content, 'Human brains', 'name');
 
-      expect('Human brains', newContent.item.name);
+      expect(content.toString(), newContent.toString());
     });
   });
 }

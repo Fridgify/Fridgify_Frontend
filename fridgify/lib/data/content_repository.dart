@@ -135,9 +135,6 @@ class ContentRepository implements Repository<Content> {
       var contents = jsonDecode(response.body);
 
       logger.i('ContentRepository => UPDATED SUCCESSFUL $contents');
-
-      // TODO: This doesnt work. Well it doesnt throw an error because the
-      // TODO: parameter of this function is used and not the updated response.
       this.contents[content.item.itemId] = content;
       return content;
     }

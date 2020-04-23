@@ -20,6 +20,8 @@ class AuthenticationService {
 
   Logger logger = Logger();
 
+  Client client;
+
   //Repository.sharedPreferences Repository.sharedPreferences = Repository.Repository.sharedPreferences;
 
   /// Constructor for the registration use case -> needs all data for user model
@@ -47,11 +49,17 @@ class AuthenticationService {
     logger.i("AuthService => LOGIN: ${user.toString()}");
   }
 
-  AuthenticationService() ;
+  AuthenticationService([Client client]) {
+    if(client != null) {
+      this.client = client;
+    } else {
+      this.client = Client();
+    }
+  }
 
   /// Register call
   Future<String> register() async {
-    var response = await post("$authAPI/register/",
+    var response = await client.post("$authAPI/register/",
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": user.username,
@@ -76,7 +84,7 @@ class AuthenticationService {
 
   /// Login call to fetch client token
   Future<String> login() async {
-    var response = await post("$authAPI/login/",
+    var response = await client.post("$authAPI/login/",
         headers: {"Content-Type": "application/json"},
         body:
             jsonEncode({"username": user.username, "password": user.password}),
@@ -120,7 +128,7 @@ class AuthenticationService {
     }
 
     var response =
-        await get("$authAPI/token/", headers: {"Authorization": clientToken});
+        await client.get("$authAPI/token/", headers: {"Authorization": clientToken});
 
     logger.i('AuthService => FETCHING API TOKEN ${response.body}');
 
@@ -160,7 +168,7 @@ class AuthenticationService {
     }
 
     var response =
-        await post("$authAPI/login/", headers: {"Authorization": clientToken});
+        await client.post("$authAPI/login/", headers: {"Authorization": clientToken});
     logger.i('Validating token: ${response.body}');
     return response.body == "invalid token" ? false : true;
   }

@@ -5,12 +5,15 @@ import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/exception/not_unique_exception.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/utils/validator.dart';
+import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   static const String userApi = "${Repository.baseURL}users/";
+
+  Client client;
 
   User user;
 
@@ -20,7 +23,12 @@ class UserService {
 
   static final UserService _userService = UserService._internal();
 
-  factory UserService() {
+  factory UserService([Client client]) {
+    if(client != null) {
+      _userService.client = client;
+    } else {
+      _userService.client = Client();
+    }
     return _userService;
   }
 
@@ -29,7 +37,7 @@ class UserService {
   Future<User> fetchUser() async {
     logger.i('UserService => FETCHING USER FROM URL: $userApi');
 
-    var response = await http.get(userApi, headers: Repository.getHeaders());
+    var response = await client.get(userApi, headers: Repository.getHeaders());
 
     logger.i('UserService => FETCHING USER DATA: ${response.body}');
 
@@ -57,7 +65,7 @@ class UserService {
 
     logger.i('UserService => FETCHING USERS FROM URL: $userApi$fridgeId/');
 
-    var response = await http.get('$userApi$fridgeId/', headers: Repository.getHeaders());
+    var response = await client.get('$userApi$fridgeId/', headers: Repository.getHeaders());
 
     logger.i(
         'UserService => FETCHING USERS FOR FRIDGE $fridgeId: ${response.body}');
@@ -90,7 +98,7 @@ class UserService {
     logger.i(
         'UserService => UPDATING $parameter with $attribute FROM URL: $userApi');
 
-    var response = await http.patch(userApi,
+    var response = await client.patch(userApi,
         headers: Repository.getHeaders(),
         body: jsonEncode({parameter: attribute}),
         encoding: utf8);
@@ -115,11 +123,14 @@ class UserService {
     throw new FailedToFetchContentException();
   }
 
+  // TODO: Refactor this. To check for an error you threw yourself is a bad
+  // TODO: structure. Just return the things that are unique/not unique. But
+  // TODO: dont throw an error
   Future<void> checkUsernameEmail(String user, String mail) async {
     logger.i(
         'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
 
-    var response = await http.post("${userApi}duplicate/",
+    var response = await client.post("${userApi}duplicate/",
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": user,

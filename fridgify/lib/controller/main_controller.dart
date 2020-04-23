@@ -7,6 +7,7 @@ import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/model/item.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/view/widgets/loader.dart';
+import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

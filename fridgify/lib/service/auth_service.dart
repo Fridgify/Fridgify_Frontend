@@ -173,21 +173,13 @@ class AuthenticationService {
     var response =
       await client.post("$authAPI/login/", headers: {"Authorization": clientToken});
 
+    logger.i('AuthService => VALIDATING TOKEN: ${response.body}');
 
-    if(response.body.toLowerCase().contains('token')) {
-      var token = jsonDecode(response.body)['token'];
-      logger.i('Validating token: ${response.body}');
-      if (token == clientToken) {
-        return true;
-      }
-      logger.i('Validating token: ${response.body}');
-      if (response.body == clientToken ? true : false) {
-        return true;
-      }
+    if(response.statusCode == 200) {
+      return true;
     }
 
-
-    throw FailedToFetchClientTokenException();
+    return false;
   }
 
   Future<bool> initiateRepositories() async {

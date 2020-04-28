@@ -89,7 +89,7 @@ class FridgeRepository implements Repository<Fridge> {
 
     logger.i('FridgeRepository => DELETING FRIDGE: ${response.body}');
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       logger.i('FridgeRepository => DELETED FRIDGE');
       this.fridges.remove(id);
       return true;

@@ -78,6 +78,8 @@ class AuthenticationService {
 
   /// Login call to fetch client token
   Future<String> login() async {
+
+    logger.i('AuthService => LOGGING');
     var response = await post("$authAPI/login/",
         headers: {"Content-Type": "application/json"},
         body:
@@ -154,7 +156,6 @@ class AuthenticationService {
   }
 
   Future<bool> validateToken() async {
-    print(Repository.sharedPreferences.toString());
     final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
 
     if (clientToken == null) {
@@ -165,7 +166,10 @@ class AuthenticationService {
     var response =
         await post("$authAPI/login/", headers: {"Authorization": clientToken});
     logger.i('Validating token: ${response.body}');
-    return response.body == "invalid token" ? false : true;
+    if(response.body == clientToken ? true : false) {
+      return true;
+    }
+    throw FailedToFetchClientTokenException();
   }
 
   Future<bool> initiateRepositories() async {

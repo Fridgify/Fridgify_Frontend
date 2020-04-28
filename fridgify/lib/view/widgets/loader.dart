@@ -304,8 +304,6 @@ class _ColorLoaderState extends State<ColorLoader>
       colorAnimations.add(animation);
     }
 
-    print(colorAnimations.length);
-
     tweenIndex = 0;
 
     timer = Timer.periodic(duration, (Timer t) {

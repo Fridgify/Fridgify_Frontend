@@ -164,7 +164,6 @@ class MenuElements {
         viewportFraction: 0.9,
         aspectRatio: 2.0,
         onPageChanged: (index) {
-          print(index);
           current = index;
           onChanged();
         },

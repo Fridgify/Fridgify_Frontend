@@ -115,7 +115,7 @@ class UserService {
     throw new FailedToFetchContentException();
   }
 
-  Future<void> checkUsernameEmail(String user, String mail) async {
+  Future<Map<String, bool>> checkUsernameEmail(String user, String mail) async {
     logger.i(
         'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
 
@@ -133,9 +133,9 @@ class UserService {
     if (response.statusCode == 200) {
       logger.i('UserService => EMAIL USER UNIQUE ${response.body}');
 
-      return;
+      return {"user": false, "mail": false};
     }
 
-    throw new NotUniqueException(user: res.containsKey('username'), mail: res.containsKey('email'));
+    return {"user": res.containsKey('username'), "mail": res.containsKey('email')};
   }
 }

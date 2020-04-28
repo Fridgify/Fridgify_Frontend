@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
+import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/view/widgets/popup.dart';
 import 'package:logger/logger.dart';
@@ -30,8 +31,8 @@ class MainController {
       validToken = await _authService.validateToken();
     }
     catch(exception) {
-      logger.e("Exception while trying to validateToken ${exception.toString()}");
-      Popups.errorPopup(context, exception.toString());
+      logger.e("MainController => Exception while trying to validateToken ${exception.toString()}");
+      await Popups.errorPopup(context, exception.toString());
       return false;
     }
 
@@ -46,7 +47,7 @@ class MainController {
           logger.e('MainController => FAILED TO FETCH API TOKEN');
         }
         else {
-          logger.e('MainController => $exception');
+          logger.e('MainController => ${exception.toString()}');
         }
         Popups.errorPopup(context, exception);
         return false;

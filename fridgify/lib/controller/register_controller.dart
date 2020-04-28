@@ -105,22 +105,18 @@ class RegisterController {
 
     Loader.showSimpleLoadingDialog(context);
 
-    try {
-      await _userService.checkUsernameEmail(
-          textInputControllerUser.text, textInputControllerMail.text);
-    } catch (exception) {
-      if (exception is NotUniqueException) {
-        _logger.i(
-            'RegisterController => NOT UNIQUE USER: ${exception.user} EMAIL: ${exception.mail}');
+    var checks = await _userService.checkUsernameEmail(
+        textInputControllerUser.text, textInputControllerMail.text);
 
-        Validator.userNotUnique = exception.user;
-        Validator.mailNotUnique = exception.mail;
+    if(checks['user'] || checks['mail']) {
+      _logger.i(
+          'RegisterController => NOT UNIQUE USER: ${checks['user']} EMAIL: ${checks['mail']}');
 
-        key.currentState.validate();
-      } else {
-        _logger.e('RegisterController => EXCEPTION $exception');
-        Popups.errorPopup(context, exception.toString());
-      }
+      Validator.userNotUnique = checks['user'];
+      Validator.mailNotUnique = checks['mail'];
+
+      key.currentState.validate();
+
       Navigator.of(context, rootNavigator: true).pop();
       return false;
     }

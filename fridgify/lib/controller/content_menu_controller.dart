@@ -25,10 +25,8 @@ class ContentMenuController {
       }
     }
     if(choice == Constants.addFridge) {
-      print('Pop');
       Popups.addFridge(context, this, onChange);
     }
-    print("Pressed");
   }
 
   Future<void> leaveFridge(Fridge f, BuildContext context, Function onChanged) async {

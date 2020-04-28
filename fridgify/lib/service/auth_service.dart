@@ -104,7 +104,7 @@ class AuthenticationService {
   }
 
   /// Logout by cleaning cache
-  Future<bool> logout(BuildContext context) async {
+  Future<bool> logout() async {
     bool cacheClear =
         await Repository.sharedPreferences.remove("clientToken") && await Repository.sharedPreferences.remove("apiToken");
 
@@ -165,10 +165,18 @@ class AuthenticationService {
 
     var response =
         await post("$authAPI/login/", headers: {"Authorization": clientToken});
-    logger.i('Validating token: ${response.body}');
-    if(response.body == clientToken ? true : false) {
-      return true;
+
+
+    if(response.body.toLowerCase().contains('token'))
+    {
+      var token = jsonDecode(response.body)['token'];
+      logger.i('Validating token: ${response.body}');
+      if(token == clientToken) {
+        return true;
+      }
     }
+
+
     throw FailedToFetchClientTokenException();
   }
 

@@ -5,6 +5,7 @@ import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
+import 'package:http/http.dart';
 
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,7 @@ class ItemRepository implements Repository<Item> {
   Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   StoreRepository storeRepository = StoreRepository();
+  Client client;
 
   static const itemApi = "${Repository.baseURL}items/";
 
@@ -22,7 +24,13 @@ class ItemRepository implements Repository<Item> {
 
   static final ItemRepository _itemRepository = ItemRepository._internal();
 
-  factory ItemRepository() {
+  factory ItemRepository([Client client]) {
+    if (client != null) {
+      _itemRepository.client = client;
+    } else {
+      _itemRepository.client = Client();
+    }
+
     return _itemRepository;
   }
 
@@ -48,7 +56,7 @@ class ItemRepository implements Repository<Item> {
   Future<Map<int, Item>> fetchAll() async {
     logger.i('ItemRepository => FETCHIN FROM URL: $itemApi');
 
-    var response = await http.get(itemApi, headers: Repository.getHeaders());
+    var response = await client.get(itemApi, headers: Repository.getHeaders());
 
     logger.i('ItemRepository => FETCHING ITEMS: ${response.body}');
 

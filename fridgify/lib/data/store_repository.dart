@@ -4,6 +4,7 @@ import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/store.dart';
+import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,7 @@ import 'package:http/http.dart' as http;
 class StoreRepository implements Repository<Store> {
   Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
+  Client client;
 
   static const storeApi = "${Repository.baseURL}stores/";
 
@@ -18,7 +20,13 @@ class StoreRepository implements Repository<Store> {
 
   static final StoreRepository _storeRepository = StoreRepository._internal();
 
-  factory StoreRepository() {
+  factory StoreRepository([Client client]) {
+    if (client != null) {
+      _storeRepository.client = client;
+    } else {
+      _storeRepository.client = Client();
+    }
+
     return _storeRepository;
   }
 
@@ -26,7 +34,7 @@ class StoreRepository implements Repository<Store> {
 
   @override
   Future<int> add(Store store) async {
-    var response = await http.post(storeApi,
+    var response = await client.post(storeApi,
         headers: Repository.getHeaders(),
         body: jsonEncode({
           "name": store.name,
@@ -58,7 +66,7 @@ class StoreRepository implements Repository<Store> {
   Future<Map<int, Store>> fetchAll() async {
     logger.i('StoreRepository => FETCHING FROM URL: $storeApi');
 
-    var response = await http.get(storeApi, headers: Repository.getHeaders());
+    var response = await client.get(storeApi, headers: Repository.getHeaders());
 
     logger.i('StoreRepository => FETCHING STORES: ${response.body}');
 

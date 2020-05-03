@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
           '/register': (BuildContext context) => new RegisterPage(),
           '/menu': (BuildContext context) => new ContentMenuPage(),
           '/startup': (BuildContext context) => new MyHomePage()
+
         },
         theme: ThemeData(
           // This is the theme of your application.
@@ -79,8 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     Repository.sharedPreferences = await SharedPreferences.getInstance();
 
-    AuthenticationService authService =
-    AuthenticationService.login("testUser", "password");
+    AuthenticationService authService = AuthenticationService.login("testUser", "password");
+
     await authService.login();
     await authService.fetchApiToken();
     await authService.validateToken();

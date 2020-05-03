@@ -158,6 +158,7 @@ class ResponseHandlers {
       switch (request.headers.remove('Authorization')) {
         case 'Token valid':
           return Response(json.encode({'token': 'Api token'}), 200);
+
         case 'Token invalid':
           return Response('invalid token', 401);
         default:

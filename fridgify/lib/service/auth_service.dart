@@ -89,6 +89,7 @@ class AuthenticationService {
   /// Login call to fetch client token
   Future<String> login() async {
     logger.i('AuthService => LOGGING');
+
     var response = await client.post("$authAPI/login/",
         headers: {"Content-Type": "application/json"},
         body:
@@ -136,6 +137,7 @@ class AuthenticationService {
     var response =
     await client.get("$authAPI/token/", headers: {"Authorization": clientToken});
 
+
     logger.i('AuthService => FETCHING API TOKEN ${response.body}');
 
     if (response.statusCode == 201) {
@@ -165,6 +167,7 @@ class AuthenticationService {
   }
 
   Future<bool> validateToken() async {
+
     final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
 
     if (clientToken == null) {
@@ -172,8 +175,7 @@ class AuthenticationService {
       throw FailedToFetchClientTokenException();
     }
 
-    var response =
-    await client.post("$authAPI/login/", headers: {"Authorization": clientToken});
+    var response = await client.post("$authAPI/login/", headers: {"Authorization": clientToken});
 
     logger.i('AuthService => VALIDATING TOKEN: ${response.body}');
 
@@ -191,22 +193,18 @@ class AuthenticationService {
 
     try {
       logger.i('MainController => FETCHING ALL REPOSITORIES');
-      fridgeRepository.fridges = Map();
-      storeRepository.stores = Map();
-      itemRepository.items = Map();
-
-      await Future.wait(
+      Future.wait(
           [
             fridgeRepository.fetchAll(),
             storeRepository.fetchAll(),
             itemRepository.fetchAll(),
           ]
       );
-      return true;
     }
     catch(exception) {
       logger.e('MainController => FAILED TO FETCH REPOSITORY $exception');
       return false;
     }
+    return true;
   }
 }

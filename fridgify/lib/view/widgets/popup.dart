@@ -3,6 +3,7 @@ import 'package:fridgify/controller/content_menu_controller.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 
+
 class Popups {
   static Future<void> errorPopup(BuildContext context, String msg) async {
     TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);

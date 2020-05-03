@@ -9,6 +9,7 @@ class FormElements {
       String hintText,
       Function(String) validator}
       ) {
+
     return SizedBox(
         height: 75.0,
         child: TextFormField(

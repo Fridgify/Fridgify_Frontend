@@ -102,7 +102,6 @@ class RegisterController {
     if (!key.currentState.validate()) {
       return false;
     }
-
     Loader.showSimpleLoadingDialog(context);
 
     var checks = await _userService.checkUsernameEmail(
@@ -199,6 +198,7 @@ class RegisterController {
             controller: textInputControllerRepeatPass)
       ];
       focusNodePas.requestFocus();
+
       _phase++;
       return;
     }

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -64,6 +63,7 @@ class Loader extends StatefulWidget {
                         ColorLoader(
                           colors: [Colors.purpleAccent],
                           duration: Duration(minutes: 5),
+
                         ),
                         /*SizedBox(
                           height: 10,

@@ -124,6 +124,7 @@ class UserService {
   }
 
   Future<Map<String, bool>> checkUsernameEmail(String user, String mail) async {
+
     logger.i(
         'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
 
@@ -140,10 +141,10 @@ class UserService {
 
     if (response.statusCode == 200) {
       logger.i('UserService => EMAIL USER UNIQUE ${response.body}');
-
       return {"user": false, "mail": false};
     }
 
     return {"user": res.containsKey('username'), "mail": res.containsKey('email')};
+
   }
 }

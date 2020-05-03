@@ -123,10 +123,8 @@ class UserService {
     throw new FailedToFetchContentException();
   }
 
-  // TODO: Refactor this. To check for an error you threw yourself is a bad
-  // TODO: structure. Just return the things that are unique/not unique. But
-  // TODO: dont throw an error
-  Future<void> checkUsernameEmail(String user, String mail) async {
+  Future<Map<String, bool>> checkUsernameEmail(String user, String mail) async {
+
     logger.i(
         'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
 
@@ -134,7 +132,7 @@ class UserService {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "username": user,
-          "mail": mail
+          "email": mail
         }),
         encoding: utf8);
 
@@ -143,10 +141,10 @@ class UserService {
 
     if (response.statusCode == 200) {
       logger.i('UserService => EMAIL USER UNIQUE ${response.body}');
-
-      return;
+      return {"user": false, "mail": false};
     }
 
-    throw new NotUniqueException(user: res.containsKey('username'), mail: res.containsKey('email'));
+    return {"user": res.containsKey('username'), "mail": res.containsKey('email')};
+
   }
 }

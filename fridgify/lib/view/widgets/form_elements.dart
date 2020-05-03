@@ -7,7 +7,9 @@ class FormElements {
       TextEditingController controller,
       bool obscureText,
       String hintText,
-      Function(String) validator}) {
+      Function(String) validator}
+      ) {
+
     return SizedBox(
         height: 75.0,
         child: TextFormField(

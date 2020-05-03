@@ -21,6 +21,9 @@ class RegisterController {
   TextEditingController textInputControllerName = TextEditingController();
   TextEditingController textInputControllerDate = TextEditingController();
 
+  FocusNode focusNodePas = FocusNode();
+  FocusNode focusNodeFirst = FocusNode();
+
   List<Widget> interactiveForm = [];
 
   AuthenticationService _authService;
@@ -55,12 +58,12 @@ class RegisterController {
     _authService = AuthenticationService.register(
         textInputControllerUser.text,
         textInputControllerPass.text,
-        textInputControllerMail.text,
         textInputControllerSur.text,
         textInputControllerName.text,
+        textInputControllerMail.text,
         textInputControllerDate.text);
 
-    Loader.showLoadingDialog(context);
+    Loader.showSimpleLoadingDialog(context);
 
     try {
       await _authService.register();
@@ -99,24 +102,20 @@ class RegisterController {
     if (!key.currentState.validate()) {
       return false;
     }
+    Loader.showSimpleLoadingDialog(context);
 
-    Loader.showLoadingDialog(context);
+    var checks = await _userService.checkUsernameEmail(
+        textInputControllerUser.text, textInputControllerMail.text);
 
-    try {
-      await _userService.checkUsernameEmail(
-          textInputControllerUser.text, textInputControllerMail.text);
-    } catch (exception) {
-      if (exception is NotUniqueException) {
-        _logger.i(
-            'RegisterController => NOT UNIQUE USER: ${exception.user} EMAIL: ${exception.mail}');
+    if(checks['user'] || checks['mail']) {
+      _logger.i(
+          'RegisterController => NOT UNIQUE USER: ${checks['user']} EMAIL: ${checks['mail']}');
 
-        Validator.userNotUnique = exception.user;
-        Validator.mailNotUnique = exception.mail;
+      Validator.userNotUnique = checks['user'];
+      Validator.mailNotUnique = checks['mail'];
 
-        key.currentState.validate();
-      } else {
-        _logger.e('RegisterController => EXCEPTION $exception');
-      }
+      key.currentState.validate();
+
       Navigator.of(context, rootNavigator: true).pop();
       return false;
     }
@@ -153,17 +152,17 @@ class RegisterController {
         FormElements.textField(
           style: this.style,
           obscureText: false,
-          controller: textInputControllerName,
-          hintText: "Last Name",
-          validator: Validator.validateName,
+          controller: textInputControllerSur,
+          hintText: "First Name",
+          validator: Validator.validateFirst,
         ),
         SizedBox(height: 25.0),
         FormElements.textField(
           style: this.style,
           obscureText: false,
-          controller: textInputControllerSur,
-          hintText: "First Name",
-          validator: Validator.validateFirst,
+          controller: textInputControllerName,
+          hintText: "Last Name",
+          validator: Validator.validateName,
         ),
         SizedBox(height: 25.0),
         FormElements.datePickerText(
@@ -176,6 +175,7 @@ class RegisterController {
         ),
         SizedBox(height: 25.0),
       ];
+      focusNodeFirst.requestFocus();
       _phase++;
       return;
     }
@@ -197,6 +197,8 @@ class RegisterController {
             validator: Validator.repeatValidatePassword,
             controller: textInputControllerRepeatPass)
       ];
+      focusNodePas.requestFocus();
+
       _phase++;
       return;
     }

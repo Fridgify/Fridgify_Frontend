@@ -99,7 +99,7 @@ class FridgeRepository implements Repository<Fridge> {
   }
 
   @override
-  Future<Map<int, Fridge>> fetchAll() async {
+  Future<Map<int, Fridge>> fetchAll([Client client]) async {
     var response = await client.get(fridgeAPI, headers: Repository.getHeaders());
     logger.i('FridgeRepository => FETCHING FRIDGES: ${response.body}');
 
@@ -114,7 +114,11 @@ class FridgeRepository implements Repository<Fridge> {
             name: fridge['name'],
             description: fridge['description'],
             content: fridge['content']);
-        f.contentRepository = ContentRepository(sharedPreferences, f);
+        if(client != null) {
+          f.contentRepository = ContentRepository(sharedPreferences, f, client);
+        } else {
+          f.contentRepository = ContentRepository(sharedPreferences, f);
+        }
 
         await getFridgeMembers(f);
         await f.contentRepository.fetchAll();
@@ -147,7 +151,7 @@ class FridgeRepository implements Repository<Fridge> {
 
     logger.i('FridgeRepository => FETCHING USER FOR FRIDGE ${f.fridgeId} ON URL $url');
 
-    var response = await http.get(url, headers: Repository.getHeaders());
+    var response = await client.get(url, headers: Repository.getHeaders());
     logger.i('FridgeRepository => FETCHING USERS : ${response.body}');
 
     if (response.statusCode == 200) {

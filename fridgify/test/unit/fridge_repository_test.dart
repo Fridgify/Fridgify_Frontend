@@ -89,7 +89,7 @@ void main() async {
           .setString('apiToken', 'Error case fetch all');
 
       expect(
-          () async => completion(await fridgeRepository.fetchAll()),
+          () async => completion(await fridgeRepository.fetchAll(mockClient)),
           throwsA(
               predicate((error) => error is FailedToFetchFridgesException)));
     });

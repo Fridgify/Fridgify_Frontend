@@ -99,7 +99,7 @@ class FridgeRepository implements Repository<Fridge> {
   }
 
   @override
-  Future<Map<int, Fridge>> fetchAll([Client client]) async {
+  Future<Map<int, Fridge>> fetchAll([Client mockClient]) async {
     var response = await client.get(fridgeAPI, headers: Repository.getHeaders());
     logger.i('FridgeRepository => FETCHING FRIDGES: ${response.body}');
 
@@ -114,8 +114,8 @@ class FridgeRepository implements Repository<Fridge> {
             name: fridge['name'],
             description: fridge['description'],
             content: fridge['content']);
-        if(client != null) {
-          f.contentRepository = ContentRepository(sharedPreferences, f, client);
+        if(mockClient != null) {
+          f.contentRepository = ContentRepository(sharedPreferences, f, mockClient);
         } else {
           f.contentRepository = ContentRepository(sharedPreferences, f);
         }

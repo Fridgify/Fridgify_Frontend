@@ -89,7 +89,7 @@ void main() async {
           .setString('apiToken', 'Error case fetch all');
 
       expect(
-          () async => completion(await fridgeRepository.fetchAll(mockClient)),
+          () async => completion(await fridgeRepository.fetchAll()),
           throwsA(
               predicate((error) => error is FailedToFetchFridgesException)));
     });
@@ -97,7 +97,7 @@ void main() async {
     test('adds all of the returned fridges', () async {
       await Repository.sharedPreferences.setString('apiToken', 'Add fridges');
 
-      var content = await fridgeRepository.fetchAll(mockClient);
+      var content = await fridgeRepository.fetchAll();
 
       // Should have 13 entries
       for (int i = 0; i < 13; i++) {

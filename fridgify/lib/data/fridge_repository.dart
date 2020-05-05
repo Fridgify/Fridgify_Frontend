@@ -114,7 +114,7 @@ class FridgeRepository implements Repository<Fridge> {
             name: fridge['name'],
             description: fridge['description'],
             content: fridge['content']);
-        f.contentRepository = ContentRepository(sharedPreferences, f);
+        f.contentRepository = ContentRepository(sharedPreferences, f, client);
 
         await getFridgeMembers(f);
         await f.contentRepository.fetchAll();
@@ -147,7 +147,7 @@ class FridgeRepository implements Repository<Fridge> {
 
     logger.i('FridgeRepository => FETCHING USER FOR FRIDGE ${f.fridgeId} ON URL $url');
 
-    var response = await http.get(url, headers: Repository.getHeaders());
+    var response = await client.get(url, headers: Repository.getHeaders());
     logger.i('FridgeRepository => FETCHING USERS : ${response.body}');
 
     if (response.statusCode == 200) {

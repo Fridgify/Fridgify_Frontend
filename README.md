@@ -2,7 +2,7 @@
 
 Fridgify - Stay cool. Stay organised. 
 
-![Code coverage](fridgify/coverage/coverage_badge.svg?)
+![Code coverage](fridgify/coverage/coverage_badge.svg) 
 
 ## Getting Started
 

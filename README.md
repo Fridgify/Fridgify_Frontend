@@ -1,4 +1,4 @@
-# fridgify
+# Fridgify - Frontend
 
 Fridgify - Stay cool. Stay organised. 
 

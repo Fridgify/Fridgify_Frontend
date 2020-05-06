@@ -111,6 +111,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_coverage_badge:
+    dependency: "direct dev"
+    description:
+      name: flutter_coverage_badge
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1+1"
   flutter_datetime_picker:
     dependency: "direct main"
     description:
@@ -215,6 +222,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.1+1"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   json_rpc_2:
     dependency: transitive
     description:
@@ -222,6 +236,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  lcov:
+    dependency: transitive
+    description:
+      name: lcov
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.7.0"
   logger:
     dependency: "direct main"
     description:

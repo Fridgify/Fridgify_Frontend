@@ -6,7 +6,6 @@ import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/utils/constants.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
-import 'package:flutter/material.dart';
 
 class ContentMenuPage extends StatefulWidget {
   ContentMenuPage({Key key, this.title}) : super(key: key);

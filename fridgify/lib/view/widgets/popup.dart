@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
+import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 
@@ -54,14 +55,14 @@ class Popups {
           actions: <Widget>[
             FlatButton(
               child: Text('Confirm'),
-              onPressed: () {
-                onPressedFunc();
+              onPressed: () async {
+                await onPressedFunc();
                 Navigator.of(context).pop();
               },
             ),
             RaisedButton(
               color: Colors.purple,
-              child: Text('Cancle'),
+              child: Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -100,13 +101,6 @@ class Popups {
                     },
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: _controller.descriptionController,
-                    decoration: InputDecoration(hintText: "Description"),
-                  ),
-                )
               ])
               ,
             ),

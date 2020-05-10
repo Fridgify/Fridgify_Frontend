@@ -24,6 +24,7 @@ void main() async {
     Repository.sharedPreferences = await SharedPreferences.getInstance();
     testUtil = ContentRepositoryTestUtil();
     content = Content.create(
+      contentId: "uuid",
       expirationDate: DateTime.now().toIso8601String(),
       amount: 13,
       unit: 'stk',
@@ -31,7 +32,6 @@ void main() async {
           itemId: 45,
           barcode: 'adw',
           name: 'Human heart',
-          description: 'Fresh',
           store: Store.create(name: 'Ikea')),
     );
 
@@ -52,7 +52,7 @@ void main() async {
 
     contentRepository = ContentRepository(
         Repository.sharedPreferences,
-        Fridge.create(fridgeId: 42, name: 'Test fridge', description: '132'),
+        Fridge.create(fridgeId: 42, name: 'Test fridge'),
         mockClient);
   });
 
@@ -69,7 +69,7 @@ void main() async {
       await Repository.sharedPreferences.setString('apiToken', 'Create');
 
       expect(
-          Future.value(42), completion(await contentRepository.add(content)));
+          Future.value("uuid"), completion(await contentRepository.add(content)));
     });
 
     test('sets the current date', () async {
@@ -88,13 +88,14 @@ void main() async {
       await Repository.sharedPreferences.setString('apiToken', 'Doesnt delete');
 
       expect(
-          Future.value(false), completion(await contentRepository.delete(13)));
+          Future.value(false), completion(await contentRepository.delete("13")));
     });
 
     test('deletes successfully', () async {
       await Repository.sharedPreferences.setString('apiToken', 'Delete');
 
-      contentRepository.contents[66] = Content.create(
+      contentRepository.contents["uuid1"] = Content.create(
+        contentId: "uuid1",
         expirationDate: DateTime.now().toIso8601String(),
         amount: 13,
         unit: 'stk',
@@ -102,13 +103,12 @@ void main() async {
             itemId: 66,
             barcode: 'adw',
             name: 'Human heart',
-            description: 'Fresh',
             store: Store.create(name: 'Ikea')),
       );
 
       expect(
-          Future.value(true), completion(await contentRepository.delete(66)));
-      expect(false, contentRepository.contents.containsKey(66));
+          Future.value(true), completion(await contentRepository.delete("uuid1")));
+      expect(false, contentRepository.contents.containsKey("uuid1"));
     });
   });
 
@@ -131,7 +131,7 @@ void main() async {
 
       // Should have 66 entries
       for (int i = 0; i < 66; i++) {
-        expect(true, contentRepository.contents.containsKey(i));
+        expect(true, contentRepository.contents.containsKey("test_uuid$i"));
       }
     });
   });
@@ -226,7 +226,8 @@ class ContentRepositoryTestUtil {
 
     for (int i = 0; i < amount; i++) {
       content.add({
-        'expirationDate': DateTime.now().toIso8601String(),
+        'content_id': 'test_uuid$i',
+        'expiration_date': "2020-05-10",
         'amount': 13,
         'unit': 'stk',
         'item_id': i,
@@ -244,7 +245,6 @@ class ContentRepositoryTestUtil {
               itemId: i,
               barcode: 'adw',
               name: 'Human heart',
-              description: 'Fresh',
               store: Store.create(name: 'Ikea')));
     }
   }

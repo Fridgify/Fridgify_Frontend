@@ -41,8 +41,7 @@ class ContentMenuController {
     _logger.i("ContentMenuController => CREATING FRIDGE");
     if(key.currentState.validate()) {
       try {
-        await _fridgeRepository.add(Fridge.create(name: nameController.text,
-            description: descriptionController.text ?? ""));
+        await _fridgeRepository.add(Fridge.create(name: nameController.text));
         MenuElements.current = _fridgeRepository.getAll().length - 1;
         onChange();
       }

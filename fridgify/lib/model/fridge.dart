@@ -5,7 +5,6 @@ import 'package:fridgify/model/user.dart';
 class Fridge {
   int fridgeId;
   String name;
-  String description;
   Map<String, dynamic> content;
   List<User> member = List();
 
@@ -14,14 +13,12 @@ class Fridge {
   Fridge({
     @required this.fridgeId,
     @required this.name,
-    @required this.description,
     @required this.content,
   });
 
   Fridge.create({
     this.fridgeId,
     @required this.name,
-    this.description = "",
   });
 
   Map<String, double> contentForPieChart() {

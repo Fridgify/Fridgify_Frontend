@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class StoreRepository implements Repository<Store> {
+class StoreRepository implements Repository<Store, int> {
   Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   Client client;
@@ -17,6 +17,7 @@ class StoreRepository implements Repository<Store> {
   static const storeApi = "${Repository.baseURL}stores/";
 
   Map<int, Store> stores = Map();
+  Map<Store, String> storeWithNames = Map();
 
   static final StoreRepository _storeRepository = StoreRepository._internal();
 
@@ -31,6 +32,17 @@ class StoreRepository implements Repository<Store> {
   }
 
   StoreRepository._internal();
+
+  Future<Store> getByName(String name) async {
+    if(this.getAllWithName().values.contains(name)) {
+      print("Found");
+      return this.getAllWithName().keys.firstWhere((element) => element.name == name);
+    }
+    print("Not Found");
+    Store s = Store.create(name: name);
+    stores[await add(s)] = s;
+    return s;
+  }
 
   @override
   Future<int> add(Store store) async {
@@ -79,6 +91,7 @@ class StoreRepository implements Repository<Store> {
         logger.i("StoreRepository => FETCHED STORES: $store");
         Store s = Store(storeId: store['store_id'], name: store['name']);
 
+        this.storeWithNames[s] = s.name;
         this.stores[s.storeId] = s;
       }
 
@@ -91,6 +104,10 @@ class StoreRepository implements Repository<Store> {
   @override
   get(int id) {
     return this.stores[id];
+  }
+
+  Map<Store, String> getAllWithName() {
+    return storeWithNames;
   }
 
   @override

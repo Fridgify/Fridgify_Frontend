@@ -69,7 +69,7 @@ void main() async {
       await Repository.sharedPreferences.setString('apiToken', 'Create');
 
       expect(
-          Future.value("uuid"), completion(await contentRepository.add(content)));
+          Future.value("Added"), completion(await contentRepository.add(content)));
     });
 
     test('sets the current date', () async {
@@ -79,7 +79,7 @@ void main() async {
       var body = testUtil.body;
       var time = DateTime.now();
 
-      expect(body['buy_date'], '${time.year}-${time.month}-${time.day}');
+      expect(body['buy_date'], '${time.year}-${time.month < 10 ? '0${time.month}' : time.month }-${time.day}');
     });
   });
 
@@ -179,10 +179,30 @@ class ContentRepositoryTestUtil {
       case 'Error case add content':
         return Response('Error case add content', 404);
       case 'Create':
-        return Response(json.encode({'message': 'created'}), 201);
+        return Response(json.encode([{
+          'id': 45,
+          'expiration_date': DateTime.now().toIso8601String(),
+          'amount': 13,
+          'max_amount': 420,
+          'unit': 'stk',
+          'created_at': DateTime.now().toIso8601String(),
+          'last_updated': DateTime.now().toIso8601String(),
+          'fridge': 42,
+          'item': 45
+        }]), 201);
       case 'Set date':
         body = Map.from(json.decode(request.body));
-        return Response(json.encode({'message': 'created'}), 201);
+        return Response(json.encode([{
+          'id': 45,
+          'expiration_date': DateTime.now().toIso8601String(),
+          'amount': 13,
+          'max_amount': 420,
+          'unit': 'stk',
+          'created_at': DateTime.now().toIso8601String(),
+          'last_updated': DateTime.now().toIso8601String(),
+          'fridge': 42,
+          'item': 45
+        }]), 201);
       default:
         return Response('Not implemented', 500);
     }

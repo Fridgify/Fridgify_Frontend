@@ -38,6 +38,6 @@ class User {
   @override
   String toString() {
     return "username: $username, password: $password, name: $name, surname: $surname,"
-        "email: $email, birthDate: $birthDate";
+        " email: $email, birthDate: $birthDate";
   }
 }

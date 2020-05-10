@@ -1,17 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/repository.dart';
-import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_create_new_fridge_exception.dart';
-import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_fridges_exception.dart';
-import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/model/item.dart';
-import 'package:fridgify/model/store.dart';
 import 'package:http/http.dart' show Response, Request;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -112,6 +106,30 @@ void main() async {
     });
   });
 
+  group('getFridgeMembers', () {
+    test('throws an error', () async {
+      await Repository.sharedPreferences
+          .setString('apiToken', 'Error case get fridge members');
+
+      expect(
+          () async =>
+              completion(await fridgeRepository.getFridgeMembers(fridge)),
+          throwsA(
+              predicate((error) => error is FailedToFetchFridgesException)));
+    });
+
+    test('returns all members', () async {
+      await Repository.sharedPreferences.setString('apiToken', 'Return member');
+
+      var members = await fridgeRepository.getFridgeMembers(fridge);
+
+      for (int i = 0; i < members.length; i++) {
+        expect(
+            'username: Mr. Mock No.$i, password: , name: Dieter No.$i, surname: Mock No.$i, email: dieter.mockNo.$i@gmail.de, birthDate: 01.01.1969',
+            members[i].toString());
+      }
+    });
+  });
 }
 
 class FridgeRepositoryTestUtil {
@@ -124,7 +142,19 @@ class FridgeRepositoryTestUtil {
       case 'Error case fetch all':
         return Response('Error case fetch all', 404);
       case 'Add fridges':
-        return Response(json.encode(createFridgeObjects(13)), 200);
+        Response response = Response(json.encode(createFridgeObjects(13)), 200);
+        Repository.sharedPreferences.setString('apiToken', 'Return member in fetch all');
+        return response;
+      case 'Error case get fridge members':
+        return Response('Error case get fridge members', 404);
+      case 'Return member':
+        return Response(json.encode(createMemberObjects(13)), 200);
+      case 'Return member in fetch all':
+        Response response = Response(json.encode(createMemberObjects(13)), 200);
+        Repository.sharedPreferences.setString('apiToken', 'Add content in fetch all');
+        return response;
+      case 'Add content in fetch all':
+        return Response(json.encode([]), 200);
       default:
         return Response('Not implemented', 500);
     }
@@ -182,6 +212,21 @@ class FridgeRepositoryTestUtil {
     }
   }
 
+  List<Object> createMemberObjects(int amount) {
+    List<Object> member = List();
+
+    for (int i = 0; i < amount; i++) {
+      member.add({
+        'username': 'Mr. Mock No.$i',
+        'name': 'Dieter No.$i',
+        'surname': 'Mock No.$i',
+        'email': 'dieter.mockNo.$i@gmail.de',
+        'birth_date': '01.01.1969'
+      });
+    }
+    return member;
+  }
+
   List<Object> createFridgeObjects(int amount) {
     List<Object> fridges = List();
 
@@ -192,7 +237,7 @@ class FridgeRepositoryTestUtil {
         'content': {
           'total': i + 120,
           'fresh': i + 52,
-          'dueSoon':	i + 51,
+          'dueSoon': i + 51,
           'overDue': i,
         }
       });
@@ -200,5 +245,4 @@ class FridgeRepositoryTestUtil {
 
     return fridges;
   }
-
 }

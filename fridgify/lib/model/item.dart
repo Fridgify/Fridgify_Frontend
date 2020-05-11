@@ -10,8 +10,13 @@ class Item {
 
   Item(
       {@required this.itemId,
-      @required this.barcode,
-      @required this.name,
-      @required this.description,
-      @required this.store});
+        @required this.barcode,
+        @required this.name,
+        @required this.store});
+
+  Item.create({
+    this.barcode,
+    @required this.name,
+    @required this.store
+  });
 }

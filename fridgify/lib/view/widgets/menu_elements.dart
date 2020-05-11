@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
 
 import 'package:fridgify/model/fridge.dart';
+import 'package:fridgify/view/screens/fridge_detail_screen.dart';
+import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
 import 'package:pie_chart/pie_chart.dart';
 
@@ -54,75 +56,70 @@ class MenuElements {
 
   static Widget fridgeCard(Fridge fridge, BuildContext context, onChanged,
       ContentMenuController controller) {
-    return Padding(
-        padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 0.0),
-        child: Card(
-            child: Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Container(
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned(
-                          child: Column(children: [
-                        Row(children: [
-                          Text(
-                            fridge.name,
-                            style: TextStyle(
-                                fontSize: 24, fontFamily: 'Montserrat'),
-                          ),
-                        ]),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: <Widget>[
+    return GestureDetector(
+      onTap: () async => await MenuElements._navigateToNextFridge(fridge, context),
+      child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 0.0),
+          child: Card(
+              child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Container(
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned(
+                            child: Column(children: [
+                          Row(children: [
                             Text(
-                              fridge.description,
+                              fridge.name,
                               style: TextStyle(
-                                  fontSize: 16,
-                                  fontFamily: 'Montserrat',
-                                  color: Colors.blueGrey),
-                            )
-                          ],
-                        ),
-                        Divider(),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text(
-                              "Members: ${fridge.member.length}",
-                              style: Theme.of(context).textTheme.body1,
+                                  fontSize: 24, fontFamily: 'Montserrat'),
                             ),
-                          ],
-                        )
-                      ])),
-                      pieChart(fridge, context),
-                      Positioned(
-                          child: Align(
-                              alignment: FractionalOffset.bottomCenter,
-                              child: ButtonBar(
-                                alignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  RaisedButton(
-                                    color: Colors.purple,
-                                    child: Text("Invite"),
-                                    onPressed: () {},
-                                  ),
-                                  FlatButton(
-                                    child: Text("Leave"),
-                                    onPressed: () async {
-                                      await Popups.confirmationPopup(context, "Leave fridge?", "Are you sure you want to leave ${fridge.name}? You can only re-join if you get invited again.", () => controller.leaveFridge(
-                                        fridge, context, onChanged),);
-                                    }
+                          ]),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Text(
+                                  "Members: ${fridge.member.length}",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'Montserrat',
+                                    color: Colors.blueGrey),
+                              )
+                            ],
+                          ),
+                          Divider(),
+                          SizedBox(
+                            height: 10,
+                          ),
+                        ])),
+                        pieChart(fridge, context),
+                        Positioned(
+                            child: Align(
+                                alignment: FractionalOffset.bottomCenter,
+                                child: ButtonBar(
+                                  alignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    RaisedButton(
+                                      color: Colors.purple,
+                                      child: Text("Invite"),
+                                      onPressed: () {},
+                                    ),
+                                    FlatButton(
+                                      child: Text("Leave"),
+                                      onPressed: () async {
+                                        await Popups.confirmationPopup(context, "Leave fridge?", "Are you sure you want to leave ${fridge.name}? You can only re-join if you get invited again.", () => controller.leaveFridge(
+                                          fridge, context, onChanged),);
+                                      }
 
-                                  ),
-                                ],
-                              )))
-                    ],
-                  ),
-                ))));
+                                    ),
+                                  ],
+                                )))
+                      ],
+                    ),
+                  )))),
+    );
   }
 
   static List<Widget> cardStack(List<Fridge> fridges, BuildContext context,
@@ -197,4 +194,15 @@ class MenuElements {
 
     return result;
   }
+  
+  static Future<void> _navigateToNextFridge(Fridge fridge, BuildContext context) async {
+    Loader.showSimpleLoadingDialog(context);
+    await fridge.contentRepository.fetchAll();
+    await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+        builder: (context) => FridgeDetailPage(fridge: fridge),
+    ));
+  }
 }
+

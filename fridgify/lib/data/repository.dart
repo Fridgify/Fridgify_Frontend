@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart';
 
-abstract class Repository<Item> {
+abstract class Repository<Item, Key> {
   static const baseURL = "https://fridgapi-dev.donkz.dev/";
   static SharedPreferences sharedPreferences;
   static Logger logger = Logger();
@@ -24,23 +24,23 @@ abstract class Repository<Item> {
     return {"Content-Type": "application/json", "Authorization": token};
   }
 
-  Future<Map<int, Item>> fetchAll() async {
-    throw Exception("Not Implented");
-  }
-
-  Item get(int id) {
-    throw Exception("Not Implented");
-  }
-
-  Map<int, Item> getAll() {
+  Future<Map<Key, Item>> fetchAll() async {
     throw Exception("Not Implemented");
   }
 
-  Future<int> add(Item item) async {
-    throw Exception("Not Implented");
+  Item get(Key id) {
+    throw Exception("Not Implemented");
   }
 
-  Future<bool> delete(int id) async {
-    throw Exception("Not Implented");
+  Map<Key, Item> getAll() {
+    throw Exception("Not Implemented");
+  }
+
+  Future<Key> add(Item item) async {
+    throw Exception("Not Implemented");
+  }
+
+  Future<bool> delete(Key id) async {
+    throw Exception("Not Implemented");
   }
 }

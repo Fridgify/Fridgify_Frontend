@@ -39,7 +39,7 @@ void main() async {
     fridgeRepository = FridgeRepository(mockClient);
 
     fridge = Fridge.create(
-        fridgeId: 69, name: 'Test fridge', description: 'Cool fridge');
+        fridgeId: 69, name: 'Test fridge');
   });
 
   group('add', () {
@@ -75,7 +75,7 @@ void main() async {
       fridgeRepository.fridges[123] = Fridge.create(
           fridgeId: 123,
           name: 'Fridge to delete',
-          description: 'I dont feel so good mister Stark');
+      );
 
       expect(
           Future.value(true), completion(await fridgeRepository.delete(123)));
@@ -168,8 +168,7 @@ class FridgeRepositoryTestUtil {
         return Response(
             json.encode({
               'fridge_id': 69,
-              'name': 'Test fridge',
-              'description': 'Cool fridge'
+              'name': 'Test fridge'
             }),
             201);
       case 'Set date':
@@ -235,7 +234,6 @@ class FridgeRepositoryTestUtil {
       fridges.add({
         'id': i,
         'name': 'Fridge No. $i',
-        'description': 'Cool fridge No. $i',
         'content': {
           'total': i + 120,
           'fresh': i + 52,

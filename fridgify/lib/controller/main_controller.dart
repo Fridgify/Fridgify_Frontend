@@ -62,6 +62,9 @@ class MainController {
         return false;
       }
     }
+    else{
+      return false;
+    }
 
     if(!await _authService.initiateRepositories()) {
       return false;

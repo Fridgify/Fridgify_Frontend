@@ -193,7 +193,7 @@ class AuthenticationService {
 
     try {
       logger.i('MainController => FETCHING ALL REPOSITORIES');
-      Future.wait(
+      await Future.wait(
           [
             fridgeRepository.fetchAll(),
             storeRepository.fetchAll(),

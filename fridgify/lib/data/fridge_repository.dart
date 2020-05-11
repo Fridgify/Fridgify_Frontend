@@ -13,7 +13,7 @@ import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FridgeRepository implements Repository<Fridge> {
+class FridgeRepository implements Repository<Fridge, int> {
   Logger logger = Repository.logger;
 
   UserService _userService = UserService();
@@ -46,8 +46,7 @@ class FridgeRepository implements Repository<Fridge> {
         headers: Repository.getHeaders(),
         body: jsonEncode({
           "fridge_id": f.fridgeId,
-          "name": f.name,
-          "description": f.description
+          "name": f.name
         }),
         encoding: utf8);
 
@@ -57,8 +56,8 @@ class FridgeRepository implements Repository<Fridge> {
       var f = jsonDecode(response.body);
       var fridge = Fridge.create(
           fridgeId: f["fridge_id"],
-          name: f["name"],
-          description: f["description"]);
+          name: f["name"]
+      );
       logger.i("FridgeRepository => CREATED SUCCESSFUL $fridge");
 
       fridge.content = {
@@ -112,7 +111,6 @@ class FridgeRepository implements Repository<Fridge> {
         Fridge f = Fridge(
             fridgeId: fridge['id'],
             name: fridge['name'],
-            description: fridge['description'],
             content: fridge['content']);
         f.contentRepository = ContentRepository(sharedPreferences, f, client);
 

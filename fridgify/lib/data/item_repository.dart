@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/data/store_repository.dart';
@@ -11,7 +12,7 @@ import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ItemRepository implements Repository<Item> {
+class ItemRepository implements Repository<Item, int> {
   Fridge fridge;
   Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
@@ -38,12 +39,16 @@ class ItemRepository implements Repository<Item> {
 
   @override
   Future<int> add(item) async {
-    // TODO: implement add
-    return null;
+    if(items.containsValue(item)) {
+      return this.items.values.firstWhere((element) => element == item).itemId;
+    }
+    int id = 100000 + Random().nextInt(1000);
+    items[id] = item;
+    return id;
   }
 
   Future<Item> barcode(String barcode) {
-    // TODO: implement barcode
+    return null;
   }
 
   @override
@@ -71,7 +76,6 @@ class ItemRepository implements Repository<Item> {
             itemId: item['item_id'],
             barcode: item['barcode'],
             name: item['name'],
-            description: item['description'],
             store: storeRepository.get(item['store']));
         this.items[i.itemId] = i;
       }

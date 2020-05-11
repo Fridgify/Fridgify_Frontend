@@ -1,4 +1,6 @@
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 class FormElements {
@@ -7,12 +9,61 @@ class FormElements {
       TextEditingController controller,
       bool obscureText,
       String hintText,
-      Function(String) validator}
-      ) {
-
+      Function(String) validator}) {
     return SizedBox(
         height: 75.0,
         child: TextFormField(
+          obscureText: obscureText ?? false,
+          style: style,
+          controller: controller ?? TextEditingController(),
+          //_controller.textInputControllerUser,
+          validator: (value) => validator(value),
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+              hintText: hintText ?? "", //"Username",
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(32.0))),
+        ));
+  }
+
+  static SizedBox autocompleteTextForm({
+    TextStyle style,
+    TextEditingController controller,
+    bool obscureText,
+    String hintText,
+    Function(String) validator,
+    List<String> suggestions,
+  }) {
+    return SizedBox(
+        height: 75.0,
+        child: SimpleAutoCompleteTextField(
+          minLength: 0,
+          style: style,
+          controller: controller ?? TextEditingController(),
+          //_controller.textInputControllerUser,
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+              hintText: hintText ?? "", //"Username",
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(32.0))),
+          suggestions: suggestions,
+          key: GlobalKey(),
+        ));
+  }
+
+  static SizedBox numberField(
+      {TextStyle style,
+      TextEditingController controller,
+      bool obscureText,
+      String hintText,
+      Function(String) validator}) {
+    return SizedBox(
+        height: 75.0,
+        child: TextFormField(
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            WhitelistingTextInputFormatter.digitsOnly,
+          ],
           obscureText: obscureText ?? false,
           style: style,
           controller: controller ?? TextEditingController(),
@@ -48,13 +99,15 @@ class FormElements {
     );
   }
 
-  static SizedBox datePickerText(
-      {TextStyle style,
-      TextEditingController controller,
-      bool obscureText,
-      String hintText,
-      BuildContext context,
-      Function(String) validator}) {
+  static SizedBox datePickerText({
+    TextStyle style,
+    TextEditingController controller,
+    bool obscureText,
+    String hintText,
+    BuildContext context,
+    Function(String) validator,
+    DateTime max,
+  }) {
     return SizedBox(
         height: 75.0,
         child: TextFormField(
@@ -62,7 +115,8 @@ class FormElements {
             DatePicker.showDatePicker(context,
                 showTitleActions: true,
                 minTime: DateTime(1900, 1, 1),
-                maxTime: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+                maxTime: max ?? DateTime(DateTime.now().year,
+                    DateTime.now().month, DateTime.now().day),
                 theme: DatePickerTheme(
                     headerColor: Colors.white,
                     backgroundColor: Colors.white,
@@ -71,10 +125,8 @@ class FormElements {
                         fontWeight: FontWeight.bold,
                         fontSize: 18),
                     doneStyle: TextStyle(color: Colors.purple, fontSize: 16)),
-                onChanged: (date) {
-
-            }, onConfirm: (date) {
-              controller.text = "${date.year}-${date.month}-${date.day}";
+                onChanged: (date) {}, onConfirm: (date) {
+              controller.text = "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day}";
             }, currentTime: DateTime.now(), locale: LocaleType.en)
           },
           readOnly: true,

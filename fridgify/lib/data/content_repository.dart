@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:fridgify/cache/http_client_interceptor.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
@@ -8,6 +9,7 @@ import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:http/http.dart';
+import 'package:http_interceptor/http_client_with_interceptor.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sortedmap/sortedmap.dart';
@@ -28,11 +30,7 @@ class ContentRepository implements Repository<Content, String> {
   ContentRepository(this.pref, this.fridge, [Client client]) {
     contentApi = "${Repository.baseURL}fridge/content/${this.fridge.fridgeId}/";
 
-    if (client != null) {
-      this.client = client;
-    } else {
-      this.client = Client();
-    }
+    this.client = Repository.getClient(client);
   }
 
   @override

@@ -54,11 +54,7 @@ class AuthenticationService {
   }
 
   AuthenticationService([Client client]) {
-    if(client != null) {
-      this.client = client;
-    } else {
-      this.client = Client();
-    }
+    this.client = Repository.getClient(client);
   }
 
   /// Register call

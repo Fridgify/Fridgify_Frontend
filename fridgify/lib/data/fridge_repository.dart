@@ -27,11 +27,7 @@ class FridgeRepository implements Repository<Fridge, int> {
       FridgeRepository._internal();
 
   factory FridgeRepository([Client client]) {
-    if (client != null) {
-      _fridgeRepository.client = client;
-    } else {
-      _fridgeRepository.client = Client();
-    }
+    _fridgeRepository.client = Repository.getClient(client);
 
     return _fridgeRepository;
   }

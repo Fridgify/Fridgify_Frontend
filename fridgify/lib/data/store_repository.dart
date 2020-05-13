@@ -22,11 +22,7 @@ class StoreRepository implements Repository<Store, int> {
   static final StoreRepository _storeRepository = StoreRepository._internal();
 
   factory StoreRepository([Client client]) {
-    if (client != null) {
-      _storeRepository.client = client;
-    } else {
-      _storeRepository.client = Client();
-    }
+    _storeRepository.client = Repository.getClient(client);
 
     return _storeRepository;
   }

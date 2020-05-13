@@ -1,4 +1,6 @@
+import 'package:fridgify/cache/http_client_interceptor.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
+import 'package:http_interceptor/http_client_with_interceptor.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +10,16 @@ abstract class Repository<Item, Key> {
   static const baseURL = "https://fridgapi-dev.donkz.dev/";
   static SharedPreferences sharedPreferences;
   static Logger logger = Logger();
+
+  static Client getClient([Client client]) {
+    if (client != null) {
+      return client;
+    } else {
+      return HttpClientWithInterceptor.build(interceptors: [
+        HttpClientInterceptor()
+      ]);
+    }
+  }
 
   static dynamic getToken() {
     var token = sharedPreferences.get("apiToken") ?? null;

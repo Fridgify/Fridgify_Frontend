@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
@@ -12,7 +13,7 @@ import 'package:http/http.dart' as http;
 class StoreRepository implements Repository<Store, int> {
   Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
-  Client client;
+  Dio dio;
 
   static const storeApi = "${Repository.baseURL}stores/";
 
@@ -22,7 +23,7 @@ class StoreRepository implements Repository<Store, int> {
   static final StoreRepository _storeRepository = StoreRepository._internal();
 
   factory StoreRepository([Client client]) {
-    _storeRepository.client = Repository.getClient(client);
+    _storeRepository.dio = Repository.getDio();
 
     return _storeRepository;
   }
@@ -42,17 +43,17 @@ class StoreRepository implements Repository<Store, int> {
 
   @override
   Future<int> add(Store store) async {
-    var response = await client.post(storeApi,
-        headers: Repository.getHeaders(),
-        body: jsonEncode({
+    var response = await dio.post(storeApi,
+        data: jsonEncode({
           "name": store.name,
         }),
-        encoding: utf8);
+        options: Options(headers: Repository.getHeaders())
+    );
 
-    logger.i('StoreRepository => ADDING STORE: ${response.body}');
+    logger.i('StoreRepository => ADDING STORE: ${response.data}');
 
     if (response.statusCode == 201) {
-      var s = jsonDecode(response.body);
+      var s = response.data;
       var store = Store(storeId: s['store_id'], name: s['name']);
       logger.i("StoreRepository => CREATED SUCCESSFUL $store");
 
@@ -74,12 +75,14 @@ class StoreRepository implements Repository<Store, int> {
   Future<Map<int, Store>> fetchAll() async {
     logger.i('StoreRepository => FETCHING FROM URL: $storeApi');
 
-    var response = await client.get(storeApi, headers: Repository.getHeaders());
+    var response = await dio.get(storeApi,
+        options: Options(headers: Repository.getHeaders())
+    );
 
-    logger.i('StoreRepository => FETCHING STORES: ${response.body}');
+    logger.i('StoreRepository => FETCHING STORES: ${response.data}');
 
     if (response.statusCode == 200) {
-      var stores = jsonDecode(response.body);
+      var stores = response.data;
 
       logger.i('StoreRepository => $stores');
 

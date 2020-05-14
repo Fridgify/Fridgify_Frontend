@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:fridgify/cache/http_client_interceptor.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -20,7 +21,7 @@ class ContentRepository implements Repository<Content, String> {
   Fridge fridge;
   SharedPreferences pref = Repository.sharedPreferences;
   ItemRepository itemRepository = ItemRepository();
-  Client client;
+  Dio dio;
 
   Map<String, Content> contents = Map();
   SortedMap<String, List<Content>> grouped = SortedMap(Ordering.byKey());
@@ -30,7 +31,7 @@ class ContentRepository implements Repository<Content, String> {
   ContentRepository(this.pref, this.fridge, [Client client]) {
     contentApi = "${Repository.baseURL}fridge/content/${this.fridge.fridgeId}/";
 
-    this.client = Repository.getClient(client);
+    this.dio = Repository.getDio();
   }
 
   @override
@@ -47,13 +48,12 @@ class ContentRepository implements Repository<Content, String> {
     });
     logger.i('ContentRepository => Requesting $contentApi with $body');
 
-    var response = await client.post(contentApi,
-        headers: Repository.getHeaders(), body: body, encoding: utf8);
+    var response = await dio.post(contentApi, options: Options(headers: Repository.getHeaders()), data: body);
 
-    logger.i('ContentRepository => CREATING CONTENT: ${response.body}');
+    logger.i('ContentRepository => CREATING CONTENT: ${response.data}');
 
     if (response.statusCode == 201) {
-      var c = jsonDecode(response.body);
+      var c = response.data;
 
       logger.i("ContentRepository => CREATED SUCCESSFUL $c");
       for(var con in c) {
@@ -71,10 +71,10 @@ class ContentRepository implements Repository<Content, String> {
   @override
   Future<bool> delete(String id) async {
     var response =
-        await client.delete("$contentApi$id", headers: Repository.getHeaders());
+        await dio.delete("$contentApi$id", options: Options(headers: Repository.getHeaders()));
 
     logger.i(
-        'ContentRepository => DELETING CONTENT: ${response.body} ON URL $contentApi$id');
+        'ContentRepository => DELETING CONTENT: ${response.data} ON URL $contentApi$id');
 
     if (response.statusCode == 200) {
       logger.i('FridgeRepository => DELETED CONTENT');
@@ -90,12 +90,12 @@ class ContentRepository implements Repository<Content, String> {
     logger.i('ContentRepository => FETCHIN FROM URL: $contentApi');
 
     var response =
-        await client.get(contentApi, headers: Repository.getHeaders());
+        await dio.get(contentApi, options: Options(headers: Repository.getHeaders()));
 
-    logger.i('ContentRepository => FETCHING CONTENT: ${response.body}');
+    logger.i('ContentRepository => FETCHING CONTENT: ${response.data}');
 
     if (response.statusCode == 200) {
-      var contents = jsonDecode(response.body);
+      var contents = response.data;
 
       logger.i('ContentRepository => $contents');
 
@@ -157,16 +157,13 @@ class ContentRepository implements Repository<Content, String> {
     logger.i(
         'ContentRepository => WITHDRAWING $amount FROM ${content.item.name} ${content.amount} FROM URL: $contentApi');
 
-    var response = await client.patch('$contentApi${content.contentId}',
-        headers: Repository.getHeaders(),
-        body: jsonEncode({'withdraw': amount}),
-        encoding: utf8);
+    var response = await dio.patch('$contentApi${content.contentId}', options: Options(headers: Repository.getHeaders()), data: jsonEncode({'withdraw': amount}));
 
-    logger.i('ContentRepository => WITHDRAWING CONTENT: ${response.body}');
+    logger.i('ContentRepository => WITHDRAWING CONTENT: ${response.data}');
 
 
     if (response.statusCode == 200) {
-      var contents = jsonDecode(response.body);
+      var contents = response.data;
 
       logger.i('ContentRepository => WITHDRAW SUCCESSFUL $contents');
       if(content.amount <= 0)
@@ -188,16 +185,13 @@ class ContentRepository implements Repository<Content, String> {
     logger.i(
         'ContentRepository => UPDATING CONTENT $attribute with $parameter FROM URL: $contentApi');
 
-    var response = await client.patch('$contentApi${content.item.itemId}',
-        headers: Repository.getHeaders(),
-        body: jsonEncode({attribute: parameter}),
-        encoding: utf8);
+    var response = await dio.patch('$contentApi${content.item.itemId}', options: Options(headers: Repository.getHeaders()), data: jsonEncode({attribute: parameter}));
 
-    logger.i('ContentRepository => PATCHING CONTENT: ${response.body}');
+    logger.i('ContentRepository => PATCHING CONTENT: ${response.data}');
 
 
     if (response.statusCode == 200) {
-      var contents = jsonDecode(response.body);
+      var contents = response.data;
 
       logger.i('ContentRepository => UPDATED SUCCESSFUL $contents');
 

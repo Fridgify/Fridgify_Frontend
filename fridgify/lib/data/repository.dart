@@ -1,24 +1,33 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:fridgify/cache/http_client_interceptor.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:http_interceptor/http_client_with_interceptor.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:http/http.dart';
 
 abstract class Repository<Item, Key> {
   static const baseURL = "https://fridgapi-dev.donkz.dev/";
   static SharedPreferences sharedPreferences;
   static Logger logger = Logger();
 
-  static Client getClient([Client client]) {
-    if (client != null) {
-      return client;
-    } else {
-      return HttpClientWithInterceptor.build(interceptors: [
-        HttpClientInterceptor()
-      ]);
-    }
+  static Dio getDio([Dio client]) {
+    Dio dio = new Dio();
+    dio.interceptors.add(InterceptorsWrapper(
+      onResponse: (Response response) async {
+        return response;
+      },
+      onError: (DioError e) async {
+        if(e.response != null) {
+          return e.response;
+        } else {
+          throw e;
+        }
+      }
+    ));
+    return dio;
   }
 
   static dynamic getToken() {

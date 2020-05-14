@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:fridgify/cache/http_client_interceptor.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/data/store_repository.dart';
@@ -19,7 +20,7 @@ class ItemRepository implements Repository<Item, int> {
   Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   StoreRepository storeRepository = StoreRepository();
-  Client client;
+  Dio dio;
 
   static const itemApi = "${Repository.baseURL}items/";
 
@@ -28,7 +29,7 @@ class ItemRepository implements Repository<Item, int> {
   static final ItemRepository _itemRepository = ItemRepository._internal();
 
   factory ItemRepository([Client client]) {
-    _itemRepository.client = Repository.getClient(client);
+    _itemRepository.dio = Repository.getDio();
     return _itemRepository;
   }
 
@@ -58,12 +59,14 @@ class ItemRepository implements Repository<Item, int> {
   Future<Map<int, Item>> fetchAll() async {
     logger.i('ItemRepository => FETCHIN FROM URL: $itemApi');
 
-    var response = await client.get(itemApi, headers: Repository.getHeaders());
+    var response = await dio.get(itemApi,
+        options: Options(headers: Repository.getHeaders())
+    );
 
-    logger.i('ItemRepository => FETCHING ITEMS: ${response.body}');
+    logger.i('ItemRepository => FETCHING ITEMS: ${response.data}');
 
     if (response.statusCode == 200) {
-      var items = jsonDecode(response.body);
+      var items = response.data;
 
       logger.i('ItemRepository => $items');
 

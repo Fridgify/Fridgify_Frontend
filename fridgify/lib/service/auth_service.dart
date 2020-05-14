@@ -54,8 +54,8 @@ class AuthenticationService {
     logger.i("AuthService => LOGIN: ${user.toString()}");
   }
 
-  AuthenticationService([Client client]) {
-    this.dio = Repository.getDio();
+  AuthenticationService([Dio dio]) {
+    this.dio = Repository.getDio(dio);
   }
 
   /// Register call

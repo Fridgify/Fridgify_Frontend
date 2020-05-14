@@ -13,21 +13,25 @@ abstract class Repository<Item, Key> {
   static SharedPreferences sharedPreferences;
   static Logger logger = Logger();
 
-  static Dio getDio([Dio client]) {
-    Dio dio = new Dio();
-    dio.interceptors.add(InterceptorsWrapper(
-      onResponse: (Response response) async {
-        return response;
-      },
-      onError: (DioError e) async {
-        if(e.response != null) {
-          return e.response;
-        } else {
-          throw e;
-        }
-      }
-    ));
-    return dio;
+  static Dio getDio([Dio mockDio]) {
+    if(mockDio != null) {
+      return mockDio;
+    } else {
+      Dio dio = new Dio();
+      dio.interceptors.add(InterceptorsWrapper(
+          onResponse: (Response response) async {
+            return response;
+          },
+          onError: (DioError e) async {
+            if(e.response != null) {
+              return e.response;
+            } else {
+              throw e;
+            }
+          }
+      ));
+      return dio;
+    }
   }
 
   static dynamic getToken() {

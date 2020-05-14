@@ -1,41 +1,44 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/auth_service.dart';
-import 'package:http/http.dart' show Response, Request;
-import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../util/MockDioInterceptor.dart';
 
 void main() async {
   AuthenticationService authService;
-  MockClient mockClient;
+  Dio mockDio;
+  ResponseHandlers handler;
 
-  setUp(() async {
+  setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
+    await Repository.sharedPreferences
+        .setString('clientToken', 'Test token');
+    mockDio = new Dio();
+    handler = ResponseHandlers(mockDio);
+    mockDio.options.extra.putIfAbsent('id', () => 'None');
+    mockDio.interceptors.add(MockDioInterceptor((RequestOptions request) async {
 
-    mockClient = new MockClient((request) async {
-      var handler = ResponseHandlers();
-      var endpoint =
-          request.url.toString().replaceAll('${Repository.baseURL}auth/', '');
+    switch (request.extra['testCase']) {
+      case "/register/":
+        return handler.handleRegisterRequest(request);
+      case '/token/':
+        return handler.handleFetchApiTokenRequest(request);
+      case 'Validate token':
+        return handler.handleValidateTokenRequest(request);
+      default:
+        return Response(data: 'Not implemented', statusCode: 201);
+    }
+    }));
 
-      switch (endpoint) {
-        case "/register/":
-          return handler.handleRegisterRequest(request);
-        case '/token/':
-          return handler.handleFetchApiTokenRequest(request);
-        case '/login/':
-          return handler.handleLoginRequest(request);
-        default:
-          return Response('Not implemented', 201);
-      }
-    });
-
-    authService = AuthenticationService(mockClient);
+    authService = AuthenticationService(mockDio);
     authService.user = User.newUser(
         username: 'Mr. Mock',
         password: 'secret',
@@ -46,23 +49,29 @@ void main() async {
   });
 
   group('Validate Token', () {
-    test('doesnt find a chached token', () async {
+    setUp(() {
+      handler.setTestCase('Validate token');
+    });
+
+    test('doesnt find a cached token', () async {
+      await Repository.sharedPreferences.remove('clientToken');
+
       expect(
           () async => completion(await authService.validateToken()),
           throwsA(predicate(
               (error) => error is FailedToFetchClientTokenException)));
+      await Repository.sharedPreferences
+          .setString('clientToken', 'Test token');
     });
 
-    test('successfully validates the chached token', () async {
-      await Repository.sharedPreferences
-          .setString('clientToken', 'Token valid');
+    test('successfully validates the cached token', () async {
+      handler.setId('Token valid');
 
       expect(Future.value(true), completion(await authService.validateToken()));
     });
 
-    test('unsuccessfully validates the chached token', () async {
-      await Repository.sharedPreferences
-          .setString('clientToken', 'Token invalid');
+    test('unsuccessfully validates the cached token', () async {
+      handler.setId('Token invalid');
 
       expect(
           Future.value(false), completion(await authService.validateToken()));
@@ -147,45 +156,61 @@ void main() async {
 }
 
 class ResponseHandlers {
-  ResponseHandlers();
-
-  Response handleRegisterRequest(Request request) {
-    return Response('No register', 402);
+  Dio mockDio;
+  ResponseHandlers(Dio dio) {
+    this.mockDio = dio;
   }
 
-  Response handleLoginRequest(Request request) {
-    if (request.headers.containsKey('Authorization')) {
-      switch (request.headers.remove('Authorization')) {
-        case 'Token valid':
-          return Response(json.encode({'token': 'Api token'}), 200);
+  void setDio(Dio dio) {
+    this.mockDio = dio;
+  }
 
-        case 'Token invalid':
-          return Response('invalid token', 401);
-        default:
-          return Response('Not implemented', 500);
-      }
+  void setId(String id) {
+    mockDio.options.extra.update('id', (value) => id);
+  }
+
+  void setTestCase(String testCase) {
+    if(!mockDio.options.extra.containsKey('testCase')) {
+      mockDio.options.extra.putIfAbsent('testCase', () => testCase);
+    } else {
+      mockDio.options.extra.update('testCase', (value) => testCase);
+    }
+  }
+
+  Response handleRegisterRequest(RequestOptions request) {
+    return Response(data: 'No register', statusCode: 402);
+  }
+
+  Response handleValidateTokenRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Token valid':
+        return Response(data: {'token': 'Api token'}, statusCode: 200);
+      case 'Token invalid':
+        return Response(data: 'invalid token', statusCode: 401);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
     }
 
-    var name = json.decode(request.body)['username'];
+    var name = json.decode(request.data)['username'];
 
     if (name == 'error') {
-      return Response(json.encode({'detail': 'Error. Login failed'}), 401);
+      return Response(data: {'detail': 'Error. Login failed'}, statusCode: 401);
     }
-    return Response(json.encode({'token': 'Api token'}), 200);
+    return Response(data: {'token': 'Api token'}, statusCode: 200);
   }
 
-  Response handleFetchApiTokenRequest(Request request) {
+  Response handleFetchApiTokenRequest(RequestOptions request) {
     switch (request.headers.remove('Authorization')) {
       case 'valid token':
         final responseBody = {
           'token': 'Api token',
           'validation_time': 42069,
         };
-        return Response(json.encode(responseBody), 201);
+        return Response(data: responseBody, statusCode: 201);
       case 'Other than 201':
-        return Response('Other than 201', 404);
+        return Response(data: 'Other than 201', statusCode: 404);
       default:
-        return Response('Not implemented', 500);
+        return Response(data: 'Not implemented', statusCode: 500);
     }
   }
 }

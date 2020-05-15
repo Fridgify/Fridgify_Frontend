@@ -25,8 +25,8 @@ class FridgeRepository implements Repository<Fridge, int> {
   static final FridgeRepository _fridgeRepository =
       FridgeRepository._internal();
 
-  factory FridgeRepository([Client client]) {
-    _fridgeRepository.dio = Repository.getDio();
+  factory FridgeRepository([Dio dio]) {
+    _fridgeRepository.dio = Repository.getDio(dio);
 
     return _fridgeRepository;
   }
@@ -102,7 +102,7 @@ class FridgeRepository implements Repository<Fridge, int> {
             fridgeId: fridge['id'],
             name: fridge['name'],
             content: fridge['content']);
-        f.contentRepository = ContentRepository(sharedPreferences, f, Client());
+        f.contentRepository = ContentRepository(sharedPreferences, f, dio);
 
         await getFridgeMembers(f);
         await f.contentRepository.fetchAll();

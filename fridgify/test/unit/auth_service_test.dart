@@ -14,6 +14,7 @@ void main() async {
   AuthenticationService authService;
   Dio mockDio;
   AuthServiceTestUtil testUtil;
+  Repository.isTest = true;
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});

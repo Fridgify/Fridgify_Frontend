@@ -18,6 +18,8 @@ void main() async {
   FridgeRepositoryTestUtil testUtil;
   Dio mockDio;
   Fridge fridge;
+  Repository.isTest = true;
+
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});

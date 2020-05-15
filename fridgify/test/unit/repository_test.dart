@@ -12,6 +12,8 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  Repository.isTest = true;
+
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
@@ -55,12 +57,6 @@ void main() async {
       
       Dio returnedDio = Repository.getDio(dio);
       expect('Test dio', returnedDio.options.extra['test']);
-    });
-
-    test('returns normal dio', () async {
-      Dio dio = Repository.getDio();
-
-      expect(false, dio.options.extra.containsKey('test'));
     });
 
   });

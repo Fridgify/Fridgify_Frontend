@@ -2,6 +2,7 @@ import 'package:fridgify/utils/validator.dart';
 import 'package:test/test.dart';
 
 void main() {
+
   group('Validate user', () {
     test('should return empty message', () {
       expect(Validator.validateUser(''), 'Please enter an username');

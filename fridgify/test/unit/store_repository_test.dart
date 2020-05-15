@@ -17,6 +17,8 @@ void main() async {
   StoreRepositoryTestUtil testUtil;
   Dio mockDio;
   Store store;
+  Repository.isTest = true;
+
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});

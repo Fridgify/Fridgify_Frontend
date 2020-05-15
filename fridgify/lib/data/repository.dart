@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:fridgify/cache/http_client_interceptor.dart';
+import 'package:fridgify/cache/cache_interceptor.dart';
+import 'package:fridgify/cache/request_cache.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:http_interceptor/http_client_with_interceptor.dart';
 import 'package:logger/logger.dart';
@@ -18,18 +19,7 @@ abstract class Repository<Item, Key> {
       return mockDio;
     } else {
       Dio dio = new Dio();
-      dio.interceptors.add(InterceptorsWrapper(
-          onResponse: (Response response) async {
-            return response;
-          },
-          onError: (DioError e) async {
-            if(e.response != null) {
-              return e.response;
-            } else {
-              throw e;
-            }
-          }
-      ));
+      dio.interceptors.add(CacheInterceptor());
       return dio;
     }
   }

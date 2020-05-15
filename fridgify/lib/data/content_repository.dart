@@ -10,7 +10,6 @@ import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:http/http.dart';
-import 'package:http_interceptor/http_client_with_interceptor.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sortedmap/sortedmap.dart';

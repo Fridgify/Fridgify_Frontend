@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fridgify/cache/cache_interceptor.dart';
-import 'package:fridgify/cache/request_cache.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
-import 'package:http_interceptor/http_client_with_interceptor.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

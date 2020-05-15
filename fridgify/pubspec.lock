@@ -237,19 +237,12 @@ packages:
     source: hosted
     version: "0.14.0+3"
   http:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: http
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.12.1"
-  http_interceptor:
-    dependency: "direct main"
-    description:
-      name: http_interceptor
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.0"
   http_multi_server:
     dependency: transitive
     description:
@@ -404,6 +397,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.4"
+  path_provider:
+    dependency: "direct main"
+    description:
+      name: path_provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.6.8"
+  path_provider_macos:
+    dependency: transitive
+    description:
+      name: path_provider_macos
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.4+2"
+  path_provider_platform_interface:
+    dependency: transitive
+    description:
+      name: path_provider_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2"
   pedantic:
     dependency: transitive
     description:

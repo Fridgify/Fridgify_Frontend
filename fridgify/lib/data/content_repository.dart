@@ -28,10 +28,10 @@ class ContentRepository implements Repository<Content, String> {
 
   var contentApi;
 
-  ContentRepository(this.pref, this.fridge, [Client client]) {
+  ContentRepository(this.pref, this.fridge, [Dio dio]) {
     contentApi = "${Repository.baseURL}fridge/content/${this.fridge.fridgeId}/";
 
-    this.dio = Repository.getDio();
+    this.dio = Repository.getDio(dio);
   }
 
   @override

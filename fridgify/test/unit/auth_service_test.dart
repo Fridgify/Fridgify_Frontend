@@ -19,6 +19,7 @@ void main() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
     await Repository.sharedPreferences.setString('clientToken', 'Test token');
+
     mockDio = new Dio();
     testUtil = AuthServiceTestUtil(mockDio);
     mockDio.options.extra.putIfAbsent('id', () => 'None');
@@ -172,22 +173,6 @@ void main() async {
 
 class AuthServiceTestUtil extends TestUtil {
   AuthServiceTestUtil(Dio dio) : super(dio);
-
-  void setDio(Dio dio) {
-    this.mockDio = dio;
-  }
-
-  void setId(String id) {
-    mockDio.options.extra.update('id', (value) => id);
-  }
-
-  void setTestCase(String testCase) {
-    if (!mockDio.options.extra.containsKey('testCase')) {
-      mockDio.options.extra.putIfAbsent('testCase', () => testCase);
-    } else {
-      mockDio.options.extra.update('testCase', (value) => testCase);
-    }
-  }
 
   Response handleRegisterRequest(RequestOptions request) {
     return Response(data: 'No register', statusCode: 402);

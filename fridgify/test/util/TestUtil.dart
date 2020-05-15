@@ -14,4 +14,12 @@ abstract class TestUtil {
   void setId(String id) {
     mockDio.options.extra.update('id', (value) => id);
   }
+
+  void setTestCase(String testCase) {
+    if (!mockDio.options.extra.containsKey('testCase')) {
+      mockDio.options.extra.putIfAbsent('testCase', () => testCase);
+    } else {
+      mockDio.options.extra.update('testCase', (value) => testCase);
+    }
+  }
 }

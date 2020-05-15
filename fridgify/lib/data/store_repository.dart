@@ -22,8 +22,8 @@ class StoreRepository implements Repository<Store, int> {
 
   static final StoreRepository _storeRepository = StoreRepository._internal();
 
-  factory StoreRepository([Client client]) {
-    _storeRepository.dio = Repository.getDio();
+  factory StoreRepository([Dio dio]) {
+    _storeRepository.dio = Repository.getDio(dio);
 
     return _storeRepository;
   }

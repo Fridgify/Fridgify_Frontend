@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/repository.dart';
@@ -10,34 +8,33 @@ import 'package:fridgify/service/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../util/MockDioInterceptor.dart';
+import '../util/TestUtil.dart';
 
 void main() async {
   AuthenticationService authService;
   Dio mockDio;
-  ResponseHandlers handler;
+  AuthServiceTestUtil testUtil;
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
-    await Repository.sharedPreferences
-        .setString('clientToken', 'Test token');
+    await Repository.sharedPreferences.setString('clientToken', 'Test token');
     mockDio = new Dio();
-    handler = ResponseHandlers(mockDio);
+    testUtil = AuthServiceTestUtil(mockDio);
     mockDio.options.extra.putIfAbsent('id', () => 'None');
     mockDio.interceptors.add(MockDioInterceptor((RequestOptions request) async {
-
-    switch (request.extra['testCase']) {
-      case "Register":
-        return handler.handleRegisterRequest(request);
-      case 'Fetch api token':
-        return handler.handleFetchApiTokenRequest(request);
-      case 'Validate token':
-        return handler.handleValidateTokenRequest(request);
-      case 'Login':
-        return handler.handleLoginRequests(request);
-      default:
-        return Response(data: 'Not implemented', statusCode: 201);
-    }
+      switch (request.extra['testCase']) {
+        case "Register":
+          return testUtil.handleRegisterRequest(request);
+        case 'Fetch api token':
+          return testUtil.handleFetchApiTokenRequest(request);
+        case 'Validate token':
+          return testUtil.handleValidateTokenRequest(request);
+        case 'Login':
+          return testUtil.handleLoginRequests(request);
+        default:
+          return Response(data: 'Not implemented', statusCode: 201);
+      }
     }));
 
     authService = AuthenticationService(mockDio);
@@ -52,7 +49,7 @@ void main() async {
 
   group('Validate Token', () {
     setUp(() {
-      handler.setTestCase('Validate token');
+      testUtil.setTestCase('Validate token');
     });
 
     test('doesnt find a cached token', () async {
@@ -62,18 +59,17 @@ void main() async {
           () async => completion(await authService.validateToken()),
           throwsA(predicate(
               (error) => error is FailedToFetchClientTokenException)));
-      await Repository.sharedPreferences
-          .setString('clientToken', 'Test token');
+      await Repository.sharedPreferences.setString('clientToken', 'Test token');
     });
 
     test('successfully validates the cached token', () async {
-      handler.setId('Token valid');
+      testUtil.setId('Token valid');
 
       expect(Future.value(true), completion(await authService.validateToken()));
     });
 
     test('unsuccessfully validates the cached token', () async {
-      handler.setId('Token invalid');
+      testUtil.setId('Token invalid');
 
       expect(
           Future.value(false), completion(await authService.validateToken()));
@@ -82,11 +78,11 @@ void main() async {
 
   group('Login', () {
     setUp(() {
-      handler.setTestCase('Login');
+      testUtil.setTestCase('Login');
     });
 
     test('gets a return type other than 201', () async {
-      handler.setId('Return error');
+      testUtil.setId('Return error');
 
       expect(
           () async => completion(await authService.login()),
@@ -96,7 +92,7 @@ void main() async {
     });
 
     test('gets a api token', () async {
-      handler.setId('Login successfully');
+      testUtil.setId('Login successfully');
 
       expect(Future.value('Api token'), completion(await authService.login()));
       expect(Future.value('Api token'),
@@ -106,7 +102,7 @@ void main() async {
 
   group('Register', () {
     setUp(() {
-      handler.setTestCase('Register');
+      testUtil.setTestCase('Register');
     });
 
     test('gets a return type other than 201', () async {
@@ -118,7 +114,6 @@ void main() async {
   });
 
   group('Logout', () {
-
     test('should return true', () async {
       await Repository.sharedPreferences.setString('clientToken', 'Test123');
       await Repository.sharedPreferences.setString('apiToken', 'Test123');
@@ -141,7 +136,7 @@ void main() async {
 
   group('Fetch api token', () {
     setUp(() {
-      handler.setTestCase('Fetch api token');
+      testUtil.setTestCase('Fetch api token');
     });
 
     test('doesnt find a cached token', () async {
@@ -156,7 +151,7 @@ void main() async {
     });
 
     test('gets a return type other than 201', () async {
-      handler.setId('Other than 201');
+      testUtil.setId('Other than 201');
 
       expect(
           () async => completion(await authService.fetchApiToken()),
@@ -165,7 +160,7 @@ void main() async {
     });
 
     test('gets a token and sets it', () async {
-      handler.setId('Valid token');
+      testUtil.setId('Valid token');
 
       expect(Future.value('Api token'),
           completion(await authService.fetchApiToken()));
@@ -175,11 +170,8 @@ void main() async {
   });
 }
 
-class ResponseHandlers {
-  Dio mockDio;
-  ResponseHandlers(Dio dio) {
-    this.mockDio = dio;
-  }
+class AuthServiceTestUtil extends TestUtil {
+  AuthServiceTestUtil(Dio dio) : super(dio);
 
   void setDio(Dio dio) {
     this.mockDio = dio;
@@ -190,7 +182,7 @@ class ResponseHandlers {
   }
 
   void setTestCase(String testCase) {
-    if(!mockDio.options.extra.containsKey('testCase')) {
+    if (!mockDio.options.extra.containsKey('testCase')) {
       mockDio.options.extra.putIfAbsent('testCase', () => testCase);
     } else {
       mockDio.options.extra.update('testCase', (value) => testCase);
@@ -202,9 +194,10 @@ class ResponseHandlers {
   }
 
   Response handleLoginRequests(RequestOptions request) {
-    switch(request.extra['id']) {
+    switch (request.extra['id']) {
       case 'Return error':
-        return Response(data: {'detail': 'Error. Login failed'}, statusCode: 401);
+        return Response(
+            data: {'detail': 'Error. Login failed'}, statusCode: 401);
       case 'Login successfully':
         return Response(data: {'token': 'Api token'}, statusCode: 200);
       default:

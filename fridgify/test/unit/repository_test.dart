@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
 
-  setUp(() async {
+  setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
   });

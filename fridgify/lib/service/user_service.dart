@@ -26,8 +26,8 @@ class UserService {
 
   static final UserService _userService = UserService._internal();
 
-  factory UserService([Client client]) {
-    _userService.dio = Repository.getDio();
+  factory UserService([Dio dio]) {
+    _userService.dio = Repository.getDio(dio);
     return _userService;
   }
 

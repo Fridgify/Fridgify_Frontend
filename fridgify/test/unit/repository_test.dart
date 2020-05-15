@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -42,6 +43,24 @@ void main() async {
       var headers = Repository.getHeaders();
       expect('application/json', headers['Content-Type']);
       expect('An api token', headers['Authorization']);
+    });
+
+  });
+  
+  group('Get dio', () {
+
+    test('returns test dio', () async {
+      Dio dio = Dio();
+      dio.options.extra.putIfAbsent('test', () => 'Test dio');
+      
+      Dio returnedDio = Repository.getDio(dio);
+      expect('Test dio', returnedDio.options.extra['test']);
+    });
+
+    test('returns normal dio', () async {
+      Dio dio = Repository.getDio();
+
+      expect(false, dio.options.extra.containsKey('test'));
     });
 
   });

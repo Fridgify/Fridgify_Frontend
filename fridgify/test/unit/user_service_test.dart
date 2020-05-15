@@ -144,7 +144,46 @@ void main() async {
       testUtil.setTestCase('Check username email');
     });
 
-    // TODO: Test this when it is refactored
+    test('name and email are unique', () async {
+      testUtil.setId('All unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+      'Dieter', 'dieter.baum@gmail.com');
+
+      expect(false, response['user']);
+      expect(false, response['mail']);
+    });
+
+    test('email not unique', () async {
+      testUtil.setId('Email not unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+          'Dieter', 'dieter.baum@gmail.com');
+      print(response);
+
+      expect(false, response['user']);
+      expect(true, response['mail']);
+    });
+
+    test('username not unique', () async {
+      testUtil.setId('Username not unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+          'Dieter', 'dieter.baum@gmail.com');
+
+      expect(true, response['user']);
+      expect(false, response['mail']);
+    });
+
+    test('name and email are not unique', () async {
+      testUtil.setId('Nothing unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+          'Dieter', 'dieter.baum@gmail.com');
+
+      expect(true, response['user']);
+      expect(true, response['mail']);
+    });
   });
 }
 
@@ -164,10 +203,19 @@ class UserServiceTestUtil extends TestUtil {
 
   Response handleCheckUsernameEmailRequest(RequestOptions request) {
     switch (request.extra['id']) {
-      case 'Doesnt delete':
-        return Response(data: 'Doesnt delete', statusCode: 404);
-      case 'Delete':
-        return Response(data: '', statusCode: 200);
+      case 'All unique':
+        return Response(data: {
+          'detail': 'No duplicates'
+        }, statusCode: 200);
+      case 'Email not unique':
+        return Response(data: { 'email': 'test@email.com'}, statusCode: 409);
+      case 'Username not unique':
+        return Response(data: { 'username': 'Hank'}, statusCode: 409);
+      case 'Nothing unique':
+        return Response(data: {
+          'email': 'test@email.com',
+          'username': 'Hank'
+        }, statusCode: 409);
       default:
         return Response(data: 'Not implemented', statusCode: 500);
     }

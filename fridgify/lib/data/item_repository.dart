@@ -28,8 +28,8 @@ class ItemRepository implements Repository<Item, int> {
 
   static final ItemRepository _itemRepository = ItemRepository._internal();
 
-  factory ItemRepository([Client client]) {
-    _itemRepository.dio = Repository.getDio();
+  factory ItemRepository([Dio dio]) {
+    _itemRepository.dio = Repository.getDio(dio);
     return _itemRepository;
   }
 

@@ -19,7 +19,7 @@ void main() async {
   Dio mockDio;
   Fridge fridge;
 
-  setUp(() async {
+  setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
     await Repository.sharedPreferences.setString('apiToken', 'Test token');

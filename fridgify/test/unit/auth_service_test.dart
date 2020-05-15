@@ -27,12 +27,14 @@ void main() async {
     mockDio.interceptors.add(MockDioInterceptor((RequestOptions request) async {
 
     switch (request.extra['testCase']) {
-      case "/register/":
+      case "Register":
         return handler.handleRegisterRequest(request);
-      case '/token/':
+      case 'Fetch api token':
         return handler.handleFetchApiTokenRequest(request);
       case 'Validate token':
         return handler.handleValidateTokenRequest(request);
+      case 'Login':
+        return handler.handleLoginRequests(request);
       default:
         return Response(data: 'Not implemented', statusCode: 201);
     }
@@ -79,8 +81,13 @@ void main() async {
   });
 
   group('Login', () {
+    setUp(() {
+      handler.setTestCase('Login');
+    });
+
     test('gets a return type other than 201', () async {
-      authService.user.username = 'error';
+      handler.setId('Return error');
+
       expect(
           () async => completion(await authService.login()),
           throwsA(predicate((error) =>
@@ -89,6 +96,8 @@ void main() async {
     });
 
     test('gets a api token', () async {
+      handler.setId('Login successfully');
+
       expect(Future.value('Api token'), completion(await authService.login()));
       expect(Future.value('Api token'),
           completion(await Repository.sharedPreferences.get('clientToken')));
@@ -96,6 +105,10 @@ void main() async {
   });
 
   group('Register', () {
+    setUp(() {
+      handler.setTestCase('Register');
+    });
+
     test('gets a return type other than 201', () async {
       expect(
           () async => completion(await authService.register()),
@@ -105,6 +118,7 @@ void main() async {
   });
 
   group('Logout', () {
+
     test('should return true', () async {
       await Repository.sharedPreferences.setString('clientToken', 'Test123');
       await Repository.sharedPreferences.setString('apiToken', 'Test123');
@@ -126,16 +140,23 @@ void main() async {
   });
 
   group('Fetch api token', () {
+    setUp(() {
+      handler.setTestCase('Fetch api token');
+    });
+
     test('doesnt find a cached token', () async {
+      await Repository.sharedPreferences.remove('clientToken');
+
       expect(
           () async => completion(await authService.fetchApiToken()),
           throwsA(predicate(
               (error) => error is FailedToFetchClientTokenException)));
+
+      await Repository.sharedPreferences.setString('clientToken', 'Test token');
     });
 
     test('gets a return type other than 201', () async {
-      await Repository.sharedPreferences
-          .setString('clientToken', 'Other than 201');
+      handler.setId('Other than 201');
 
       expect(
           () async => completion(await authService.fetchApiToken()),
@@ -144,8 +165,7 @@ void main() async {
     });
 
     test('gets a token and sets it', () async {
-      await Repository.sharedPreferences
-          .setString('clientToken', 'valid token');
+      handler.setId('Valid token');
 
       expect(Future.value('Api token'),
           completion(await authService.fetchApiToken()));
@@ -181,6 +201,17 @@ class ResponseHandlers {
     return Response(data: 'No register', statusCode: 402);
   }
 
+  Response handleLoginRequests(RequestOptions request) {
+    switch(request.extra['id']) {
+      case 'Return error':
+        return Response(data: {'detail': 'Error. Login failed'}, statusCode: 401);
+      case 'Login successfully':
+        return Response(data: {'token': 'Api token'}, statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
   Response handleValidateTokenRequest(RequestOptions request) {
     switch (request.extra['id']) {
       case 'Token valid':
@@ -190,18 +221,11 @@ class ResponseHandlers {
       default:
         return Response(data: 'Not implemented', statusCode: 500);
     }
-
-    var name = json.decode(request.data)['username'];
-
-    if (name == 'error') {
-      return Response(data: {'detail': 'Error. Login failed'}, statusCode: 401);
-    }
-    return Response(data: {'token': 'Api token'}, statusCode: 200);
   }
 
   Response handleFetchApiTokenRequest(RequestOptions request) {
-    switch (request.headers.remove('Authorization')) {
-      case 'valid token':
+    switch (request.extra['id']) {
+      case 'Valid token':
         final responseBody = {
           'token': 'Api token',
           'validation_time': 42069,

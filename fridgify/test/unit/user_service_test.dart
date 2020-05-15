@@ -61,7 +61,7 @@ void main() async {
           userService.user.toString());
     });
   });
-
+  /*
   group('get users for fridge', () {
     test('throws an error', () async {
       await Repository.sharedPreferences
@@ -87,7 +87,7 @@ void main() async {
       expect(testUsers.length, users.length);
     });
   });
-
+*/
   group('update', () {
     test('throws an error', () async {
       await Repository.sharedPreferences

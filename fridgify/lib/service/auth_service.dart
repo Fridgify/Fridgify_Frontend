@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/item_repository.dart';
@@ -9,6 +10,7 @@ import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/model/user.dart';
+import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/view/widgets/popup.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart';
@@ -154,7 +156,7 @@ class AuthenticationService {
         Starting timer with the Token live time and fetch a new token if timer
         expires -> Maybe outsource to extra function?
        */
-      Timer(Duration(seconds: timer), () async {
+      Timer(Duration(seconds: 60/*timer*/), () async {
         logger.i("AuthService => API TOKEN DIED FETCH NEW");
         if (await Repository.sharedPreferences.remove("apiToken")) {
           await fetchApiToken();
@@ -190,6 +192,7 @@ class AuthenticationService {
     StoreRepository storeRepository = StoreRepository();
     ItemRepository itemRepository = ItemRepository();
     FridgeRepository fridgeRepository = FridgeRepository();
+    UserService userService = UserService();
 
     try {
       logger.i('MainController => FETCHING ALL REPOSITORIES');
@@ -198,6 +201,7 @@ class AuthenticationService {
             fridgeRepository.fetchAll(),
             storeRepository.fetchAll(),
             itemRepository.fetchAll(),
+            userService.fetchUser(),
           ]
       );
     }

@@ -116,7 +116,7 @@ class Popups {
               onPressed: () async => await _controller.createFridge(key, context, onChange)
               ,
             )),
-            FlatButton(
+            /*FlatButton(
                 shape: new RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
                 color: Colors.transparent,
@@ -131,7 +131,7 @@ class Popups {
                 onPressed: () {}//() =>
                 //Navigator.push(context,
                 //     MaterialPageRoute(builder: (context) => RegisterPage())),
-                ),
+                ),*/
           ],
         );
       },

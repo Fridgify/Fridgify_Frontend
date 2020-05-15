@@ -4,8 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_create_new_fridge_exception.dart';
+import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_fridges_exception.dart';
 import 'package:fridgify/model/fridge.dart';
+import 'package:fridgify/utils/permission_helper.dart';
 import 'package:http/http.dart' show Response, Request;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -106,27 +108,28 @@ void main() async {
     });
   });
 
-  group('getFridgeMembers', () {
+  group('getUsersForFridge', () {
     test('throws an error', () async {
       await Repository.sharedPreferences
           .setString('apiToken', 'Error case get fridge members');
 
       expect(
           () async =>
-              completion(await fridgeRepository.getFridgeMembers(fridge)),
+              completion(await fridgeRepository.getUsersForFridge(fridge.fridgeId)),
           throwsA(
-              predicate((error) => error is FailedToFetchFridgesException)));
+              predicate((error) => error is FailedToFetchContentException)));
     });
 
     test('returns all members', () async {
       await Repository.sharedPreferences.setString('apiToken', 'Return member');
 
-      var members = await fridgeRepository.getFridgeMembers(fridge);
+      var members = await fridgeRepository.getUsersForFridge(fridge.fridgeId);
 
       for (int i = 0; i < members.length; i++) {
+        var mem = members.keys.toList();
         expect(
-            'username: Mr. Mock No.$i, password: , name: Dieter No.$i, surname: Mock No.$i, email: dieter.mockNo.$i@gmail.de, birthDate: 01.01.1969',
-            members[i].toString());
+            'username: Mr. Mock No.$i, password: , name: Dieter No.$i, surname: Mock No.$i, email: dieter.mockNo.$i@gmail.de, birthDate: 01.01.1969, id null',
+            mem[i].toString());
       }
     });
   });
@@ -212,16 +215,19 @@ class FridgeRepositoryTestUtil {
     }
   }
 
-  List<Object> createMemberObjects(int amount) {
-    List<Object> member = List();
+  List<Map<String, dynamic>> createMemberObjects(int amount) {
+    List<Map<String, dynamic>> member = List();
 
     for (int i = 0; i < amount; i++) {
-      member.add({
+      member.add({'user': {
         'username': 'Mr. Mock No.$i',
         'name': 'Dieter No.$i',
         'surname': 'Mock No.$i',
         'email': 'dieter.mockNo.$i@gmail.de',
-        'birth_date': '01.01.1969'
+        'birth_date': '01.01.1969',
+        'id': null,
+      },
+        'role' : 'Fridge Owner'
       });
     }
     return member;

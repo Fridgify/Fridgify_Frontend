@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:fridgify/utils/permission_helper.dart';
 
 class User {
   String username;
@@ -7,6 +8,7 @@ class User {
   String surname;
   String email;
   String birthDate;
+  int userId;
 
   User.newUser({
     @required this.username,
@@ -33,11 +35,12 @@ class User {
     @required this.surname,
     @required this.email,
     @required this.birthDate,
+    @required this.userId,
   });
 
   @override
   String toString() {
     return "username: $username, password: $password, name: $name, surname: $surname,"
-        " email: $email, birthDate: $birthDate";
+        " email: $email, birthDate: $birthDate, id $userId";
   }
 }

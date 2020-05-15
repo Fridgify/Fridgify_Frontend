@@ -2,16 +2,18 @@ import 'dart:convert';
 
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
-import 'package:fridgify/exception/not_unique_exception.dart';
+import 'package:fridgify/exception/failed_to_fetch_qr_exception.dart';
+import 'package:fridgify/exception/failed_to_patch_user_exception.dart';
+import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
-import 'package:fridgify/utils/validator.dart';
 import 'package:http/http.dart';
 import 'package:logger/logger.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fridgify/utils/permission_helper.dart';
 
 class UserService {
   static const String userApi = "${Repository.baseURL}users/";
+  static const String userManagementApi = "${Repository.baseURL}fridge/management/";
 
   Client client;
 
@@ -56,36 +58,6 @@ class UserService {
       logger.i('UserService => $user');
 
       return this.user;
-    }
-    throw new FailedToFetchContentException();
-  }
-
-  Future<List<User>> getUsersForFridge(int fridgeId) async {
-    List<User> usersList = List();
-
-    logger.i('UserService => FETCHING USERS FROM URL: $userApi$fridgeId/');
-
-    var response = await client.get('$userApi$fridgeId/', headers: Repository.getHeaders());
-
-    logger.i(
-        'UserService => FETCHING USERS FOR FRIDGE $fridgeId: ${response.body}');
-
-    if (response.statusCode == 200) {
-      var users = jsonDecode(response.body);
-      for (var user in users) {
-        User u = User.noPassword(
-            username: user['username'],
-            name: user['name'],
-            surname: user['surname'],
-            email: user['email'],
-            birthDate: user['birth_date']);
-        logger.i('UserService => FOUND USER $u');
-
-        usersList.add(u);
-      }
-
-      logger.i('UserService => ${usersList.length}');
-      return usersList;
     }
     throw new FailedToFetchContentException();
   }
@@ -145,6 +117,63 @@ class UserService {
     }
 
     return {"user": res.containsKey('username'), "mail": res.containsKey('email')};
+
+  }
+
+  Future<String> patchUser(Fridge f, User u, int role) async {
+
+    var userUrl = "$userManagementApi${f.fridgeId}/users/${u.userId}/";
+
+    logger.i("UserService => PATCHING USER ${u.username} FOR FRIDGE ${f.fridgeId} NEW ROLE $role URL $userUrl");
+
+    var response = await client.patch(userUrl, headers: Repository.getHeaders(), body: jsonEncode({
+      "role": role
+    }),
+    encoding: utf8);
+
+    logger.i('UserService => PATCHED USER ${response.body}');
+
+    if(response.statusCode == 200) {
+      return jsonDecode(response.body)['role'];
+    }
+
+    throw FailedToPatchUserException();
+
+  }
+
+  Future<bool> kickUser(Fridge f, User u) async {
+
+    var userUrl = "$userManagementApi${f.fridgeId}/users/${u.userId}/";
+
+    logger.i("UserService => REMOVING USER ${u.username} FOR FRIDGE ${f.fridgeId} URL $userUrl");
+
+    var response = await client.delete(userUrl, headers: Repository.getHeaders(),);
+
+    logger.i('UserService => REMOVED USER ${response.body}');
+
+    if(response.statusCode == 200) {
+      return true;
+    }
+
+    throw FailedToPatchUserException();
+
+  }
+
+  Future<String> fetchDeepLink(Fridge f) async {
+    var fridgeUrl = "$userManagementApi/${f.fridgeId}/qr-code";
+
+    logger.i("UserService => FETCHIGN QR FROM $fridgeUrl");
+
+    var response = await client.get(fridgeUrl, headers: Repository.getHeaders());
+
+
+    logger.i("UserService => RESPONSE FROM ${response.body}");
+
+    if(response.statusCode == 201) {
+      return jsonDecode(response.body)["dynamic_link"];
+    }
+
+    throw FailedToFetchQrException();
 
   }
 }

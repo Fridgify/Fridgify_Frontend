@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/utils/constants.dart';
+import 'package:fridgify/view/widgets/popup.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
 
@@ -15,11 +19,13 @@ class ContentMenuPage extends StatefulWidget {
   _ContentMenuPageState createState() => _ContentMenuPageState();
 }
 
-class _ContentMenuPageState extends State<ContentMenuPage> {
+class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingObserver {
   FridgeRepository _fridgeRepository = FridgeRepository();
   AuthenticationService _authenticationService = AuthenticationService();
   ContentMenuController _controller = ContentMenuController();
   RefreshController _refreshController =  RefreshController(initialRefresh: false);
+
+  Timer _timerLink;
 
   Future<void> _handleOptions(String string, BuildContext context) async {
 
@@ -55,9 +61,32 @@ class _ContentMenuPageState extends State<ContentMenuPage> {
 
     });
   }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    if (_timerLink != null) {
+      _timerLink.cancel();
+    }
+    super.dispose();
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+      _timerLink = new Timer(const Duration(milliseconds: 850), () {
+        _controller.retrieveDynamicLink();
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
+    _controller.context = context;
+    _controller.setState = setState;
     return Scaffold(
         appBar: new AppBar(
           title: new Text("Fridgify"),

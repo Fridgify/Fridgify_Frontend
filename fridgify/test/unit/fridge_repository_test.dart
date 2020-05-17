@@ -1,51 +1,62 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_create_new_fridge_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_fridges_exception.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:http/http.dart' show Response, Request;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../util/MockDioInterceptor.dart';
+import '../util/TestUtil.dart';
 
 void main() async {
   FridgeRepository fridgeRepository;
   FridgeRepositoryTestUtil testUtil;
-  MockClient mockClient;
+  Dio mockDio;
   Fridge fridge;
+  Repository.isTest = true;
 
-  setUp(() async {
+
+  setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
-    testUtil = FridgeRepositoryTestUtil();
+    await Repository.sharedPreferences.setString('apiToken', 'Test token');
 
-    mockClient = new MockClient((request) async {
-      switch (request.method) {
-        case "GET":
-          return testUtil.handleGETRequest(request);
-        case 'POST':
-          return testUtil.handlePOSTRequest(request);
-        case 'PATCH':
-          return testUtil.handlePATCHRequest(request);
-        case 'DELETE':
-          return testUtil.handleDELETERequest(request);
+    mockDio = new Dio();
+    testUtil = FridgeRepositoryTestUtil(mockDio);
+    mockDio.options.extra.putIfAbsent('id', () => 'None');
+    mockDio.interceptors.add(MockDioInterceptor((RequestOptions request) async {
+      switch (request.extra['testCase']) {
+        case "Add":
+          return testUtil.handleAddRequest(request);
+        case "Delete":
+          return testUtil.handleDeleteRequest(request);
+        case 'Fetch all':
+          return testUtil.handleFetchAllRequest(request);
+        case 'Get fridge member':
+          return testUtil.handleGetFridgeMemberRequest(request);
         default:
-          return Response('Not implemented', 201);
+          return Response(data: 'Not implemented', statusCode: 201);
       }
-    });
+    }));
 
-    fridgeRepository = FridgeRepository(mockClient);
+    fridgeRepository = FridgeRepository(mockDio);
 
     fridge = Fridge.create(
         fridgeId: 69, name: 'Test fridge');
   });
 
   group('add', () {
+    setUp(() {
+      testUtil.setTestCase('Add');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case add fridge');
+      testUtil.setId('Error case add fridge');
 
       expect(
           () async => completion(await fridgeRepository.add(fridge)),
@@ -54,7 +65,7 @@ void main() async {
     });
 
     test('creates successfully', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Create fridge');
+      testUtil.setId('Create fridge');
 
       expect(Future.value(69), completion(await fridgeRepository.add(fridge)));
       expect(fridge.name, fridgeRepository.fridges[69].name);
@@ -62,15 +73,19 @@ void main() async {
   });
 
   group('delete', () {
+    setUp(() {
+      testUtil.setTestCase('Delete');
+    });
+
     test('doesnt delete', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Doesnt delete');
+      testUtil.setId('Doesnt delete');
 
       expect(
           Future.value(false), completion(await fridgeRepository.delete(13)));
     });
 
     test('deletes successfully', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Delete');
+      testUtil.setId('Delete');
 
       fridgeRepository.fridges[123] = Fridge.create(
           fridgeId: 123,
@@ -84,9 +99,12 @@ void main() async {
   });
 
   group('fetchAll', () {
+    setUp(() {
+      testUtil.setTestCase('Fetch all');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case fetch all');
+      testUtil.setId('Error case fetch all');
 
       expect(
           () async => completion(await fridgeRepository.fetchAll()),
@@ -95,7 +113,7 @@ void main() async {
     });
 
     test('adds all of the returned fridges', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Add fridges');
+      testUtil.setId('Add fridges');
 
       var content = await fridgeRepository.fetchAll();
 
@@ -107,9 +125,12 @@ void main() async {
   });
 
   group('getFridgeMembers', () {
+    setUp(() {
+      testUtil.setTestCase('Get fridge member');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case get fridge members');
+      testUtil.setId('Error case get fridge members');
 
       expect(
           () async =>
@@ -119,7 +140,7 @@ void main() async {
     });
 
     test('returns all members', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Return member');
+      testUtil.setId('Return member');
 
       var members = await fridgeRepository.getFridgeMembers(fridge);
 
@@ -132,85 +153,66 @@ void main() async {
   });
 }
 
-class FridgeRepositoryTestUtil {
-  FridgeRepositoryTestUtil();
+class FridgeRepositoryTestUtil extends TestUtil {
+  FridgeRepositoryTestUtil(Dio dio) : super(dio);
 
   Map body;
 
-  Response handleGETRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
+  Response handleAddRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case add content':
+        return Response(data: 'Error case add fridge', statusCode: 404);
+      case 'Create fridge':
+        return Response(data: {
+          'fridge_id': 69,
+          'name': 'Test fridge'
+        }, statusCode: 201);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handleDeleteRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Doesnt delete':
+        return Response(data: 'Doesnt delete', statusCode: 404);
+      case 'Delete':
+        return Response(data: '', statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handleFetchAllRequest(RequestOptions request) {
+    switch (request.extra['id']) {
       case 'Error case fetch all':
-        return Response('Error case fetch all', 404);
+        return Response(data: 'Error case fetch all', statusCode: 404);
       case 'Add fridges':
-        Response response = Response(json.encode(createFridgeObjects(13)), 200);
-        Repository.sharedPreferences.setString('apiToken', 'Return member in fetch all');
+        Response response = Response(data: createFridgeObjects(13), statusCode: 200);
+        setId('Return member in fetch all');
         return response;
-      case 'Error case get fridge members':
-        return Response('Error case get fridge members', 404);
-      case 'Return member':
-        return Response(json.encode(createMemberObjects(13)), 200);
       case 'Return member in fetch all':
-        Response response = Response(json.encode(createMemberObjects(13)), 200);
-        Repository.sharedPreferences.setString('apiToken', 'Add content in fetch all');
+        Response response = Response(data: createMemberObjects(13), statusCode: 200);
+        setId('Add content in fetch all');
         return response;
       case 'Add content in fetch all':
-        return Response(json.encode([]), 200);
+        return Response(data: [], statusCode: 200);
       default:
-        return Response('Not implemented', 500);
+        return Response(data: 'Not implemented', statusCode: 500);
     }
   }
 
-  Response handlePOSTRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
-      case 'Error case add fridge':
-        return Response('Error case add fridge', 404);
-      case 'Create fridge':
-        return Response(
-            json.encode({
-              'fridge_id': 69,
-              'name': 'Test fridge'
-            }),
-            201);
-      case 'Set date':
-        body = Map.from(json.decode(request.body));
-        return Response(json.encode({'message': 'created'}), 201);
+  Response handleGetFridgeMemberRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case get fridge members':
+        return Response(data: 'Error case get fridge members', statusCode: 404);
+      case 'Return member':
+        return Response(data: createMemberObjects(13), statusCode: 200);
       default:
-        return Response('Not implemented', 500);
+        return Response(data: 'Not implemented', statusCode: 500);
     }
   }
 
-  Response handlePATCHRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
-      case 'Error case update content':
-        return Response('Error case update content', 404);
-      case 'Update':
-        return Response(
-            json.encode({
-              'id': 45,
-              'expiration_date': DateTime.now().toIso8601String(),
-              'amount': 13,
-              'unit': 'stk',
-              'created_at': DateTime.now().toIso8601String(),
-              'last_updated': DateTime.now().toIso8601String(),
-              'fridge': 42,
-              'item': 45
-            }),
-            200);
-      default:
-        return Response('Not implemented', 500);
-    }
-  }
-
-  Response handleDELETERequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
-      case 'Doesnt delete':
-        return Response('Doesnt delete', 404);
-      case 'Delete':
-        return Response('', 200);
-      default:
-        return Response('Not implemented', 500);
-    }
-  }
 
   List<Object> createMemberObjects(int amount) {
     List<Object> member = List();

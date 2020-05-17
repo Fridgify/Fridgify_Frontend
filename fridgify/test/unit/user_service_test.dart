@@ -1,44 +1,57 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
-import 'package:http/http.dart' show Response, Request;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../util/MockDioInterceptor.dart';
+import '../util/TestUtil.dart';
 
 void main() async {
   UserService userService;
   UserServiceTestUtil testUtil;
-  MockClient mockClient;
+  Dio mockDio;
+  Repository.isTest = true;
 
-  setUp(() async {
+
+  setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
-    testUtil = UserServiceTestUtil();
+    await Repository.sharedPreferences.setString('apiToken', 'Test token');
 
-    mockClient = new MockClient((request) async {
-      switch (request.method) {
-        case "GET":
-          return testUtil.handleGETRequest(request);
-        case 'POST':
-          return testUtil.handlePOSTRequest(request);
-        case 'PATCH':
-          return testUtil.handlePATCHRequest(request);
+    mockDio = new Dio();
+    testUtil = UserServiceTestUtil(mockDio);
+    mockDio.options.extra.putIfAbsent('id', () => 'None');
+    mockDio.interceptors.add(MockDioInterceptor((RequestOptions request) async {
+      switch (request.extra['testCase']) {
+        case "Get users for fridge":
+          return testUtil.handleGetUsersForFridgeRequest(request);
+        case "Check username email":
+          return testUtil.handleCheckUsernameEmailRequest(request);
+        case 'Fetch user':
+          return testUtil.handleFetchUserRequest(request);
+        case 'Update':
+          return testUtil.handleUpdateRequest(request);
         default:
-          return Response('Not implemented', 201);
+          return Response(data: 'Not implemented', statusCode: 201);
       }
-    });
+    }));
 
-    userService = UserService(mockClient);
+    userService = UserService(mockDio);
   });
 
   group('fetch user', () {
+    setUp(() {
+      testUtil.setTestCase('Fetch user');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case fetch user');
+      testUtil.setId('Error case fetch user');
 
       expect(
           () async => completion(await userService.fetchUser()),
@@ -47,14 +60,14 @@ void main() async {
     });
 
     test('gets an user', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Return user');
+      testUtil.setId('Return user');
 
       var user = await userService.fetchUser();
       expect(testUtil.createUser(1, 'pw')[0].toString(), user.toString());
     });
 
     test('saves the user in the user service', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Return user');
+      testUtil.setId('Return user');
 
       var user = await userService.fetchUser();
       expect(testUtil.createUser(1, 'pw')[0].toString(),
@@ -63,9 +76,12 @@ void main() async {
   });
 
   group('get users for fridge', () {
+    setUp(() {
+      testUtil.setTestCase('Get users for fridge');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case fetch user');
+      testUtil.setId('Error case fetch user');
 
       expect(
           () async => completion(await userService.getUsersForFridge(42)),
@@ -74,8 +90,7 @@ void main() async {
     });
 
     test('returns the user list for fridge 42', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Return users for fridge 42');
+      testUtil.setId('Return users for fridge 42');
 
       var users = await userService.getUsersForFridge(42);
       var testUsers = testUtil.createUser(42, 'nopw');
@@ -89,9 +104,13 @@ void main() async {
   });
 
   group('update', () {
+    setUp(() {
+      testUtil.setTestCase('Update');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case fetch user');
+      testUtil.setId('Error case fetch user');
+
       User user = testUtil.createUser(1, 'pw')[0];
 
       expect(
@@ -102,8 +121,8 @@ void main() async {
     });
 
     test('updates the attribute', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Update attribute');
+      testUtil.setId('Update attribute');
+
       User user = testUtil.createUser(1, 'pw')[0];
 
       User updatedUser = await userService.update(user, 'name', 'Olaf');
@@ -112,8 +131,8 @@ void main() async {
     });
 
     test('saves the user in the user service', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Update attribute');
+      testUtil.setId('Update attribute');
+
       User user = testUtil.createUser(1, 'pw')[0];
 
       User updatedUser = await userService.update(user, 'name', 'Olaf');
@@ -123,53 +142,110 @@ void main() async {
   });
 
   group('check username email', () {
-    // TODO: Test this when it is refactored
+    setUp(() {
+      testUtil.setTestCase('Check username email');
+    });
+
+    test('name and email are unique', () async {
+      testUtil.setId('All unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+      'Dieter', 'dieter.baum@gmail.com');
+
+      expect(false, response['user']);
+      expect(false, response['mail']);
+    });
+
+    test('email not unique', () async {
+      testUtil.setId('Email not unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+          'Dieter', 'dieter.baum@gmail.com');
+      print(response);
+
+      expect(false, response['user']);
+      expect(true, response['mail']);
+    });
+
+    test('username not unique', () async {
+      testUtil.setId('Username not unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+          'Dieter', 'dieter.baum@gmail.com');
+
+      expect(true, response['user']);
+      expect(false, response['mail']);
+    });
+
+    test('name and email are not unique', () async {
+      testUtil.setId('Nothing unique');
+
+      Map<String, bool> response = await userService.checkUsernameEmail(
+          'Dieter', 'dieter.baum@gmail.com');
+
+      expect(true, response['user']);
+      expect(true, response['mail']);
+    });
   });
 }
 
-class UserServiceTestUtil {
-  UserServiceTestUtil();
+class UserServiceTestUtil extends TestUtil {
+  UserServiceTestUtil(Dio dio) : super(dio);
 
-  Response handleGETRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
-      case 'Error case fetch user':
-        return Response('Error case fetch user', 404);
-      case 'Return user':
-        return Response(json.encode(createUserObject(1, 'pw')[0]), 200);
+  Response handleGetUsersForFridgeRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case add content':
+        return Response(data: 'Error case fetch user', statusCode: 404);
       case 'Return users for fridge 42':
-        return Response(json.encode(createUserObject(42, 'nopw')), 200);
+        return Response(data: createUserObject(42, 'nopw'), statusCode: 200);
       default:
-        return Response('Not implemented', 500);
+        return Response(data: 'Not implemented', statusCode: 500);
     }
   }
 
-  Response handlePOSTRequest(Request request) {
-    var username = json.decode(request.body)['username'];
-
-    if (username == 'Not unique') {
-      return Response(request.body, 409);
+  Response handleCheckUsernameEmailRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'All unique':
+        return Response(data: {
+          'detail': 'No duplicates'
+        }, statusCode: 200);
+      case 'Email not unique':
+        return Response(data: { 'email': 'test@email.com'}, statusCode: 409);
+      case 'Username not unique':
+        return Response(data: { 'username': 'Hank'}, statusCode: 409);
+      case 'Nothing unique':
+        return Response(data: {
+          'email': 'test@email.com',
+          'username': 'Hank'
+        }, statusCode: 409);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
     }
-
-    if (username == 'Unique') {
-      return Response('', 200);
-    }
-
-    return Response('Not implemented', 500);
   }
 
-  Response handlePATCHRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
+  Response handleFetchUserRequest(RequestOptions request) {
+    switch (request.extra['id']) {
       case 'Error case fetch user':
-        return Response('Error case fetch user', 404);
+        return Response(data: 'Error case fetch user', statusCode: 404);
+      case 'Return user':
+        return Response(data: createUserObject(1, 'pw')[0], statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handleUpdateRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case fetch user':
+        return Response(data: 'Error case fetch user', statusCode: 404);
       case 'Update attribute':
         var user = Map.from(createUserObject(1, 'nopw')[0]);
-        var body = Map.from(json.decode(request.body));
+        var body = Map.from(json.decode(request.data));
 
         body.forEach((key, value) => {user[key] = value});
-
-        return Response(json.encode(user), 200);
+        return Response(data: user, statusCode: 200);
       default:
-        return Response('Not implemented', 500);
+        return Response(data: 'Not implemented', statusCode: 500);
     }
   }
 

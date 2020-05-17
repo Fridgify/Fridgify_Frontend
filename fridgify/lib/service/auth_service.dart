@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/item_repository.dart';
@@ -22,7 +23,7 @@ class AuthenticationService {
 
   Logger logger = Logger();
 
-  Client client;
+  Dio dio;
 
   //Repository.sharedPreferences Repository.sharedPreferences = Repository.Repository.sharedPreferences;
 
@@ -42,30 +43,25 @@ class AuthenticationService {
         surname: surname,
         email: email,
         birthDate: birthDate);
-    this.client = Client();
+    this.dio = Repository.getDio();
     logger.i("AuthService => NEW USER: ${user.toString()}");
   }
 
   /// Constructor for login use case
   AuthenticationService.login(String username, String password) {
     user = User.loginUser(username: username, password: password);
-    this.client = Client();
+    this.dio = Repository.getDio();
     logger.i("AuthService => LOGIN: ${user.toString()}");
   }
 
-  AuthenticationService([Client client]) {
-    if(client != null) {
-      this.client = client;
-    } else {
-      this.client = Client();
-    }
+  AuthenticationService([Dio dio]) {
+    this.dio = Repository.getDio(dio);
   }
 
   /// Register call
   Future<String> register() async {
-    var response = await client.post("$authAPI/register/",
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
+    var response = await dio.post("$authAPI/register/",
+        data: jsonEncode({
           "username": user.username,
           "password": user.password,
           "name": user.name,
@@ -73,9 +69,10 @@ class AuthenticationService {
           "email": user.email,
           "birth_date": user.birthDate
         }),
-        encoding: utf8);
+        options: Options(headers: {"Content-Type": "application/json"})
+    );
 
-    logger.i('AuthService => REGISTER: ${response.body}');
+    logger.i('AuthService => REGISTER: ${response.data}');
 
     if (response.statusCode == 201) {
       logger.i('AuthService => REGISTER SUCCESSFUL ${response.statusCode}');
@@ -90,16 +87,15 @@ class AuthenticationService {
   Future<String> login() async {
     logger.i('AuthService => LOGGING');
 
-    var response = await client.post("$authAPI/login/",
-        headers: {"Content-Type": "application/json"},
-        body:
-        jsonEncode({"username": user.username, "password": user.password}),
-        encoding: utf8);
+    var response = await dio.post("$authAPI/login/",
+        data: jsonEncode({"username": user.username, "password": user.password}),
+        options: Options(headers: {"Content-Type": "application/json"})
+    );
 
-    logger.i('AuthService => LOGGING IN: ${response.body}');
+    logger.i('AuthService => LOGGING IN: ${response.data}');
 
     if (response.statusCode == 200) {
-      var token = jsonDecode(response.body)["token"];
+      var token = response.data["token"];
 
       logger.i('AuthService => FETCHED CLIENTTOKEN $token');
 
@@ -109,7 +105,7 @@ class AuthenticationService {
       return token;
     }
 
-    String err = jsonDecode(response.body)["detail"];
+    String err = response.data["detail"];
     throw FailedToFetchClientTokenException.withErr(err);
   }
 
@@ -135,14 +131,15 @@ class AuthenticationService {
     }
 
     var response =
-    await client.get("$authAPI/token/", headers: {"Authorization": clientToken});
+    await dio.get("$authAPI/token/", options: Options(
+      headers: {"Authorization": clientToken}));
 
 
-    logger.i('AuthService => FETCHING API TOKEN ${response.body}');
+    logger.i('AuthService => FETCHING API TOKEN ${response.data}');
 
     if (response.statusCode == 201) {
-      var token = jsonDecode(response.body)["token"];
-      var timer = jsonDecode(response.body)["validation_time"];
+      var token = response.data["token"];
+      var timer = response.data["validation_time"];
 
       logger.i("AuthService => FETCHED TOKEN: $token");
 
@@ -175,9 +172,10 @@ class AuthenticationService {
       throw FailedToFetchClientTokenException();
     }
 
-    var response = await client.post("$authAPI/login/", headers: {"Authorization": clientToken});
+    var response = await dio.post("$authAPI/login/", options: Options(
+        headers: {"Authorization": clientToken}));
 
-    logger.i('AuthService => VALIDATING TOKEN: ${response.body}');
+    logger.i('AuthService => VALIDATING TOKEN: ${response.data}');
 
     if(response.statusCode == 200) {
       return true;

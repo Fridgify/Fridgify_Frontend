@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_create_new_fridge_exception.dart';
@@ -7,8 +8,6 @@ import 'package:fridgify/exception/failed_to_fetch_fridges_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
-
-import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,19 +18,15 @@ class FridgeRepository implements Repository<Fridge, int> {
   UserService _userService = UserService();
 
   Map<int, Fridge> fridges = Map();
-  Client client;
+  Dio dio;
 
   static const fridgeAPI = "${Repository.baseURL}/fridge/";
 
   static final FridgeRepository _fridgeRepository =
       FridgeRepository._internal();
 
-  factory FridgeRepository([Client client]) {
-    if (client != null) {
-      _fridgeRepository.client = client;
-    } else {
-      _fridgeRepository.client = Client();
-    }
+  factory FridgeRepository([Dio dio]) {
+    _fridgeRepository.dio = Repository.getDio(dio);
 
     return _fridgeRepository;
   }
@@ -42,22 +37,16 @@ class FridgeRepository implements Repository<Fridge, int> {
 
   @override
   Future<int> add(Fridge f) async {
-    var response = await client.post("${fridgeAPI}management/create/",
-        headers: Repository.getHeaders(),
-        body: jsonEncode({
-          "fridge_id": f.fridgeId,
-          "name": f.name
-        }),
-        encoding: utf8);
+    var response = await dio.post("${fridgeAPI}management/create/",
+        data: jsonEncode({"fridge_id": f.fridgeId, "name": f.name}),
+        options: Options(headers: Repository.getHeaders())
+    );
 
-    logger.i('FridgeRepository => CREATING FRIDGE: ${response.body}');
+    logger.i('FridgeRepository => CREATING FRIDGE: ${response.data}');
 
     if (response.statusCode == 201) {
-      var f = jsonDecode(response.body);
-      var fridge = Fridge.create(
-          fridgeId: f["fridge_id"],
-          name: f["name"]
-      );
+      var f = response.data;
+      var fridge = Fridge.create(fridgeId: f["fridge_id"], name: f["name"]);
       logger.i("FridgeRepository => CREATED SUCCESSFUL $fridge");
 
       fridge.content = {
@@ -73,8 +62,6 @@ class FridgeRepository implements Repository<Fridge, int> {
 
       this.fridges[fridge.fridgeId] = fridge;
 
-
-
       return fridge.fridgeId;
     }
 
@@ -83,10 +70,11 @@ class FridgeRepository implements Repository<Fridge, int> {
 
   @override
   Future<bool> delete(int id) async {
-    var response = await client.delete("$fridgeAPI/management/$id/",
-        headers: Repository.getHeaders());
+    var response = await dio.delete("$fridgeAPI/management/$id/",
+        options: Options(headers: Repository.getHeaders())
+    );
 
-    logger.i('FridgeRepository => DELETING FRIDGE: ${response.body}');
+    logger.i('FridgeRepository => DELETING FRIDGE: ${response.data}');
 
     if (response.statusCode == 200) {
       logger.i('FridgeRepository => DELETED FRIDGE');
@@ -99,11 +87,13 @@ class FridgeRepository implements Repository<Fridge, int> {
 
   @override
   Future<Map<int, Fridge>> fetchAll() async {
-    var response = await client.get(fridgeAPI, headers: Repository.getHeaders());
-    logger.i('FridgeRepository => FETCHING FRIDGES: ${response.body}');
+    var response = await dio.get(fridgeAPI,
+        options: Options(headers: Repository.getHeaders())
+    );
+    logger.i('FridgeRepository => FETCHING FRIDGES: ${response.data}');
 
     if (response.statusCode == 200) {
-      var fridges = jsonDecode(response.body);
+      var fridges = response.data;
 
       logger.i('FridgeRepository => $fridges');
 
@@ -112,7 +102,7 @@ class FridgeRepository implements Repository<Fridge, int> {
             fridgeId: fridge['id'],
             name: fridge['name'],
             content: fridge['content']);
-        f.contentRepository = ContentRepository(sharedPreferences, f, client);
+        f.contentRepository = ContentRepository(sharedPreferences, f, dio);
 
         await getFridgeMembers(f);
         await f.contentRepository.fetchAll();
@@ -143,21 +133,28 @@ class FridgeRepository implements Repository<Fridge, int> {
     List<User> member = List();
     var url = Repository.baseURL + 'users/${f.fridgeId}/';
 
-    logger.i('FridgeRepository => FETCHING USER FOR FRIDGE ${f.fridgeId} ON URL $url');
+    logger.i(
+        'FridgeRepository => FETCHING USER FOR FRIDGE ${f.fridgeId} ON URL $url');
 
-    var response = await client.get(url, headers: Repository.getHeaders());
-    logger.i('FridgeRepository => FETCHING USERS : ${response.body}');
+    var response = await dio.get(url,
+        options: Options(headers: Repository.getHeaders())
+    );
+    logger.i('FridgeRepository => FETCHING USERS : ${response.data}');
 
     if (response.statusCode == 200) {
-      var users = jsonDecode(response.body);
+      var users = response.data;
 
       logger.i('FridgeRepository => $users');
 
       for (var user in users) {
         logger.i("FridgeRepository => FETCHED USER: $user");
 
-        User u = User.noPassword(username: user['username'], name: user['name'],
-            surname: user['surname'], email: user['email'], birthDate: user['birth_date']);
+        User u = User.noPassword(
+            username: user['username'],
+            name: user['name'],
+            surname: user['surname'],
+            email: user['email'],
+            birthDate: user['birth_date']);
 
         member.add(u);
       }

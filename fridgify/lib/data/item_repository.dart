@@ -1,15 +1,13 @@
-import 'dart:convert';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
-import 'package:http/http.dart';
 
 import 'package:logger/logger.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ItemRepository implements Repository<Item, int> {
@@ -17,7 +15,7 @@ class ItemRepository implements Repository<Item, int> {
   Logger logger = Repository.logger;
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   StoreRepository storeRepository = StoreRepository();
-  Client client;
+  Dio dio;
 
   static const itemApi = "${Repository.baseURL}items/";
 
@@ -25,13 +23,8 @@ class ItemRepository implements Repository<Item, int> {
 
   static final ItemRepository _itemRepository = ItemRepository._internal();
 
-  factory ItemRepository([Client client]) {
-    if (client != null) {
-      _itemRepository.client = client;
-    } else {
-      _itemRepository.client = Client();
-    }
-
+  factory ItemRepository([Dio dio]) {
+    _itemRepository.dio = Repository.getDio(dio);
     return _itemRepository;
   }
 
@@ -61,12 +54,14 @@ class ItemRepository implements Repository<Item, int> {
   Future<Map<int, Item>> fetchAll() async {
     logger.i('ItemRepository => FETCHIN FROM URL: $itemApi');
 
-    var response = await client.get(itemApi, headers: Repository.getHeaders());
+    var response = await dio.get(itemApi,
+        options: Options(headers: Repository.getHeaders())
+    );
 
-    logger.i('ItemRepository => FETCHING ITEMS: ${response.body}');
+    logger.i('ItemRepository => FETCHING ITEMS: ${response.data}');
 
     if (response.statusCode == 200) {
-      var items = jsonDecode(response.body);
+      var items = response.data;
 
       logger.i('ItemRepository => $items');
 

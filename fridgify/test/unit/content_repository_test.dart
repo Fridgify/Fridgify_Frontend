@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -9,23 +10,47 @@ import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
 import 'package:fridgify/model/store.dart';
-import 'package:http/http.dart' show Response, Request;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../util/MockDioInterceptor.dart';
+import '../util/TestUtil.dart';
 
 void main() async {
   ContentRepository contentRepository;
   ContentRepositoryTestUtil testUtil;
-  MockClient mockClient;
+  Dio mockDio;
   Content content;
+  Repository.isTest = true;
 
-  setUp(() async {
+
+  setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
-    testUtil = ContentRepositoryTestUtil();
+    await Repository.sharedPreferences.setString('apiToken', 'Test token');
+
+    mockDio = new Dio();
+    testUtil = ContentRepositoryTestUtil(mockDio);
+    mockDio.options.extra.putIfAbsent('id', () => 'None');
+    mockDio.interceptors.add(MockDioInterceptor((RequestOptions request) async {
+      switch (request.extra['testCase']) {
+        case "Add":
+          return testUtil.handleAddRequest(request);
+        case "Delete":
+          return testUtil.handleDeleteRequest(request);
+        case 'Fetch all':
+          return testUtil.handleFetchAllRequest(request);
+        case 'Update':
+          return testUtil.handleUpdateRequest(request);
+        default:
+          return Response(data: 'Not implemented', statusCode: 201);
+      }
+    }));
+
     content = Content.create(
       contentId: "uuid",
       expirationDate: DateTime.now().toIso8601String(),
+      count: 42,
       amount: 13,
       unit: 'stk',
       item: Item(
@@ -35,45 +60,33 @@ void main() async {
           store: Store.create(name: 'Ikea')),
     );
 
-    mockClient = new MockClient((request) async {
-      switch (request.method) {
-        case "GET":
-          return testUtil.handleGETRequest(request);
-        case 'POST':
-          return testUtil.handlePOSTRequest(request);
-        case 'PATCH':
-          return testUtil.handlePATCHRequest(request);
-        case 'DELETE':
-          return testUtil.handleDELETERequest(request);
-        default:
-          return Response('Not implemented', 201);
-      }
-    });
-
     contentRepository = ContentRepository(
         Repository.sharedPreferences,
         Fridge.create(fridgeId: 42, name: 'Test fridge'),
-        mockClient);
+        mockDio);
   });
 
   group('add', () {
+    setUp(() {
+      testUtil.setTestCase('Add');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case add content');
+      testUtil.setId('Error case add content');
 
       expect(() async => completion(await contentRepository.add(content)),
           throwsA(predicate((error) => error is FailedToAddContentException)));
     });
 
     test('creates successfully', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Create');
+      testUtil.setId('Create');
 
       expect(
           Future.value("Added"), completion(await contentRepository.add(content)));
     });
 
     test('sets the current date', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Set date');
+      testUtil.setId('Set date');
 
       var id = await contentRepository.add(content);
       var body = testUtil.body;
@@ -84,19 +97,24 @@ void main() async {
   });
 
   group('delete', () {
+    setUp(() {
+      testUtil.setTestCase('Delete');
+    });
+
     test('doesnt delete', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Doesnt delete');
+      testUtil.setId('Doesnt delete');
 
       expect(
           Future.value(false), completion(await contentRepository.delete("13")));
     });
 
     test('deletes successfully', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Delete');
+      testUtil.setId('Delete');
 
       contentRepository.contents["uuid1"] = Content.create(
         contentId: "uuid1",
         expirationDate: DateTime.now().toIso8601String(),
+        count: 42,
         amount: 13,
         unit: 'stk',
         item: Item(
@@ -113,9 +131,12 @@ void main() async {
   });
 
   group('fetchAll', () {
+    setUp(() {
+      testUtil.setTestCase('Fetch all');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case fetch all');
+      testUtil.setId('Error case fetch all');
 
       expect(
           () async => completion(await contentRepository.fetchAll()),
@@ -124,7 +145,7 @@ void main() async {
     });
 
     test('adds all of the returned content', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Add content');
+      testUtil.setId('Add content');
 
       testUtil.setUpItems(contentRepository, 66);
       var content = await contentRepository.fetchAll();
@@ -137,9 +158,12 @@ void main() async {
   });
 
   group('update', () {
+    setUp(() {
+      testUtil.setTestCase('Update');
+    });
+
     test('throws an error', () async {
-      await Repository.sharedPreferences
-          .setString('apiToken', 'Error case update content');
+      testUtil.setId('Error case update content');
 
       expect(
           () async => completion(
@@ -149,7 +173,8 @@ void main() async {
     });
 
     test('updates successfully', () async {
-      await Repository.sharedPreferences.setString('apiToken', 'Update');
+      testUtil.setId('Update');
+
       var newContent =
           await contentRepository.update(content, 'Human brains', 'name');
 
@@ -158,28 +183,17 @@ void main() async {
   });
 }
 
-class ContentRepositoryTestUtil {
-  ContentRepositoryTestUtil();
+class ContentRepositoryTestUtil extends TestUtil {
+  ContentRepositoryTestUtil(Dio dio) : super(dio);
 
   Map body;
 
-  Response handleGETRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
-      case 'Error case fetch all':
-        return Response('Error case fetch all', 404);
-      case 'Add content':
-        return Response(json.encode(createContentObjects(66)), 200);
-      default:
-        return Response('Not implemented', 500);
-    }
-  }
-
-  Response handlePOSTRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
+  Response handleAddRequest(RequestOptions request) {
+    switch (request.extra['id']) {
       case 'Error case add content':
-        return Response('Error case add content', 404);
+        return Response(data: 'Error case add content', statusCode: 404);
       case 'Create':
-        return Response(json.encode([{
+        return Response(data: [{
           'id': 45,
           'expiration_date': DateTime.now().toIso8601String(),
           'amount': 13,
@@ -189,10 +203,10 @@ class ContentRepositoryTestUtil {
           'last_updated': DateTime.now().toIso8601String(),
           'fridge': 42,
           'item': 45
-        }]), 201);
+        }], statusCode: 201);
       case 'Set date':
-        body = Map.from(json.decode(request.body));
-        return Response(json.encode([{
+        body = Map.from(json.decode(request.data));
+        return Response(data: [{
           'id': 45,
           'expiration_date': DateTime.now().toIso8601String(),
           'amount': 13,
@@ -202,19 +216,40 @@ class ContentRepositoryTestUtil {
           'last_updated': DateTime.now().toIso8601String(),
           'fridge': 42,
           'item': 45
-        }]), 201);
+        }], statusCode: 201);
       default:
-        return Response('Not implemented', 500);
+        return Response(data: 'Not implemented', statusCode: 500);
     }
   }
 
-  Response handlePATCHRequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
+  Response handleDeleteRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Doesnt delete':
+        return Response(data: 'Doesnt delete', statusCode: 404);
+      case 'Delete':
+        return Response(data: '', statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handleFetchAllRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case fetch all':
+        return Response(data: 'Error case fetch all', statusCode: 404);
+      case 'Add content':
+        return Response(data: createContentObjects(66), statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handleUpdateRequest(RequestOptions request) {
+    switch (request.extra['id']) {
       case 'Error case update content':
-        return Response('Error case update content', 404);
+        return Response(data: 'Error case update content', statusCode: 404);
       case 'Update':
-        return Response(
-            json.encode({
+        return Response(data: {
               'id': 45,
               'expiration_date': DateTime.now().toIso8601String(),
               'amount': 13,
@@ -223,23 +258,13 @@ class ContentRepositoryTestUtil {
               'last_updated': DateTime.now().toIso8601String(),
               'fridge': 42,
               'item': 45
-            }),
-            200);
+            },
+            statusCode: 200);
       default:
-        return Response('Not implemented', 500);
+        return Response(data: 'Not implemented', statusCode: 500);
     }
   }
 
-  Response handleDELETERequest(Request request) {
-    switch (request.headers.remove('Authorization')) {
-      case 'Doesnt delete':
-        return Response('Doesnt delete', 404);
-      case 'Delete':
-        return Response('', 200);
-      default:
-        return Response('Not implemented', 500);
-    }
-  }
 
   List<Object> createContentObjects(int amount) {
     List<Object> content = List();

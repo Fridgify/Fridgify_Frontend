@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -11,8 +12,10 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
+  Repository.isTest = true;
 
-  setUp(() async {
+
+  setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
   });
@@ -42,6 +45,18 @@ void main() async {
       var headers = Repository.getHeaders();
       expect('application/json', headers['Content-Type']);
       expect('An api token', headers['Authorization']);
+    });
+
+  });
+  
+  group('Get dio', () {
+
+    test('returns test dio', () async {
+      Dio dio = Dio();
+      dio.options.extra.putIfAbsent('test', () => 'Test dio');
+      
+      Dio returnedDio = Repository.getDio(dio);
+      expect('Test dio', returnedDio.options.extra['test']);
     });
 
   });

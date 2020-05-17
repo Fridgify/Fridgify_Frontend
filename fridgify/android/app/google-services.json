@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "146913505256",
+    "firebase_url": "https://fridgify-52ae9.firebaseio.com",
+    "project_id": "fridgify-52ae9",
+    "storage_bucket": "fridgify-52ae9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:146913505256:android:8a09da42b20812c266be5d",
+        "android_client_info": {
+          "package_name": "dev.donkz.fridgify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "146913505256-654tma42rujkquo0isha03t9gotae723.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDXI0tr7coisyxYrKAnQx0AP3-RBSbNHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "146913505256-654tma42rujkquo0isha03t9gotae723.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "146913505256-r931v138i0p7b0qfg3b4mnnf27nbbt6r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fridgify.fridgify"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

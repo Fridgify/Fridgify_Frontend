@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/main_controller.dart';
-import 'package:fridgify/data/fridge_repository.dart';
-import 'package:fridgify/data/item_repository.dart';
-import 'package:fridgify/data/repository.dart';
-import 'package:fridgify/data/store_repository.dart';
-import 'package:fridgify/model/content.dart';
-import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/service/auth_service.dart';
-import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/view/screens/content_menu_screen.dart';
 import 'package:fridgify/view/screens/login_screen.dart';
 import 'package:fridgify/view/screens/register_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -70,59 +61,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
   MainController _controller = MainController();
 
-  void _incrementCounter() async {
-    //var authService = AuthenticationService.register("dennis", "pw", "dennis", "rein", "testmail", "2000-04-25");
-    //await authService.register();
-
-    Repository.sharedPreferences = await SharedPreferences.getInstance();
-
-    AuthenticationService authService = AuthenticationService.login("testUser", "password");
-
-    await authService.login();
-    await authService.fetchApiToken();
-    await authService.validateToken();
-
-    UserService userService = UserService();
-    FridgeRepository fridgeRepository = FridgeRepository();
-    ItemRepository itemRepository = ItemRepository();
-    StoreRepository storeRepository = StoreRepository();
-
-    var user = await userService.fetchUser();
-    await userService.getUsersForFridge(2);
-    user.name = "DuummyXY";
-
-    await userService.update(user, "name", "teeeest");
-    await storeRepository.fetchAll();
-    await itemRepository.fetchAll();
-
-    var f = await fridgeRepository.fetchAll();
-
-    var id = await fridgeRepository.add(Fridge.create(name: "Test2"));
-    await fridgeRepository.delete(id);
-
-    await f[2].contentRepository.fetchAll();
-    //id = await f[2].contentRepository.add(Content.create(item: itemRepository.get(6), amount: 2, unit: 'ml', expirationDate: '2020-04-10'));
-    //await f[2].contentRepository.delete(id);
-
-    var c = f[2].contentRepository.getAll()[1];
-    c.unit = "LUL";
-
-    await f[2].contentRepository.update(c, 'unit', 'tons');
-    //await storeRepository.add(Store.create(name: "Lidl"));
-
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   @override
   void initState() {

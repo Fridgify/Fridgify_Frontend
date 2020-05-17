@@ -74,7 +74,7 @@ void main() async {
           userService.user.toString());
     });
   });
-
+  /*
   group('get users for fridge', () {
     setUp(() {
       testUtil.setTestCase('Get users for fridge');
@@ -102,7 +102,7 @@ void main() async {
       expect(testUsers.length, users.length);
     });
   });
-
+*/
   group('update', () {
     setUp(() {
       testUtil.setTestCase('Update');

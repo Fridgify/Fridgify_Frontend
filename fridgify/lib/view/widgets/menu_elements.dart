@@ -1,8 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
 
 import 'package:fridgify/model/fridge.dart';
+import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/view/screens/fridge_detail_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
@@ -56,6 +58,7 @@ class MenuElements {
 
   static Widget fridgeCard(Fridge fridge, BuildContext context, onChanged,
       ContentMenuController controller) {
+
     return GestureDetector(
       onTap: () async => await MenuElements._navigateToNextFridge(fridge, context),
       child: Padding(
@@ -67,13 +70,26 @@ class MenuElements {
                     child: Stack(
                       children: <Widget>[
                         Positioned(
-                            child: Column(children: [
-                          Row(children: [
+                            child: Column(
+                                children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
                             Text(
-                              fridge.name,
+                              fridge.name ?? " ",
                               style: TextStyle(
                                   fontSize: 24, fontFamily: 'Montserrat'),
                             ),
+                              IconButton(
+                                onPressed: () => {
+                                  controller.getUser(fridge, context)
+                                },
+                                icon: Icon(
+                                  Icons.people,
+                                  color: Colors.purple,
+                                ),
+
+                              )
                           ]),
                           SizedBox(
                             height: 10,
@@ -81,7 +97,7 @@ class MenuElements {
                           Row(
                             children: <Widget>[
                               Text(
-                                  "Members: ${fridge.member.length}",
+                                  "Members: ${fridge.members.length}",
                                 style: TextStyle(
                                     fontSize: 16,
                                     fontFamily: 'Montserrat',
@@ -104,7 +120,7 @@ class MenuElements {
                                     RaisedButton(
                                       color: Colors.purple,
                                       child: Text("Invite"),
-                                      onPressed: () {},
+                                      onPressed: () async => await controller.generateQr(fridge, context),
                                     ),
                                     FlatButton(
                                       child: Text("Leave"),
@@ -198,6 +214,7 @@ class MenuElements {
   static Future<void> _navigateToNextFridge(Fridge fridge, BuildContext context) async {
     Loader.showSimpleLoadingDialog(context);
     await fridge.contentRepository.fetchAll();
+
     await Navigator.pushReplacement(
         context,
         MaterialPageRoute(

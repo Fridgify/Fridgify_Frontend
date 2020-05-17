@@ -7,9 +7,8 @@ class Constants {
   static const String settings = "Settings";
 
   static const String addItem = "Add Item";
-  static const String editFridge = "Edit Fridge";
-  static const String manageFridge = "Manage Member";
-  static const String deleteFridge = "Delete Fridge";
+  static const String showMembers = "Show Members";
+  static const String editFridge = "Fridge Settings";
 
   static const List<String> menuOptions = [
     addFridge,
@@ -18,12 +17,18 @@ class Constants {
   ];
 
 
+
+
+  static const List<String> ownerDetailOptions = [
+    //TODO: Return items depending on access rights
+    addItem,
+    showMembers,
+    editFridge,
+  ];
   static const List<String> detailOptions = [
     //TODO: Return items depending on access rights
     addItem,
-    editFridge,
-    manageFridge,
-    deleteFridge,
+    showMembers,
   ];
 
   // Technical

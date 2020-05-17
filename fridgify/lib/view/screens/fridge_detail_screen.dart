@@ -29,6 +29,7 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
   Widget build(BuildContext context) {
     _controller.contents = fridge.contentRepository.getAll().values.toList();
 
+
     return Scaffold(
         appBar: new AppBar(
           title: new Text("Fridgify"),
@@ -54,7 +55,14 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
                     onSelected: (string) =>
                         _controller.handleOptions(string, context),
                     itemBuilder: (BuildContext context) {
-                      return Constants.detailOptions.map((String choice) {
+                      return _controller.isOwner(this.fridge) ?
+                      Constants.ownerDetailOptions.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(choice),
+                        );
+                      }).toList()
+                          : Constants.detailOptions.map((String choice) {
                         return PopupMenuItem<String>(
                           value: choice,
                           child: Text(choice),

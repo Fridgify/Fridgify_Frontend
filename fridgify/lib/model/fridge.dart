@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/model/user.dart';
+import 'package:fridgify/utils/permission_helper.dart';
 
 class Fridge {
   int fridgeId;
   String name;
   Map<String, dynamic> content;
-  List<User> member = List();
+  Map<User, Permissions> members = Map();
 
   ContentRepository contentRepository;
 

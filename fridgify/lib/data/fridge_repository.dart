@@ -4,10 +4,12 @@ import 'package:dio/dio.dart';
 import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_create_new_fridge_exception.dart';
+import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_fridges_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
+import 'package:fridgify/utils/permission_helper.dart';
 import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +23,7 @@ class FridgeRepository implements Repository<Fridge, int> {
   Dio dio;
 
   static const fridgeAPI = "${Repository.baseURL}/fridge/";
+  static const String userManagementApi = "${fridgeAPI}management/";
 
   static final FridgeRepository _fridgeRepository =
       FridgeRepository._internal();
@@ -56,7 +59,7 @@ class FridgeRepository implements Repository<Fridge, int> {
         'overDue': 0,
       };
 
-      fridge.member.add(_userService.get());
+      fridge.members[_userService.get()] = Permissions.owner;
 
       fridge.contentRepository = ContentRepository(sharedPreferences, fridge);
 
@@ -104,7 +107,7 @@ class FridgeRepository implements Repository<Fridge, int> {
             content: fridge['content']);
         f.contentRepository = ContentRepository(sharedPreferences, f, dio);
 
-        await getFridgeMembers(f);
+        f.members = await getUsersForFridge(f.fridgeId);
         await f.contentRepository.fetchAll();
 
         logger.i("FridgeRepository => FETCHED FRIDGE: $f");
@@ -128,8 +131,70 @@ class FridgeRepository implements Repository<Fridge, int> {
   Map<int, Fridge> getAll() {
     return this.fridges;
   }
+  Future<Map<User, Permissions>> getUsersForFridge(int fridgeId) async {
+    Map<User, Permissions> usersList = Map();
+    var userUrl = "$userManagementApi$fridgeId/users";
 
-  Future<List<User>> getFridgeMembers(Fridge f) async {
+
+    logger.i('UserService => FETCHING USERS FROM URL: $userUrl');
+
+    var response = await dio.get('$userUrl', options: Options(headers: Repository.getHeaders()));
+
+    logger.i(
+        'UserService => FETCHING USERS FOR FRIDGE $fridgeId: ${response.data}');
+
+    if (response.statusCode == 200) {
+      var users = response.data;
+      for (var us in users) {
+        var user = us['user'];
+        User u = User.noPassword(
+          username: user['username'],
+          name: user['name'],
+          surname: user['surname'],
+          email: user['email'],
+          birthDate: user['birth_date'],
+          userId: user['user_id'],
+        );
+        logger.i('UserService => FOUND USER $u ROLE ${us['role']}');
+
+        usersList[u] = Permissions.user.byName(us['role']);
+      }
+
+      logger.i('UserService => ${usersList.length}');
+      return usersList;
+    }
+    throw new FailedToFetchContentException();
+  }
+
+  Future<Fridge> joinByUrl(Uri url) async {
+    logger.i('FridgeRepository => JOINING FRIDGE VIA INVITE URL $url');
+
+    var response = await dio.get(url.toString(), options: Options(headers: Repository.getHeaders()));
+
+    logger.i('UserService => JOINED FRIDGE ${response.data}');
+
+    if(response.statusCode == 201){
+      var fridge = response.data;
+
+      Fridge f = Fridge(
+          fridgeId: fridge['id'],
+          name: fridge['name'],
+          content: fridge['content']
+      );
+
+      f.contentRepository = ContentRepository(sharedPreferences, f, dio);
+
+      f.members = await getUsersForFridge(f.fridgeId);
+      await f.contentRepository.fetchAll();
+
+      this.fridges[f.fridgeId] = f;
+      return f;
+    }
+
+    throw new FailedToCreateNewFridgeException();
+
+  }
+  /*Future<List<User>> getFridgeMembers(Fridge f) async {
     List<User> member = List();
     var url = Repository.baseURL + 'users/${f.fridgeId}/';
 
@@ -149,12 +214,9 @@ class FridgeRepository implements Repository<Fridge, int> {
       for (var user in users) {
         logger.i("FridgeRepository => FETCHED USER: $user");
 
-        User u = User.noPassword(
-            username: user['username'],
-            name: user['name'],
-            surname: user['surname'],
-            email: user['email'],
-            birthDate: user['birth_date']);
+        User u = User.noPassword(username: user['username'], name: user['name'],
+            surname: user['surname'], email: user['email'], birthDate: user['birth_date'],
+          userId: user['user_id'],);
 
         member.add(u);
       }
@@ -166,5 +228,5 @@ class FridgeRepository implements Repository<Fridge, int> {
       return member;
     }
     throw new FailedToFetchFridgesException();
-  }
+  }*/
 }

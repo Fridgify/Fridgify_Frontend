@@ -8,10 +8,14 @@ import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
+import 'package:fridgify/model/user.dart';
+import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/constants.dart';
+import 'package:fridgify/utils/permission_helper.dart';
 import 'package:fridgify/view/popups/add_item_popup.dart';
 import 'package:fridgify/view/popups/edit_value_popup.dart';
 import 'package:fridgify/view/popups/no_item_found_popup.dart';
+import 'package:fridgify/view/screens/fridge_users_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
 import 'package:logger/logger.dart';
@@ -31,6 +35,23 @@ class FridgeDetailController {
   ItemRepository _itemRepository = ItemRepository();
 
   FridgeDetailController(this.setState, this.fridge);
+
+  UserService _userService = UserService();
+
+  bool isOwner(Fridge f) {
+    var u = _userService.get();
+    var users = f.members;
+
+    for(User val in users.keys) {
+      if(val.username == u.username)
+        {
+          if(users[val] == Permissions.owner)
+            return true;
+        }
+    }
+    return false;
+  }
+
 
   Future<void> handleOptions(String string, BuildContext context) async {
     if(string == Constants.addItem) {
@@ -70,7 +91,20 @@ class FridgeDetailController {
             return AddItemPopUp(this.fridge.contentRepository, item, context, setState);
           });
     }
+    if(string == Constants.showMembers) {
+      await getUser(this.fridge, context);
+    }
     setState(() {});
+  }
+
+  Future<void> getUser(Fridge f, BuildContext context) async {
+    Loader.showSimpleLoadingDialog(context);
+    var users = f.members;
+    await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UsersPage(users, f),
+        ));
   }
 
   Future<Item> findItem(ScanResult result) async {

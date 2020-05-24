@@ -4,9 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
+import 'package:fridgify/exception/failed_to_fetch_qr_exception.dart';
+import 'package:fridgify/exception/failed_to_patch_user_exception.dart';
+import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
-import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../util/MockDioInterceptor.dart';
@@ -18,7 +20,6 @@ void main() async {
   Dio mockDio;
   Repository.isTest = true;
 
-
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
@@ -29,14 +30,16 @@ void main() async {
     mockDio.options.extra.putIfAbsent('id', () => 'None');
     mockDio.interceptors.add(MockDioInterceptor((RequestOptions request) async {
       switch (request.extra['testCase']) {
-        case "Get users for fridge":
-          return testUtil.handleGetUsersForFridgeRequest(request);
         case "Check username email":
           return testUtil.handleCheckUsernameEmailRequest(request);
         case 'Fetch user':
           return testUtil.handleFetchUserRequest(request);
         case 'Update':
           return testUtil.handleUpdateRequest(request);
+        case 'Kick user':
+          return testUtil.handleKickUserRequest(request);
+        case 'Fetch deep link':
+          return testUtil.handleFetchDeepLinkRequest(request);
         default:
           return Response(data: 'Not implemented', statusCode: 201);
       }
@@ -74,35 +77,7 @@ void main() async {
           userService.user.toString());
     });
   });
-  /*
-  group('get users for fridge', () {
-    setUp(() {
-      testUtil.setTestCase('Get users for fridge');
-    });
 
-    test('throws an error', () async {
-      testUtil.setId('Error case fetch user');
-
-      expect(
-          () async => completion(await userService.getUsersForFridge(42)),
-          throwsA(
-              predicate((error) => error is FailedToFetchContentException)));
-    });
-
-    test('returns the user list for fridge 42', () async {
-      testUtil.setId('Return users for fridge 42');
-
-      var users = await userService.getUsersForFridge(42);
-      var testUsers = testUtil.createUser(42, 'nopw');
-
-      for (int i = 0; i < users.length; i++) {
-        expect(testUsers[i].toString(), users[i].toString());
-      }
-
-      expect(testUsers.length, users.length);
-    });
-  });
-*/
   group('update', () {
     setUp(() {
       testUtil.setTestCase('Update');
@@ -141,6 +116,70 @@ void main() async {
     });
   });
 
+  group('fetchDeepLink', () {
+    setUp(() {
+      testUtil.setTestCase('Fetch deep link');
+    });
+
+    test('throws an error', () async {
+      testUtil.setId('Error case fetch deep link');
+
+      expect(
+          () async => completion(await userService
+              .fetchDeepLink(Fridge.create(name: 'test', fridgeId: 12))),
+          throwsA(predicate((error) => error is FailedToFetchQrException)));
+    });
+
+    test('gets the link', () async {
+      testUtil.setId('Return link');
+
+      expect(
+          Future.value('link 123'),
+          completion(
+            await userService.fetchDeepLink(Fridge.create(name: 'Test')),
+          ));
+    });
+  });
+
+  group('kickUser', () {
+    setUp(() {
+      testUtil.setTestCase('Kick user');
+    });
+
+    test('throws an error', () async {
+      testUtil.setId('Error case kick user');
+
+      expect(
+          () async => completion(await userService.kickUser(
+              Fridge.create(name: 'test', fridgeId: 12),
+              User.newUser(
+                  username: 'adadsoladn',
+                  password: 'asdandan',
+                  name: 'Dieter',
+                  surname: 'Dieter',
+                  email: 'dieter.dieter@gmail.com',
+                  birthDate: "2020-01-01"))),
+          throwsA(predicate((error) => error is FailedToPatchUserException)));
+    });
+
+    test('removes the user', () async {
+      testUtil.setId('Remove user');
+
+      expect(
+        Future.value(true),
+        completion(await userService.kickUser(
+            Fridge.create(name: 'Test'),
+            User.newUser(
+                username: 'adadsoladn',
+                password: 'asdandan',
+                name: 'Dieter',
+                surname: 'Dieter',
+                email: 'dieter.dieter@gmail.com',
+                birthDate: "2020-01-01"))),
+      );
+    });
+  });
+
   group('check username email', () {
     setUp(() {
       testUtil.setTestCase('Check username email');
@@ -150,7 +189,7 @@ void main() async {
       testUtil.setId('All unique');
 
       Map<String, bool> response = await userService.checkUsernameEmail(
-      'Dieter', 'dieter.baum@gmail.com');
+          'Dieter', 'dieter.baum@gmail.com');
 
       expect(false, response['user']);
       expect(false, response['mail']);
@@ -192,12 +231,23 @@ void main() async {
 class UserServiceTestUtil extends TestUtil {
   UserServiceTestUtil(Dio dio) : super(dio);
 
-  Response handleGetUsersForFridgeRequest(RequestOptions request) {
+  Response handleFetchDeepLinkRequest(RequestOptions request) {
     switch (request.extra['id']) {
-      case 'Error case add content':
-        return Response(data: 'Error case fetch user', statusCode: 404);
-      case 'Return users for fridge 42':
-        return Response(data: createUserObject(42, 'nopw'), statusCode: 200);
+      case 'Error case fetch deep link':
+        return Response(data: 'Error case fetch deep link', statusCode: 404);
+      case 'Return link':
+        return Response(data: {'dynamic_link': "link 123"}, statusCode: 201);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handleKickUserRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case kick user':
+        return Response(data: 'Error case kick user', statusCode: 404);
+      case 'Remove user':
+        return Response(data: 'Removed', statusCode: 200);
       default:
         return Response(data: 'Not implemented', statusCode: 500);
     }
@@ -206,18 +256,15 @@ class UserServiceTestUtil extends TestUtil {
   Response handleCheckUsernameEmailRequest(RequestOptions request) {
     switch (request.extra['id']) {
       case 'All unique':
-        return Response(data: {
-          'detail': 'No duplicates'
-        }, statusCode: 200);
+        return Response(data: {'detail': 'No duplicates'}, statusCode: 200);
       case 'Email not unique':
-        return Response(data: { 'email': 'test@email.com'}, statusCode: 409);
+        return Response(data: {'email': 'test@email.com'}, statusCode: 409);
       case 'Username not unique':
-        return Response(data: { 'username': 'Hank'}, statusCode: 409);
+        return Response(data: {'username': 'Hank'}, statusCode: 409);
       case 'Nothing unique':
-        return Response(data: {
-          'email': 'test@email.com',
-          'username': 'Hank'
-        }, statusCode: 409);
+        return Response(
+            data: {'email': 'test@email.com', 'username': 'Hank'},
+            statusCode: 409);
       default:
         return Response(data: 'Not implemented', statusCode: 500);
     }

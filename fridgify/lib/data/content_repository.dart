@@ -1,18 +1,17 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:fridgify/cache/request_cache.dart';
+import 'package:fridgify/model/item.dart';
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sortedmap/sortedmap.dart';
+
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:http/http.dart';
-import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sortedmap/sortedmap.dart';
 
 class ContentRepository implements Repository<Content, String> {
   Logger logger = Repository.logger;
@@ -35,16 +34,7 @@ class ContentRepository implements Repository<Content, String> {
 
   @override
   Future<String> add(Content content) async {
-    var date = DateTime.now();
-    var body = jsonEncode({
-      "name": content.item.name,
-      "buy_date": "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day}",
-      "expiration_date": content.expirationDate,
-      "count": content.count,
-      "amount": content.amount,
-      "unit": content.unit,
-      "store": content.item.store.name,
-    });
+    var body = content.toString();
     logger.i('ContentRepository => Requesting $contentApi with $body');
 
     var response = await dio.post(contentApi, options: Options(headers: Repository.getHeaders()), data: body);
@@ -55,12 +45,19 @@ class ContentRepository implements Repository<Content, String> {
       var c = response.data;
 
       logger.i("ContentRepository => CREATED SUCCESSFUL $c");
-      for(var con in c) {
-        Content temp = Content(amount: content.amount, contentId: con['content_id'],
-          expirationDate: content.expirationDate, fridge: content.fridge, item: content.item, maxAmount: content.maxAmount, unit: content.unit,);
-        this.contents[content.contentId] = temp;
-      }
-      group(this.getAll());
+
+      itemRepository.addSync(Item.create(
+        name: content.item.name,
+        store: content.item.store,
+        barcode: "",
+        itemId: c[0]['item'],
+      ));
+
+      this.contents.addAll(Map.fromIterable(c, key: (k) => k['content_id'],
+          value: (v) => Content.fromJson(v, this.fridge)));
+
+      group();
+
       return "Added";
     }
 
@@ -73,10 +70,11 @@ class ContentRepository implements Repository<Content, String> {
         await dio.delete("$contentApi$id", options: Options(headers: Repository.getHeaders()));
 
     logger.i(
-        'ContentRepository => DELETING CONTENT: ${response.data} ON URL $contentApi$id');
+        'ContentRepository => DELETING CONTENT: ${response.data} ${response.statusCode} ON URL $contentApi$id');
 
     if (response.statusCode == 200) {
       logger.i('FridgeRepository => DELETED CONTENT');
+      removeFromGroup(this.get(id));
       this.contents.remove(id);
       return true;
     }
@@ -87,6 +85,7 @@ class ContentRepository implements Repository<Content, String> {
   @override
   Future<Map<String, Content>> fetchAll() async {
     logger.i('ContentRepository => FETCHIN FROM URL: $contentApi');
+    this.grouped = SortedMap(Ordering.byKey());
 
     var response =
         await dio.get(contentApi, options: Options(headers: Repository.getHeaders()));
@@ -94,52 +93,18 @@ class ContentRepository implements Repository<Content, String> {
     logger.i('ContentRepository => FETCHING CONTENT: ${response.data}');
 
     if (response.statusCode == 200) {
-      var contents = response.data;
+      var contents = response.data as List;
 
       logger.i('ContentRepository => $contents');
 
-      for (var content in contents) {
-        Content c = Content(
-            contentId: content['content_id'],
-            expirationDate: content['expiration_date'],
-            amount: content['amount'],
-            maxAmount: content['max_amount'],
-            unit: content['unit'],
-            fridge: this.fridge,
-            item: itemRepository.get(content['item_id']));
-        this.contents[c.contentId] = c;
-      }
+      this.contents = Map.fromIterable(contents,
+          key: (e) => e['content_id'], value: (e) => Content.fromJson(e, this.fridge));
 
-        logger.i("ContentRepository => FETCHED ${this.contents.length} CONTENTS");
-        group(this.contents);
+      logger.i("ContentRepository => FETCHED ${this.contents.length} CONTENTS");
+      group();
       return this.contents;
     }
     throw new FailedToFetchContentException();
-  }
-
-  void group(var all) {
-    SortedMap<String, List<Content>> ret = SortedMap(Ordering.byKey());
-    List<Content> tmp = List();
-
-    this.getAll().forEach((key, value) =>
-    {
-      if(value.item != null) {
-
-        if(ret.containsKey(value.item.name)) {
-          ret[value.item.name].add(value),
-        }
-        else
-          {
-            tmp = List(),
-            tmp.add(value),
-            ret[value.item.name] = tmp,
-          }
-      }
-      else {
-        logger.e("ContentRepository => ERROR OCCURED WHILE CREATING GROUP FOR VALUE $value")
-      }
-    });
-    grouped = ret;
   }
 
   @override
@@ -169,7 +134,7 @@ class ContentRepository implements Repository<Content, String> {
       {
         logger.i("Empty delete");
         this.contents.remove(content.contentId);
-        group(this.contents);
+        removeFromGroup(content);
       }
       else {
         this.contents[content.contentId] = content;
@@ -197,6 +162,42 @@ class ContentRepository implements Repository<Content, String> {
       return content;
     }
     throw new FailedToFetchContentException();
+  }
+
+  void group() {
+
+    this.getAll().forEach((key, value) =>
+    {
+      if(value.item != null) {
+        this.addToGroup(value)
+      }
+      else {
+        logger.e("ContentRepository => ERROR OCCURED WHILE CREATING GROUP FOR VALUE $value")
+      }
+    });
+    logger.i("ContentRepository => CREATED GROUP ${this.grouped.length}");
+  }
+
+  void addToGroup(Content c) {
+    if(grouped.containsKey(c.item.name)) {
+      grouped[c.item.name].add(c);
+    }
+    else
+    {
+      List<Content> tmp = List<Content>();
+      tmp.add(c);
+      grouped[c.item.name] = tmp;
+    }
+  }
+
+  void removeFromGroup(Content c) {
+    if(grouped.containsKey(c.item.name)) {
+      grouped[c.item.name].remove(c);
+      if(grouped[c.item.name].length == 0)
+        {
+          grouped.remove(c.item.name);
+        }
+    }
   }
 
   SortedMap<String, List<Content>> getAsGroup() {

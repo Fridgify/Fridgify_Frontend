@@ -30,7 +30,7 @@ class FridgeDetailController {
 
   BuildContext context;
 
-  List<Content> _selected = List();
+  Set<Content> _selected = Set();
 
   ItemRepository _itemRepository = ItemRepository();
 
@@ -135,7 +135,7 @@ class FridgeDetailController {
 
   cancelSelection() {
     setState(() {
-      _selected = List();
+      _selected = Set();
       isEditMode = false;
     });
   }
@@ -144,7 +144,7 @@ class FridgeDetailController {
     isEditMode = true;
     _selected.addAll(group);
     setState(() {});
-    print("Long");
+    print("GROUP $group");
   }
 
   groupTap(group, ExpandableController expandableController) {
@@ -191,10 +191,11 @@ class FridgeDetailController {
   Future<bool> _deleteItems() async {
     Loader.showSimpleLoadingDialog(this.context);
     try {
+      print("Selected => ${this._selected}");
+      print("Selected => ${fridge.contentRepository.getAll()}");
       await Future.wait(
         this._selected.map((e) => fridge.contentRepository.delete(e.contentId))
       );
-      fridge.contentRepository.group(fridge.contentRepository.getAll());
       setState(() {});
       cancelSelection();
       Navigator.of(this.context).pop();

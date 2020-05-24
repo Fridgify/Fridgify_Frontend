@@ -88,6 +88,16 @@ class FridgeRepository implements Repository<Fridge, int> {
     return false;
   }
 
+  Future<Fridge> initFridge(dynamic json) async {
+    Fridge f = Fridge.fromJson(json);
+    f.contentRepository = ContentRepository(sharedPreferences, f, dio);
+
+    f.members = await getUsersForFridge(f.fridgeId);
+    await f.contentRepository.fetchAll();
+
+    return f;
+  }
+
   @override
   Future<Map<int, Fridge>> fetchAll() async {
     var response = await dio.get(fridgeAPI,
@@ -96,24 +106,13 @@ class FridgeRepository implements Repository<Fridge, int> {
     logger.i('FridgeRepository => FETCHING FRIDGES: ${response.data}');
 
     if (response.statusCode == 200) {
-      var fridges = response.data;
+      List fridges = response.data;
 
       logger.i('FridgeRepository => $fridges');
 
-      for (var fridge in fridges) {
-        Fridge f = Fridge(
-            fridgeId: fridge['id'],
-            name: fridge['name'],
-            content: fridge['content']);
-        f.contentRepository = ContentRepository(sharedPreferences, f, dio);
+      Iterable<Future<Fridge>> temp = fridges.map((e) async => await initFridge(e));
+      this.fridges = Map.fromIterable(await Future.wait(temp), key: (e) => e.fridgeId, value: (e) => e);
 
-        f.members = await getUsersForFridge(f.fridgeId);
-        await f.contentRepository.fetchAll();
-
-        logger.i("FridgeRepository => FETCHED FRIDGE: $f");
-
-        this.fridges[fridge['id']] = f;
-      }
 
       logger.i("FridgeRepository => FETCHED ${this.fridges.length} FRIDGES");
 
@@ -145,20 +144,8 @@ class FridgeRepository implements Repository<Fridge, int> {
 
     if (response.statusCode == 200) {
       var users = response.data;
-      for (var us in users) {
-        var user = us['user'];
-        User u = User.noPassword(
-          username: user['username'],
-          name: user['name'],
-          surname: user['surname'],
-          email: user['email'],
-          birthDate: user['birth_date'],
-          userId: user['user_id'],
-        );
-        logger.i('UserService => FOUND USER $u ROLE ${us['role']}');
 
-        usersList[u] = Permissions.user.byName(us['role']);
-      }
+      usersList = Map.fromIterable(users, key: (e) => User.fromJson(e['user']), value: (e) => Permissions.user.byName(e['role']));
 
       logger.i('UserService => ${usersList.length}');
       return usersList;
@@ -176,11 +163,7 @@ class FridgeRepository implements Repository<Fridge, int> {
     if(response.statusCode == 201){
       var fridge = response.data;
 
-      Fridge f = Fridge(
-          fridgeId: fridge['id'],
-          name: fridge['name'],
-          content: fridge['content']
-      );
+      Fridge f = Fridge.fromJson(fridge);
 
       f.contentRepository = ContentRepository(sharedPreferences, f, dio);
 
@@ -194,39 +177,4 @@ class FridgeRepository implements Repository<Fridge, int> {
     throw new FailedToCreateNewFridgeException();
 
   }
-  /*Future<List<User>> getFridgeMembers(Fridge f) async {
-    List<User> member = List();
-    var url = Repository.baseURL + 'users/${f.fridgeId}/';
-
-    logger.i(
-        'FridgeRepository => FETCHING USER FOR FRIDGE ${f.fridgeId} ON URL $url');
-
-    var response = await dio.get(url,
-        options: Options(headers: Repository.getHeaders())
-    );
-    logger.i('FridgeRepository => FETCHING USERS : ${response.data}');
-
-    if (response.statusCode == 200) {
-      var users = response.data;
-
-      logger.i('FridgeRepository => $users');
-
-      for (var user in users) {
-        logger.i("FridgeRepository => FETCHED USER: $user");
-
-        User u = User.noPassword(username: user['username'], name: user['name'],
-            surname: user['surname'], email: user['email'], birthDate: user['birth_date'],
-          userId: user['user_id'],);
-
-        member.add(u);
-      }
-
-      logger.i("FridgeRepository => FETCHED ${member.length} MEMBERS");
-
-      f.member = member;
-
-      return member;
-    }
-    throw new FailedToFetchFridgesException();
-  }*/
 }

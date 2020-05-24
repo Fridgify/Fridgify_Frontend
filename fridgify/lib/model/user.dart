@@ -38,6 +38,17 @@ class User {
     @required this.userId,
   });
 
+  factory User.fromJson(dynamic json) {
+    return User.noPassword(
+      username: json['username'],
+      name: json['name'],
+      surname: json['surname'],
+      email: json['email'],
+      birthDate: json['birth_date'],
+      userId: json['user_id'],
+    );
+  }
+
   @override
   String toString() {
     return "username: $username, password: $password, name: $name, surname: $surname,"

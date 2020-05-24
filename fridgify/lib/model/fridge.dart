@@ -11,6 +11,14 @@ class Fridge {
 
   ContentRepository contentRepository;
 
+  factory Fridge.fromJson(dynamic json) {
+    Fridge f = Fridge(
+        fridgeId: json['id'],
+        name: json['name'],
+        content: json['content']);
+    return f;
+  }
+
   Fridge({
     @required this.fridgeId,
     @required this.name,

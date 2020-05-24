@@ -10,7 +10,6 @@ import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
 import 'package:fridgify/model/store.dart';
-import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../util/MockDioInterceptor.dart';
@@ -157,6 +156,30 @@ void main() async {
     });
   });
 
+  group('group', () {
+    setUp(() {
+      //Creates 9 copies of three individual items
+      var content = testUtil.createContent(27);
+      content.forEach((entry) {
+        contentRepository.contents[entry.contentId] = entry;
+      });
+
+    });
+
+    test('groups 3 items', () {
+      contentRepository.group('Useless parameter');
+
+      var groupedContent = contentRepository.grouped;
+
+      expect(groupedContent.length, 3);
+
+      for(int i = 0; i < 3; i++) {
+        expect(groupedContent['Item $i'].length, 9);
+      }
+    });
+
+  });
+
   group('update', () {
     setUp(() {
       testUtil.setTestCase('Update');
@@ -265,6 +288,32 @@ class ContentRepositoryTestUtil extends TestUtil {
     }
   }
 
+  List<Content> createContent(int amount) {
+    List<Content> content = List();
+
+    for (int i = 0; i < amount; i++) {
+      content.add(Content(
+          contentId: 'uuid$i',
+          expirationDate: '2020-05-10',
+          amount: 42,
+          maxAmount: 50,
+          unit: 'balls',
+          fridge: Fridge(
+            name: 'asmsdklöa',
+            fridgeId: 23,
+            content: {}
+          ),
+          item: Item(
+              name: 'Item ${i % 3}',
+              barcode: 'abcas${i % 3}',
+              itemId: i % 3,
+              store: Store(storeId: 2, name: 'Ikea'),
+          )
+      ));
+    }
+
+    return content;
+  }
 
   List<Object> createContentObjects(int amount) {
     List<Object> content = List();

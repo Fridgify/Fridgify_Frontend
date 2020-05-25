@@ -131,6 +131,7 @@ class FridgeRepository implements Repository<Fridge, int> {
   Map<int, Fridge> getAll() {
     return this.fridges;
   }
+
   Future<Map<User, Permissions>> getUsersForFridge(int fridgeId) async {
     Map<User, Permissions> usersList = Map();
     var userUrl = "$userManagementApi$fridgeId/users";
@@ -194,6 +195,8 @@ class FridgeRepository implements Repository<Fridge, int> {
     throw new FailedToCreateNewFridgeException();
 
   }
+
+
   /*Future<List<User>> getFridgeMembers(Fridge f) async {
     List<User> member = List();
     var url = Repository.baseURL + 'users/${f.fridgeId}/';

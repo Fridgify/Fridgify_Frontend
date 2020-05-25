@@ -151,8 +151,8 @@ class ContentRepository implements Repository<Content, String> {
   Map<String, Content> getAll() {
     return this.contents;
   }
-  Future<Content> withdraw(
-      Content content, int amount) async {
+
+  Future<Content> withdraw(Content content, int amount) async {
     logger.i(
         'ContentRepository => WITHDRAWING $amount FROM ${content.item.name} ${content.amount} FROM URL: $contentApi');
 

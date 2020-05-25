@@ -34,6 +34,8 @@ void main() async {
           return testUtil.handleAddRequest(request);
         case 'Fetch all':
           return testUtil.handleFetchAllRequest(request);
+        case 'Get by name':
+          return testUtil.handleGetByNameRequest(request);
         default:
           return Response(data: 'Not implemented', statusCode: 201);
       }
@@ -41,6 +43,28 @@ void main() async {
 
     storeRepository = StoreRepository(mockDio);
     store = Store(storeId: 2, name: 'Ikea');
+
+  });
+
+  group('get by name', () {
+    setUp(() {
+      testUtil.setTestCase('Get by name');
+    });
+
+    test('finds the store', () async {
+      storeRepository.stores[store.storeId] = store;
+      storeRepository.storeWithNames[store] = store.name;
+
+      Store foundStore = await storeRepository.getByName('Ikea');
+      expect(foundStore.name, 'Ikea');
+    });
+
+    test('doesnt find the store', () async {
+      testUtil.setId('Create store');
+
+      Store newStore = await storeRepository.getByName('Ikea 2');
+      expect(newStore.name, 'Ikea 2');
+    });
 
   });
 
@@ -95,6 +119,18 @@ void main() async {
 
 class StoreRepositoryTestUtil extends TestUtil {
   StoreRepositoryTestUtil(Dio dio) : super(dio);
+
+  Response handleGetByNameRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Create store':
+        return Response(data: {
+          'store_id': 222,
+          'name': 'Ikea 2',
+        }, statusCode: 201);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
 
   Response handleAddRequest(RequestOptions request) {
     switch (request.extra['id']) {

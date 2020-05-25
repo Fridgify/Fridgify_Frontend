@@ -1,14 +1,8 @@
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
-import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
-import 'package:fridgify/model/store.dart';
-import 'package:http/http.dart' show Response, Request;
-import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {

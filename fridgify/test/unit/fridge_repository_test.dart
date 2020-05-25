@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/fridge_repository.dart';
@@ -8,8 +6,6 @@ import 'package:fridgify/exception/failed_to_create_new_fridge_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_fridges_exception.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/utils/permission_helper.dart';
-import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../util/MockDioInterceptor.dart';
@@ -41,6 +37,8 @@ void main() async {
           return testUtil.handleFetchAllRequest(request);
         case 'Get users for fridge':
           return testUtil.handleGetUsersForFridgeRequest(request);
+        case 'Join by url':
+          return testUtil.handleJoinByUrlRequests(request);
         default:
           return Response(data: 'Not implemented', statusCode: 201);
       }
@@ -155,12 +153,66 @@ void main() async {
       }
     });
   });
+
+  group('joinByUrl', () {
+    setUp(() => {
+      testUtil.setTestCase('Join by url')
+    });
+
+
+    test('throws an error', () async {
+      testUtil.setId('Error case join');
+
+      expect(
+              () async =>
+              completion(await fridgeRepository.joinByUrl(Uri())),
+          throwsA(
+              predicate((error) => error is FailedToCreateNewFridgeException)));
+    });
+
+    test('returns all members', () async {
+      testUtil.setId('Join fridge');
+
+      Fridge fridge = await fridgeRepository.joinByUrl(Uri());
+
+      expect(fridge.fridgeId, 123);
+      expect(fridgeRepository.fridges.containsKey(fridge.fridgeId), true);
+    });
+  });
 }
 
 class FridgeRepositoryTestUtil extends TestUtil {
   FridgeRepositoryTestUtil(Dio dio) : super(dio);
 
   Map body;
+
+  Response handleJoinByUrlRequests(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case join':
+        return Response(data: 'Error case join', statusCode: 404);
+      case 'Join fridge':
+        Response response = Response(data: {
+          'id': 123,
+          'name': 'G',
+          'content': {
+            "total": 10,
+            "fresh": 0,
+            "dueSoon": 0,
+            "overDue": 10
+          },
+        }, statusCode: 201);
+        this.setId('Join fridge handle get user for fridge');
+        return response;
+      case 'Join fridge handle get user for fridge':
+        Response response = Response(data: [], statusCode: 200);
+        this.setId('Join fridge handle fetch all in contentRepository');
+        return response;
+      case 'Join fridge handle fetch all in contentRepository':
+        return Response(data: [], statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
 
   Response handleAddRequest(RequestOptions request) {
     switch (request.extra['id']) {

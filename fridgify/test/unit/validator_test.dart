@@ -77,6 +77,16 @@ void main() {
     });
   });
 
+  group('Validate last name', () {
+    test('should return empty message', () {
+      expect(Validator.validateName(''), 'Please enter a last name');
+    });
+
+    test('should return null', () {
+      expect(Validator.validateName('Test'), null);
+    });
+  });
+
   group('Validate date', () {
     test('should return empty message', () {
       expect(Validator.validateDate(''), 'Please enter a birthdate');

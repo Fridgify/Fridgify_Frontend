@@ -3,6 +3,13 @@
 Fridgify - Stay cool. Stay organised. 
 
 ![Code coverage](fridgify/coverage/coverage_badge.svg) 
+![Github top language](https://img.shields.io/github/languages/top/fridgify/Fridgify_Frontend)
+![Test status](https://img.shields.io/teamcity/build/s/Fridgify_TestFrontend?label=tests&server=https%3A%2F%2Ffridgify-tc.donkz.dev%2F)
+
+![Github commits](https://img.shields.io/github/commit-activity/w/fridgify/Fridgify_Frontend) ![Github commits](https://img.shields.io/github/commit-activity/m/fridgify/Fridgify_Frontend)
+![Github commits](https://img.shields.io/github/commit-activity/y/fridgify/Fridgify_Frontend)
+
+![Website status](https://img.shields.io/website?url=https%3A%2F%2Ffridgify.donkz.dev%2F)
 
 ## Getting Started
 

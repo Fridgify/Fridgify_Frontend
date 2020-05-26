@@ -3,6 +3,7 @@
 Fridgify - Stay cool. Stay organised. 
 
 ![Code coverage](fridgify/coverage/coverage_badge.svg) 
+![Test status](https://img.shields.io/teamcity/build/s/Fridgify_TestFrontend?label=tests&server=https%3A%2F%2Ffridgify-tc.donkz.dev%2F)
 
 ## Getting Started
 

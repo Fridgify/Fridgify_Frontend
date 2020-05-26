@@ -1,0 +1,3 @@
+class FailedToFetchQrException implements Exception {
+
+}

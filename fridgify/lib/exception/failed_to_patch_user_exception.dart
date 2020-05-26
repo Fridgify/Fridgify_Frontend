@@ -1,0 +1,3 @@
+class FailedToPatchUserException implements Exception {
+
+}

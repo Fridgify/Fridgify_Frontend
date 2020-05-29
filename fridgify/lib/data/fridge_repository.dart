@@ -130,6 +130,7 @@ class FridgeRepository implements Repository<Fridge, int> {
   Map<int, Fridge> getAll() {
     return this.fridges;
   }
+
   Future<Map<User, Permissions>> getUsersForFridge(int fridgeId) async {
     Map<User, Permissions> usersList = Map();
     var userUrl = "$userManagementApi$fridgeId/users";

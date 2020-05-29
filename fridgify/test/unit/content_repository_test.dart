@@ -10,7 +10,6 @@ import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
 import 'package:fridgify/model/store.dart';
-import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../util/MockDioInterceptor.dart';
@@ -42,6 +41,8 @@ void main() async {
           return testUtil.handleFetchAllRequest(request);
         case 'Update':
           return testUtil.handleUpdateRequest(request);
+        case 'Withdraw':
+          return testUtil.handleWithdrawRequest(request);
         default:
           return Response(data: 'Not implemented', statusCode: 201);
       }
@@ -157,6 +158,100 @@ void main() async {
     });
   });
 
+  group('group', () {
+    setUp(() {
+      contentRepository.contents.clear();
+      //Creates 9 copies of three individual items
+      //Uses modulo 3 to create items with the same name. Use a multiple of
+      //three to have the same amount of items in each group
+      var content = testUtil.createContent(27);
+      content.forEach((entry) {
+        contentRepository.contents[entry.contentId] = entry;
+      });
+    
+    });
+    
+    tearDown(() {
+      contentRepository.contents.clear();
+    });
+
+    test('groups 3 items', () {
+      contentRepository.group('Useless parameter');
+
+      var groupedContent = contentRepository.grouped;
+
+      print((groupedContent));
+      expect(groupedContent.length, 3);
+
+      for(int i = 0; i < 3; i++) {
+        expect(groupedContent['Item $i'].length, 9);
+      }
+    });
+
+  });
+
+  group('withdraw', () {
+    setUp(() {
+      testUtil.setTestCase('Withdraw');
+    });
+
+    test('throws an error', () async {
+      testUtil.setId('Error case withdraw');
+
+      expect(
+              () async => completion(
+              await contentRepository.withdraw(content, 2)),
+          throwsA(
+              predicate((error) => error is FailedToFetchContentException)));
+    });
+
+    test('withdraws successfully', () async {
+      testUtil.setId('Withdraw with something left');
+
+      var testContent = Content.create(
+        contentId: "uuid123141141",
+        expirationDate: DateTime.now().toIso8601String(),
+        count: 1,
+        amount: 20,
+        unit: 'g',
+        item: Item(
+            itemId: 5165,
+            barcode: 'adw',
+            name: 'Human heart',
+            store: Store.create(name: 'Ikea')),
+      );
+
+      Content content = await contentRepository.withdraw(testContent, 10);
+
+      expect(contentRepository.contents.containsKey('uuid123141141'), true);
+
+    });
+
+    test('removes the item', () async {
+      testUtil.setId('Withdraw without something left');
+
+      var testContent = Content.create(
+        contentId: "uuid123",
+        expirationDate: DateTime.now().toIso8601String(),
+        count: 1,
+        amount: 20,
+        unit: 'g',
+        item: Item(
+            itemId: 51653,
+            barcode: 'adw',
+            name: 'Human heart',
+            store: Store.create(name: 'Ikea')),
+      );
+      contentRepository.contents[testContent.contentId] = testContent;
+      testContent.amount = 0;
+
+      Content content = await contentRepository.withdraw(testContent, 20);
+
+      expect(contentRepository.contents.containsKey('uuid123'), false);
+
+    });
+  });
+
   group('update', () {
     setUp(() {
       testUtil.setTestCase('Update');
@@ -187,6 +282,19 @@ class ContentRepositoryTestUtil extends TestUtil {
   ContentRepositoryTestUtil(Dio dio) : super(dio);
 
   Map body;
+
+  Response handleWithdrawRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case add content':
+        return Response(data: 'Error case withdraw', statusCode: 404);
+      case 'Withdraw with something left':
+        return Response(data: 'Item response that is not used', statusCode: 200);
+      case 'Withdraw without something left':
+        return Response(data: 'Item response that is not used', statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
 
   Response handleAddRequest(RequestOptions request) {
     switch (request.extra['id']) {
@@ -265,6 +373,32 @@ class ContentRepositoryTestUtil extends TestUtil {
     }
   }
 
+  List<Content> createContent(int amount) {
+    List<Content> content = List();
+
+    for (int i = 0; i < amount; i++) {
+      content.add(Content(
+          contentId: 'uuid$i',
+          expirationDate: '2020-05-10',
+          amount: 42,
+          maxAmount: 50,
+          unit: 'balls',
+          fridge: Fridge(
+            name: 'asmsdklöa',
+            fridgeId: 23,
+            content: {}
+          ),
+          item: Item(
+              name: 'Item ${i % 3}',
+              barcode: 'abcas${i % 3}',
+              itemId: i % 3,
+              store: Store(storeId: 2, name: 'Ikea'),
+          )
+      ));
+    }
+
+    return content;
+  }
 
   List<Object> createContentObjects(int amount) {
     List<Object> content = List();

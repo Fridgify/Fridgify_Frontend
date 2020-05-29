@@ -166,6 +166,8 @@ class ContentRepository implements Repository<Content, String> {
 
   void group() {
 
+    this.grouped = SortedMap();
+
     this.getAll().forEach((key, value) =>
     {
       if(value.item != null) {

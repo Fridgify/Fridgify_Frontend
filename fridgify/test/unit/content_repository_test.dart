@@ -176,11 +176,10 @@ void main() async {
     });
 
     test('groups 3 items', () {
-      contentRepository.group('Useless parameter');
+      contentRepository.group();
 
       var groupedContent = contentRepository.grouped;
 
-      print((groupedContent));
       expect(groupedContent.length, 3);
 
       for(int i = 0; i < 3; i++) {

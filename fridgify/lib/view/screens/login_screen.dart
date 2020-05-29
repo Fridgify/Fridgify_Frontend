@@ -43,6 +43,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(height: 45.0),
                     FormTextField(
+                        key: Key('loginUsername'),
                         style: style,
                         controller: _controller.textInputControllerUser,
                         obscureText: false,
@@ -50,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
                         validator: Validator.validateUser),
                     SizedBox(height: 25.0),
                     FormTextField(
+                        key: Key('loginPassword'),
                         style: style,
                         controller: _controller.textInputControllerPass,
                         obscureText: true,
@@ -59,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 35.0,
                     ),
                     FormButton(
+                        key: Key('loginButton'),
                         context: context,
                         style: style,
                         onPressed: () => _controller.login(context, key),
@@ -68,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     Label(
                         text: "DON'T HAVE AN ACCOUNT?",
-                        key: Key('register'),
+                        key: Key('registerButton'),
                         onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(

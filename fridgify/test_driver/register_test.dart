@@ -7,8 +7,10 @@ void main() {
   final testUtils = IntegrationUtils();
 
   group('Fridgify', () {
-    final registerButton = find.byValueKey('register');
-    final buttonFinder = find.byValueKey('increment');
+    final registerButton = find.byValueKey('registerButton');
+    final usernameInput = find.byValueKey('registerUsername');
+    final emailInput = find.byValueKey('email');
+    final nextButton = find.byValueKey('nextButton');
 
     FlutterDriver driver;
 

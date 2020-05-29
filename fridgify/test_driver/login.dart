@@ -7,8 +7,8 @@ void main() {
   // ignore: missing_return
   Future<String> requestHandler(String request) async {
     switch (request) {
-      case "register":
-        IntegrationMock.register();
+      case "login":
+        IntegrationMock.login();
         break;
       default:
         throw ArgumentError('Not implemented');

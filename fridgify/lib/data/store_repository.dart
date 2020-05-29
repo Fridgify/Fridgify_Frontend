@@ -86,12 +86,14 @@ class StoreRepository implements Repository<Store, int> {
 
       logger.i('StoreRepository => $stores');
 
+
       for (var store in stores) {
         logger.i("StoreRepository => FETCHED STORES: $store");
-        Store s = Store(storeId: store['store_id'], name: store['name']);
-
+        Store s = Store.fromJson(store);
         this.storeWithNames[s] = s.name;
         this.stores[s.storeId] = s;
+
+
       }
 
       logger.i("StoreRepository => FETCHED ${this.stores.length} ITEMS");
@@ -99,6 +101,7 @@ class StoreRepository implements Repository<Store, int> {
     }
     throw new FailedToFetchContentException();
   }
+
 
   @override
   get(int id) {

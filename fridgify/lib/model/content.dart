@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/utils/item_state_helper.dart';
@@ -19,6 +21,19 @@ class Content {
 
   Logger _logger = Logger();
 
+
+  factory Content.fromJson(dynamic json, Fridge f) {
+    return Content(
+      contentId: json['content_id'],
+      expirationDate: json['expiration_date'],
+      amount: json['amount'],
+      maxAmount: json['max_amount'],
+      unit: json['unit'],
+      fridge:f,
+      item: ItemRepository().get(json['item_id']),
+    );
+  }
+
   Content({
     @required this.contentId,
     @required this.expirationDate,
@@ -39,17 +54,12 @@ class Content {
     @required this.unit,
     @required this.item,
   }) {
-    ItemRepository _itemRepository = ItemRepository();
-    _itemRepository.add(item);
     this.maxAmount = this.amount;
     setItemState();
   }
 
   void setItemState() {
-    print(this.expirationDate);
     var date = DateTime.parse(this.expirationDate);
-    print("STATE => ${DateTime.now().subtract(Duration(days: 5))}");
-    print("STATE => $date");
     _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item} AND DATE: $date / ${this.expirationDate}');
 
     if(date.isAfter(DateTime.now().add(Duration(days: 5)))) {
@@ -68,8 +78,16 @@ class Content {
 
   @override
   String toString() {
-    return "expirationDate: ${this.expirationDate}, amount: ${this.amount}, "
-        "unit: ${this.unit}"
-        "fridgeId: ${this.fridge}";
+    var date = DateTime.now();
+    return jsonEncode({
+      "name": this.item != null ? this.item.name : "",
+      "buy_date": "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day}",
+      "expiration_date": this.expirationDate,
+      "count": this.count,
+      "amount": this.amount,
+      "unit": this.unit,
+      "store": this.item != null ? this.item.store.name : "",
+      "contend_id": this.contentId != null ? this.contentId : "",
+    });
   }
 }

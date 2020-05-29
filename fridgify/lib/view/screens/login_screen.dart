@@ -42,14 +42,14 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 45.0),
-                    FormElements.textField(
+                    FormTextField(
                         style: style,
                         controller: _controller.textInputControllerUser,
                         obscureText: false,
                         hintText: 'Username',
                         validator: Validator.validateUser),
                     SizedBox(height: 25.0),
-                    FormElements.textField(
+                    FormTextField(
                         style: style,
                         controller: _controller.textInputControllerPass,
                         obscureText: true,
@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       height: 35.0,
                     ),
-                    FormElements.button(
+                    FormButton(
                         context: context,
                         style: style,
                         onPressed: () => _controller.login(context, key),
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       height: 15.0,
                     ),
-                    FormElements.label(
+                    Label(
                         text: "DON'T HAVE AN ACCOUNT?",
                         onPressed: () => Navigator.push(
                             context,

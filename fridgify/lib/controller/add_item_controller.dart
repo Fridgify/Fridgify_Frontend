@@ -22,7 +22,14 @@ class AddItemController {
   TextEditingController itemStoreController = TextEditingController();
   String barcode = "";
 
-  AddItemController({this.contentRepository});
+  AddItemController({this.contentRepository}) {
+    itemNameController.text = "TestName";
+    expirationDateController.text = "2020-05-09";
+    itemCountController.text = "1";
+    itemAmountController.text = "1000";
+    itemUnitController.text = "ml";
+    itemStoreController.text = "Lidl";
+  }
 
 
   Future<Content> addContent() async {

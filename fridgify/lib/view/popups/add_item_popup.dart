@@ -65,13 +65,13 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
         child: Form(
           child: Column(
             children: <Widget>[
-              FormElements.textField(
+              FormTextField(
                   style: style,
                   controller: _controller.itemNameController,
                   obscureText: false,
                   hintText: 'Item Name',
                   validator: Validator.validateUser),
-              FormElements.datePickerText(
+              DatePickerText(
                 style: style,
                 context: context,
                 controller: _controller.expirationDateController,
@@ -80,25 +80,25 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
                 validator: Validator.validateDate,
                 max: DateTime.now().add(Duration(days: 10000)),
               ),
-              FormElements.numberField(
+              NumberField(
                   style: style,
                   controller: _controller.itemCountController,
                   obscureText: false,
                   hintText: 'Count',
                   validator: Validator.validateUser),
-              FormElements.numberField(
+              NumberField(
                   style: style,
                   controller: _controller.itemAmountController,
                   obscureText: false,
                   hintText: 'Amount',
                   validator: Validator.validateUser),
-              FormElements.textField(
+              FormTextField(
                   style: style,
                   controller: _controller.itemUnitController,
                   obscureText: false,
                   hintText: 'Unit',
                   validator: Validator.validateUser),
-              FormElements.autocompleteTextForm(
+              AutocompleteTextForm(
                   style: style,
                   controller: _controller.itemStoreController,
                   obscureText: false,

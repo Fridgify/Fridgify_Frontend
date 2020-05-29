@@ -49,7 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       SizedBox(height: 45.0),
                       for (var widget in _controller.interactiveForm) widget,
                       SizedBox(height: 35.0),
-                      FormElements.button(
+                      FormButton(
                           text: "Next",
                           onPressed: () =>
                               _updateForm(_controller, key, context),
@@ -58,7 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       SizedBox(
                         height: 15.0,
                       ),
-                      FormElements.label(
+                      Label(
                           text: "ALREADY OWN AN ACCOUNT?",
                           onPressed: () => Navigator.pop(context)),
                     ],

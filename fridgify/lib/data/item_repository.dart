@@ -30,14 +30,13 @@ class ItemRepository implements Repository<Item, int> {
 
   ItemRepository._internal();
 
-  @override
-  Future<int> add(item) async {
-    if(items.containsValue(item)) {
-      return this.items.values.firstWhere((element) => element == item).itemId;
-    }
-    int id = 100000 + Random().nextInt(1000);
-    items[id] = item;
-    return id;
+  
+  
+  
+  int addSync(item) {
+    logger.i("ItemRepository => ADDING ITEM ${item.name}");
+    this.items[item.itemId] = item;
+    return item.itemId;
   }
 
   Future<Item> barcode(String barcode) {
@@ -65,15 +64,9 @@ class ItemRepository implements Repository<Item, int> {
 
       logger.i('ItemRepository => $items');
 
-      for (var item in items) {
-        logger.i("ItemRepository => FETCHED ITEMS: ${item.toString()}");
-        Item i = Item(
-            itemId: item['item_id'],
-            barcode: item['barcode'],
-            name: item['name'],
-            store: storeRepository.get(item['store']));
-        this.items[i.itemId] = i;
-      }
+      this.items = Map.fromIterable(items,
+          key: (e) => e['item_id'], value: (e) => Item.fromJson(e));
+
 
       logger.i("ItemRepository => FETCHED ${this.items.length} ITEMS");
       return this.items;
@@ -89,5 +82,11 @@ class ItemRepository implements Repository<Item, int> {
   @override
   Map<int, Item> getAll() {
     return this.items;
+  }
+
+  @override
+  Future<int> add(Item item) {
+    // TODO: implement add
+    throw UnimplementedError();
   }
 }

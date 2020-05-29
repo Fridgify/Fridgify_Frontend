@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/model/store.dart';
 
 class Item {
@@ -7,6 +8,7 @@ class Item {
   String name;
   String description;
   Store store;
+
 
   Item(
       {@required this.itemId,
@@ -17,6 +19,16 @@ class Item {
   Item.create({
     this.barcode,
     @required this.name,
-    @required this.store
+    @required this.store,
+    this.itemId,
   });
+
+  factory Item.fromJson(dynamic json) {
+    StoreRepository _storeRepository = StoreRepository();
+    return Item(
+        itemId: json['item_id'],
+        barcode: json['barcode'],
+        name: json['name'],
+        store: _storeRepository.get(json['store']));
+  }
 }

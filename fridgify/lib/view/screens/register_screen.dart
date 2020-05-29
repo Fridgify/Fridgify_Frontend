@@ -65,10 +65,27 @@ class _RegisterPageState extends State<RegisterPage> {
                               onPressed: () => Navigator.pop(context)),
                         ],
                       ),
-                    ),
-                  )),
-            ),
-          ),
-        ));
+                      SizedBox(height: 45.0),
+                      for (var widget in _controller.interactiveForm) widget,
+                      SizedBox(height: 35.0),
+                      FormButton(
+                          text: "Next",
+                          onPressed: () =>
+                              _updateForm(_controller, key, context),
+                          context: this.context,
+                          style: this.style),
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      Label(
+                          text: "ALREADY OWN AN ACCOUNT?",
+                          onPressed: () => Navigator.pop(context)),
+                    ],
+                  ),
+                ),
+              )),
+        ),
+      ),
+    ));
   }
 }

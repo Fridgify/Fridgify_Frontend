@@ -38,14 +38,14 @@ class RegisterController {
 
   RegisterController() {
     this.interactiveForm = [
-      FormElements.textField(
+      FormTextField(
           style: this.style,
           obscureText: false,
           controller: textInputControllerUser,
           hintText: "Username",
           validator: Validator.validateUser),
       SizedBox(height: 25.0),
-      FormElements.textField(
+      FormTextField(
           style: this.style,
           obscureText: false,
           controller: textInputControllerMail,
@@ -149,7 +149,7 @@ class RegisterController {
 
     if (_phase == 1 && await validateSecondForm(key, context)) {
       this.interactiveForm = [
-        FormElements.textField(
+        FormTextField(
           style: this.style,
           obscureText: false,
           controller: textInputControllerSur,
@@ -157,7 +157,7 @@ class RegisterController {
           validator: Validator.validateFirst,
         ),
         SizedBox(height: 25.0),
-        FormElements.textField(
+        FormTextField(
           style: this.style,
           obscureText: false,
           controller: textInputControllerName,
@@ -165,7 +165,7 @@ class RegisterController {
           validator: Validator.validateName,
         ),
         SizedBox(height: 25.0),
-        FormElements.datePickerText(
+        DatePickerText(
           style: this.style,
           obscureText: false,
           controller: textInputControllerDate,
@@ -182,7 +182,7 @@ class RegisterController {
 
     if (_phase == 0 && await validateFirstForm(key, context)) {
       this.interactiveForm = [
-        FormElements.textField(
+        FormTextField(
           style: this.style,
           obscureText: true,
           controller: textInputControllerPass,
@@ -190,7 +190,7 @@ class RegisterController {
           validator: Validator.validatePassword,
         ),
         SizedBox(height: 25.0),
-        FormElements.textField(
+        FormTextField(
             style: this.style,
             obscureText: true,
             hintText: "Repeat Password",

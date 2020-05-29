@@ -1,0 +1,957 @@
+@startuml
+set namespaceSeparator ::
+
+class "fridgify::cache::cache_interceptor.dart::CacheInterceptor" {
+  +RequestCache requestCache
+  +Future onRequest()
+  +Future onError()
+  +Future onResponse()
+}
+
+"fridgify::cache::cache_interceptor.dart::CacheInterceptor" o-- "fridgify::cache::request_cache.dart::RequestCache"
+"dio::src::interceptor.dart::Interceptor" <|-- "fridgify::cache::cache_interceptor.dart::CacheInterceptor"
+
+class "fridgify::cache::request_cache.dart::RequestCache" {
+  {static} -RequestCache _cache
+  -SplayTreeMap<String, Response> _responseStorage
+  -Connectivity _connectivity
+  -StreamSubscription<ConnectivityResult> _connectivitySubscription
+  -ConnectivityResult _connectivityStatus
+  +Logger logger
+  -Future<String> _localPath
+  +void initCache()
+  +void saveToFile()
+  +Response cached()
+  +void cache()
+  +Future initConnectivity()
+  -void _setConnectionStatus()
+}
+
+"fridgify::cache::request_cache.dart::RequestCache" o-- "fridgify::cache::request_cache.dart::RequestCache"
+"fridgify::cache::request_cache.dart::RequestCache" o-- "dart::collection::SplayTreeMap<String, Response>"
+"fridgify::cache::request_cache.dart::RequestCache" o-- "connectivity::connectivity.dart::Connectivity"
+"fridgify::cache::request_cache.dart::RequestCache" o-- "dart::async::StreamSubscription<ConnectivityResult>"
+"fridgify::cache::request_cache.dart::RequestCache" o-- "connectivity_platform_interface::src::enums.dart::ConnectivityResult"
+"fridgify::cache::request_cache.dart::RequestCache" o-- "logger::logger.dart::Logger"
+
+class "fridgify::controller::add_item_controller.dart::AddItemController" {
+  -StoreRepository _storeRepository
+  -ItemRepository _itemRepository
+  +ContentRepository contentRepository
+  -Logger _logger
+  +TextEditingController itemNameController
+  +TextEditingController expirationDateController
+  +TextEditingController itemCountController
+  +TextEditingController itemAmountController
+  +TextEditingController itemUnitController
+  +TextEditingController itemStoreController
+  +String barcode
+  +Future addContent()
+}
+
+"fridgify::controller::add_item_controller.dart::AddItemController" o-- "fridgify::data::store_repository.dart::StoreRepository"
+"fridgify::controller::add_item_controller.dart::AddItemController" o-- "fridgify::data::item_repository.dart::ItemRepository"
+"fridgify::controller::add_item_controller.dart::AddItemController" o-- "fridgify::data::content_repository.dart::ContentRepository"
+"fridgify::controller::add_item_controller.dart::AddItemController" o-- "logger::logger.dart::Logger"
+"fridgify::controller::add_item_controller.dart::AddItemController" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+
+class "fridgify::controller::content_menu_controller.dart::ContentMenuController" {
+  -AuthenticationService _authService
+  -UserService _userService
+  -FridgeRepository _fridgeRepository
+  +TextEditingController nameController
+  +TextEditingController descriptionController
+  +Function setState
+  +BuildContext context
+  -Logger _logger
+  +Future choiceAction()
+  +Future leaveFridge()
+  +Future getUser()
+  +Future generateQr()
+  +Future createFridge()
+  +Future showPopUp()
+  +Future retrieveDynamicLink()
+}
+
+"fridgify::controller::content_menu_controller.dart::ContentMenuController" o-- "fridgify::service::auth_service.dart::AuthenticationService"
+"fridgify::controller::content_menu_controller.dart::ContentMenuController" o-- "fridgify::service::user_service.dart::UserService"
+"fridgify::controller::content_menu_controller.dart::ContentMenuController" o-- "fridgify::data::fridge_repository.dart::FridgeRepository"
+"fridgify::controller::content_menu_controller.dart::ContentMenuController" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"fridgify::controller::content_menu_controller.dart::ContentMenuController" o-- "flutter::src::widgets::framework.dart::BuildContext"
+"fridgify::controller::content_menu_controller.dart::ContentMenuController" o-- "logger::logger.dart::Logger"
+
+class "fridgify::controller::fridge_detail_controller.dart::FridgeDetailController" {
+  +Function setState
+  +Fridge fridge
+  -Logger _logger
+  +bool isEditMode
+  +List<Content> contents
+  +BuildContext context
+  -Set<Content> _selected
+  -ItemRepository _itemRepository
+  -UserService _userService
+  +bool isOwner()
+  +Future handleOptions()
+  +Future getUser()
+  +Future findItem()
+  +bool isValidBarcode()
+  +dynamic showEditDialog()
+  +dynamic cancelSelection()
+  +dynamic selectGroup()
+  +dynamic groupTap()
+  +dynamic tileTapped()
+  +dynamic deleteSelection()
+  +void toggleSelection()
+  -Future _deleteItems()
+  +bool isSelected()
+}
+
+"fridgify::controller::fridge_detail_controller.dart::FridgeDetailController" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::controller::fridge_detail_controller.dart::FridgeDetailController" o-- "logger::logger.dart::Logger"
+"fridgify::controller::fridge_detail_controller.dart::FridgeDetailController" o-- "flutter::src::widgets::framework.dart::BuildContext"
+"fridgify::controller::fridge_detail_controller.dart::FridgeDetailController" o-- "fridgify::data::item_repository.dart::ItemRepository"
+"fridgify::controller::fridge_detail_controller.dart::FridgeDetailController" o-- "fridgify::service::user_service.dart::UserService"
+
+class "fridgify::controller::login_controller.dart::LoginController" {
+  +TextEditingController textInputControllerUser
+  +TextEditingController textInputControllerPass
+  -AuthenticationService _authService
+  +Logger logger
+  +Future login()
+}
+
+"fridgify::controller::login_controller.dart::LoginController" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"fridgify::controller::login_controller.dart::LoginController" o-- "fridgify::service::auth_service.dart::AuthenticationService"
+"fridgify::controller::login_controller.dart::LoginController" o-- "logger::logger.dart::Logger"
+
+class "fridgify::controller::main_controller.dart::MainController" {
+  +Logger logger
+  -AuthenticationService _authService
+  +Future initialLaunch()
+  +Future initDynamicLinks()
+}
+
+"fridgify::controller::main_controller.dart::MainController" o-- "logger::logger.dart::Logger"
+"fridgify::controller::main_controller.dart::MainController" o-- "fridgify::service::auth_service.dart::AuthenticationService"
+
+class "fridgify::controller::register_controller.dart::RegisterController" {
+  +TextEditingController textInputControllerUser
+  +TextEditingController textInputControllerPass
+  +TextEditingController textInputControllerRepeatPass
+  +TextEditingController textInputControllerMail
+  +TextEditingController textInputControllerSur
+  +TextEditingController textInputControllerName
+  +TextEditingController textInputControllerDate
+  +FocusNode focusNodePas
+  +FocusNode focusNodeFirst
+  +List<Widget> interactiveForm
+  -AuthenticationService _authService
+  -UserService _userService
+  -Logger _logger
+  +TextStyle style
+  +BuildContext context
+  -int _phase
+  +Future register()
+  +Future validateFirstForm()
+  +Future validateSecondForm()
+  +Future validateThirdForm()
+  +Future getNextForm()
+}
+
+"fridgify::controller::register_controller.dart::RegisterController" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"fridgify::controller::register_controller.dart::RegisterController" o-- "flutter::src::widgets::focus_manager.dart::FocusNode"
+"fridgify::controller::register_controller.dart::RegisterController" o-- "fridgify::service::auth_service.dart::AuthenticationService"
+"fridgify::controller::register_controller.dart::RegisterController" o-- "fridgify::service::user_service.dart::UserService"
+"fridgify::controller::register_controller.dart::RegisterController" o-- "logger::logger.dart::Logger"
+"fridgify::controller::register_controller.dart::RegisterController" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"fridgify::controller::register_controller.dart::RegisterController" o-- "flutter::src::widgets::framework.dart::BuildContext"
+
+class "fridgify::controller::user_controller.dart::UserController" {
+  +Fridge fridge
+  +Function setState
+  +Map<User, dynamic> users
+  -Logger _logger
+  -UserService _userService
+  +Future userTapped()
+  +Future removeAdmin()
+  +Future addAdmin()
+  +Future managePermissionAsOverseer()
+  +Future managePermissionAsOwner()
+  +Future removeUser()
+}
+
+"fridgify::controller::user_controller.dart::UserController" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::controller::user_controller.dart::UserController" o-- "logger::logger.dart::Logger"
+"fridgify::controller::user_controller.dart::UserController" o-- "fridgify::service::user_service.dart::UserService"
+
+class "fridgify::data::content_repository.dart::ContentRepository" {
+  +Logger logger
+  +Fridge fridge
+  +SharedPreferences pref
+  +ItemRepository itemRepository
+  +Dio dio
+  +Map<String, Content> contents
+  +SortedMap<String, List<Content>> grouped
+  +dynamic contentApi
+  +Future add()
+  +Future delete()
+  +Future fetchAll()
+  +Content get()
+  +Map getAll()
+  +Future withdraw()
+  +Future update()
+  +void group()
+  +void addToGroup()
+  +void removeFromGroup()
+  +SortedMap getAsGroup()
+}
+
+"fridgify::data::content_repository.dart::ContentRepository" o-- "logger::logger.dart::Logger"
+"fridgify::data::content_repository.dart::ContentRepository" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::data::content_repository.dart::ContentRepository" o-- "shared_preferences::shared_preferences.dart::SharedPreferences"
+"fridgify::data::content_repository.dart::ContentRepository" o-- "fridgify::data::item_repository.dart::ItemRepository"
+"fridgify::data::content_repository.dart::ContentRepository" o-- "dio::src::dio.dart::Dio"
+"fridgify::data::content_repository.dart::ContentRepository" o-- "sortedmap::sortedmap.dart::SortedMap<String, List<Content>>"
+"fridgify::data::repository.dart::Repository<Item, Key>" <|-- "fridgify::data::content_repository.dart::ContentRepository"
+
+class "fridgify::data::fridge_repository.dart::FridgeRepository" {
+  +Logger logger
+  -UserService _userService
+  +Map<int, Fridge> fridges
+  +Dio dio
+  {static} +String fridgeAPI
+  {static} +String userManagementApi
+  {static} -FridgeRepository _fridgeRepository
+  +SharedPreferences sharedPreferences
+  +Future add()
+  +Future delete()
+  +Future fetchAll()
+  +Fridge get()
+  +Map getAll()
+  +Future getUsersForFridge()
+  +Future joinByUrl()
+}
+
+"fridgify::data::fridge_repository.dart::FridgeRepository" o-- "logger::logger.dart::Logger"
+"fridgify::data::fridge_repository.dart::FridgeRepository" o-- "fridgify::service::user_service.dart::UserService"
+"fridgify::data::fridge_repository.dart::FridgeRepository" o-- "dio::src::dio.dart::Dio"
+"fridgify::data::fridge_repository.dart::FridgeRepository" o-- "fridgify::data::fridge_repository.dart::FridgeRepository"
+"fridgify::data::fridge_repository.dart::FridgeRepository" o-- "shared_preferences::shared_preferences.dart::SharedPreferences"
+"fridgify::data::repository.dart::Repository<Item, Key>" <|-- "fridgify::data::fridge_repository.dart::FridgeRepository"
+
+class "fridgify::data::item_repository.dart::ItemRepository" {
+  +Fridge fridge
+  +Logger logger
+  +SharedPreferences sharedPreferences
+  +StoreRepository storeRepository
+  +Dio dio
+  {static} +String itemApi
+  +Map<int, Item> items
+  {static} -ItemRepository _itemRepository
+  +int addSync()
+  +Future barcode()
+  +Future delete()
+  +Future fetchAll()
+  +Item get()
+  +Map getAll()
+  +Future add()
+}
+
+"fridgify::data::item_repository.dart::ItemRepository" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::data::item_repository.dart::ItemRepository" o-- "logger::logger.dart::Logger"
+"fridgify::data::item_repository.dart::ItemRepository" o-- "shared_preferences::shared_preferences.dart::SharedPreferences"
+"fridgify::data::item_repository.dart::ItemRepository" o-- "fridgify::data::store_repository.dart::StoreRepository"
+"fridgify::data::item_repository.dart::ItemRepository" o-- "dio::src::dio.dart::Dio"
+"fridgify::data::item_repository.dart::ItemRepository" o-- "fridgify::data::item_repository.dart::ItemRepository"
+"fridgify::data::repository.dart::Repository<Item, Key>" <|-- "fridgify::data::item_repository.dart::ItemRepository"
+
+abstract class "fridgify::data::repository.dart::Repository<Item, Key>" {
+  {static} +String baseURL
+  {static} +SharedPreferences sharedPreferences
+  {static} +Logger logger
+  {static} +bool isTest
+  {static} +Dio getDio()
+  {static} +dynamic getToken()
+  {static} +Map getHeaders()
+  +Future fetchAll()
+  +Item get()
+  +Map getAll()
+  +Future add()
+  +Future delete()
+}
+
+"fridgify::data::repository.dart::Repository<Item, Key>" o-- "shared_preferences::shared_preferences.dart::SharedPreferences"
+"fridgify::data::repository.dart::Repository<Item, Key>" o-- "logger::logger.dart::Logger"
+
+class "fridgify::data::store_repository.dart::StoreRepository" {
+  +Logger logger
+  +SharedPreferences sharedPreferences
+  +Dio dio
+  {static} +String storeApi
+  +Map<int, Store> stores
+  +Map<Store, String> storeWithNames
+  {static} -StoreRepository _storeRepository
+  +Future getByName()
+  +Future add()
+  +Future delete()
+  +Future fetchAll()
+  +Store get()
+  +Map getAllWithName()
+  +Map getAll()
+}
+
+"fridgify::data::store_repository.dart::StoreRepository" o-- "logger::logger.dart::Logger"
+"fridgify::data::store_repository.dart::StoreRepository" o-- "shared_preferences::shared_preferences.dart::SharedPreferences"
+"fridgify::data::store_repository.dart::StoreRepository" o-- "dio::src::dio.dart::Dio"
+"fridgify::data::store_repository.dart::StoreRepository" o-- "fridgify::data::store_repository.dart::StoreRepository"
+"fridgify::data::repository.dart::Repository<Item, Key>" <|-- "fridgify::data::store_repository.dart::StoreRepository"
+
+class "fridgify::exception::failed_to_add_content_exception.dart::FailedToAddContentException" {
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_add_content_exception.dart::FailedToAddContentException"
+
+class "fridgify::exception::failed_to_create_new_fridge_exception.dart::FailedToCreateNewFridgeException" {
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_create_new_fridge_exception.dart::FailedToCreateNewFridgeException"
+
+class "fridgify::exception::failed_to_fetch_api_token_exception.dart::FailedToFetchApiTokenException" {
+  +String errMsg()
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_fetch_api_token_exception.dart::FailedToFetchApiTokenException"
+
+class "fridgify::exception::failed_to_fetch_client_token.dart::FailedToFetchClientTokenException" {
+  +String err
+  +String errMsg()
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_fetch_client_token.dart::FailedToFetchClientTokenException"
+
+class "fridgify::exception::failed_to_fetch_content_exception.dart::FailedToFetchContentException" {
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_fetch_content_exception.dart::FailedToFetchContentException"
+
+class "fridgify::exception::failed_to_fetch_fridges_exception.dart::FailedToFetchFridgesException" {
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_fetch_fridges_exception.dart::FailedToFetchFridgesException"
+
+class "fridgify::exception::failed_to_fetch_qr_exception.dart::FailedToFetchQrException" {
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_fetch_qr_exception.dart::FailedToFetchQrException"
+
+class "fridgify::exception::failed_to_patch_user_exception.dart::FailedToPatchUserException" {
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_patch_user_exception.dart::FailedToPatchUserException"
+
+class "fridgify::exception::failed_to_remove_content_exception.dart::FailedToRemoveContentException" {
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::failed_to_remove_content_exception.dart::FailedToRemoveContentException"
+
+class "fridgify::exception::not_unique_exception.dart::NotUniqueException" {
+  +bool user
+  +bool mail
+}
+
+"dart::core::Exception" <|-- "fridgify::exception::not_unique_exception.dart::NotUniqueException"
+
+class "fridgify::main.dart::MyApp" {
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "fridgify::main.dart::MyApp"
+
+class "fridgify::main.dart::MyHomePage" {
+  +String title
+  +_MyHomePageState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::main.dart::MyHomePage"
+
+class "fridgify::main.dart::_MyHomePageState" {
+  -MainController _controller
+  +void initState()
+  +Widget build()
+}
+
+"fridgify::main.dart::_MyHomePageState" o-- "fridgify::controller::main_controller.dart::MainController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::main.dart::_MyHomePageState"
+
+class "fridgify::model::content.dart::Content" {
+  +String contentId
+  +String expirationDate
+  +int amount
+  +int count
+  +int maxAmount
+  +String unit
+  +Fridge fridge
+  +Item item
+  +dynamic state
+  -Logger _logger
+  +void setItemState()
+  +String toString()
+}
+
+"fridgify::model::content.dart::Content" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::model::content.dart::Content" o-- "fridgify::model::item.dart::Item"
+"fridgify::model::content.dart::Content" o-- "logger::logger.dart::Logger"
+
+class "fridgify::model::fridge.dart::Fridge" {
+  +int fridgeId
+  +String name
+  +Map<String, dynamic> content
+  +Map<User, dynamic> members
+  +ContentRepository contentRepository
+  +Map contentForPieChart()
+}
+
+"fridgify::model::fridge.dart::Fridge" o-- "fridgify::data::content_repository.dart::ContentRepository"
+
+class "fridgify::model::item.dart::Item" {
+  +int itemId
+  +String barcode
+  +String name
+  +String description
+  +Store store
+}
+
+"fridgify::model::item.dart::Item" o-- "fridgify::model::store.dart::Store"
+
+class "fridgify::model::store.dart::Store" {
+  +int storeId
+  +String name
+}
+
+class "fridgify::model::user.dart::User" {
+  +String username
+  +String password
+  +String name
+  +String surname
+  +String email
+  +String birthDate
+  +int userId
+  +String toString()
+}
+
+class "fridgify::service::auth_service.dart::AuthenticationService" {
+  {static} +String authAPI
+  +User user
+  +Logger logger
+  +Dio dio
+  +Future register()
+  +Future login()
+  +Future logout()
+  +Future fetchApiToken()
+  +Future validateToken()
+  +Future initiateRepositories()
+}
+
+"fridgify::service::auth_service.dart::AuthenticationService" o-- "fridgify::model::user.dart::User"
+"fridgify::service::auth_service.dart::AuthenticationService" o-- "logger::logger.dart::Logger"
+"fridgify::service::auth_service.dart::AuthenticationService" o-- "dio::src::dio.dart::Dio"
+
+class "fridgify::service::user_service.dart::UserService" {
+  {static} +String userApi
+  {static} +String userManagementApi
+  +Dio dio
+  +User user
+  +Logger logger
+  +SharedPreferences sharedPreferences
+  {static} -UserService _userService
+  +Future fetchUser()
+  +User get()
+  +Future update()
+  +Future checkUsernameEmail()
+  +Future patchUser()
+  +Future kickUser()
+  +Future fetchDeepLink()
+}
+
+"fridgify::service::user_service.dart::UserService" o-- "dio::src::dio.dart::Dio"
+"fridgify::service::user_service.dart::UserService" o-- "fridgify::model::user.dart::User"
+"fridgify::service::user_service.dart::UserService" o-- "logger::logger.dart::Logger"
+"fridgify::service::user_service.dart::UserService" o-- "shared_preferences::shared_preferences.dart::SharedPreferences"
+"fridgify::service::user_service.dart::UserService" o-- "fridgify::service::user_service.dart::UserService"
+
+class "fridgify::utils::constants.dart::Constants" {
+  {static} +String addFridge
+  {static} +String logout
+  {static} +String settings
+  {static} +String addItem
+  {static} +String showMembers
+  {static} +String editFridge
+  {static} +List<String> menuOptions
+  {static} +List<String> ownerDetailOptions
+  {static} +List<String> detailOptions
+}
+
+class "fridgify::utils::item_state_helper.dart::ItemState" {
+  +int index
+  {static} +List<ItemState> values
+  {static} +ItemState fresh
+  {static} +ItemState dueSoon
+  {static} +ItemState overDue
+}
+
+"fridgify::utils::item_state_helper.dart::ItemState" o-- "fridgify::utils::item_state_helper.dart::ItemState"
+
+class "fridgify::utils::permission_helper.dart::Permissions" {
+  +int index
+  {static} +List<Permissions> values
+  {static} +Permissions user
+  {static} +Permissions overseer
+  {static} +Permissions owner
+}
+
+"fridgify::utils::permission_helper.dart::Permissions" o-- "fridgify::utils::permission_helper.dart::Permissions"
+
+class "fridgify::utils::validator.dart::Validator" {
+  {static} +bool userNotUnique
+  {static} +bool mailNotUnique
+  {static} +bool doNotMatch
+  {static} +String validateMail()
+  {static} +String validateUser()
+  {static} +String validateName()
+  {static} +String validateFirst()
+  {static} +String validateDate()
+  {static} +String validatePassword()
+  {static} +String repeatValidatePassword()
+}
+
+class "fridgify::view::popups::add_item_popup.dart::AddItemPopUp" {
+  +ContentRepository repo
+  +BuildContext context
+  +Item item
+  +Function parentSetState
+  +_AddItemPopUpState createState()
+}
+
+"fridgify::view::popups::add_item_popup.dart::AddItemPopUp" o-- "fridgify::data::content_repository.dart::ContentRepository"
+"fridgify::view::popups::add_item_popup.dart::AddItemPopUp" o-- "flutter::src::widgets::framework.dart::BuildContext"
+"fridgify::view::popups::add_item_popup.dart::AddItemPopUp" o-- "fridgify::model::item.dart::Item"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::popups::add_item_popup.dart::AddItemPopUp"
+
+class "fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" {
+  +ContentRepository repo
+  +BuildContext context
+  -StoreRepository _storeRepository
+  +Function parentSetState
+  -AddItemController _controller
+  +int startValue
+  +Content content
+  +Item item
+  +TextStyle style
+  -Future _addItem()
+  +Widget build()
+}
+
+"fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" o-- "fridgify::data::content_repository.dart::ContentRepository"
+"fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" o-- "flutter::src::widgets::framework.dart::BuildContext"
+"fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" o-- "fridgify::data::store_repository.dart::StoreRepository"
+"fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" o-- "fridgify::controller::add_item_controller.dart::AddItemController"
+"fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" o-- "fridgify::model::content.dart::Content"
+"fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" o-- "fridgify::model::item.dart::Item"
+"fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::popups::add_item_popup.dart::_AddItemPopUpState"
+
+class "fridgify::view::popups::edit_value_popup.dart::EditValuePopUp" {
+  +ContentRepository repo
+  +Content content
+  +BuildContext context
+  +Function parentSetState
+  +_EditValuePopUpState createState()
+}
+
+"fridgify::view::popups::edit_value_popup.dart::EditValuePopUp" o-- "fridgify::data::content_repository.dart::ContentRepository"
+"fridgify::view::popups::edit_value_popup.dart::EditValuePopUp" o-- "fridgify::model::content.dart::Content"
+"fridgify::view::popups::edit_value_popup.dart::EditValuePopUp" o-- "flutter::src::widgets::framework.dart::BuildContext"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::popups::edit_value_popup.dart::EditValuePopUp"
+
+class "fridgify::view::popups::edit_value_popup.dart::_EditValuePopUpState" {
+  +ContentRepository repo
+  +Content content
+  +BuildContext context
+  +Function parentSetState
+  -Logger _logger
+  +int startValue
+  +TextStyle style
+  -Future _updateItem()
+  +Widget build()
+}
+
+"fridgify::view::popups::edit_value_popup.dart::_EditValuePopUpState" o-- "fridgify::data::content_repository.dart::ContentRepository"
+"fridgify::view::popups::edit_value_popup.dart::_EditValuePopUpState" o-- "fridgify::model::content.dart::Content"
+"fridgify::view::popups::edit_value_popup.dart::_EditValuePopUpState" o-- "flutter::src::widgets::framework.dart::BuildContext"
+"fridgify::view::popups::edit_value_popup.dart::_EditValuePopUpState" o-- "logger::logger.dart::Logger"
+"fridgify::view::popups::edit_value_popup.dart::_EditValuePopUpState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::popups::edit_value_popup.dart::_EditValuePopUpState"
+
+class "fridgify::view::popups::invite_user_popup.dart::InviteUserPopUp" {
+  +String url
+  +_InviteUserPopUpState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::popups::invite_user_popup.dart::InviteUserPopUp"
+
+class "fridgify::view::popups::invite_user_popup.dart::_InviteUserPopUpState" {
+  +String url
+  +TextStyle style
+  +Widget build()
+  +Future share()
+}
+
+"fridgify::view::popups::invite_user_popup.dart::_InviteUserPopUpState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::popups::invite_user_popup.dart::_InviteUserPopUpState"
+
+class "fridgify::view::popups::join_fridge_popup.dart::JoinFridgePopUp" {
+  +Uri url
+  +Function parentSetState
+  +_JoinFridgePopUpState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::popups::join_fridge_popup.dart::JoinFridgePopUp"
+
+class "fridgify::view::popups::join_fridge_popup.dart::_JoinFridgePopUpState" {
+  +Uri url
+  +Function parentSetState
+  -FridgeRepository _fridgeRepository
+  +TextStyle style
+  -Logger _logger
+  -Future _joinFridgeWithQr()
+  +Widget build()
+}
+
+"fridgify::view::popups::join_fridge_popup.dart::_JoinFridgePopUpState" o-- "fridgify::data::fridge_repository.dart::FridgeRepository"
+"fridgify::view::popups::join_fridge_popup.dart::_JoinFridgePopUpState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"fridgify::view::popups::join_fridge_popup.dart::_JoinFridgePopUpState" o-- "logger::logger.dart::Logger"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::popups::join_fridge_popup.dart::_JoinFridgePopUpState"
+
+class "fridgify::view::popups::no_item_found_popup.dart::NoItemFoundPopUp" {
+  +_NoItemFoundPopUpState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::popups::no_item_found_popup.dart::NoItemFoundPopUp"
+
+class "fridgify::view::popups::no_item_found_popup.dart::_NoItemFoundPopUpState" {
+  +TextStyle style
+  +Widget build()
+}
+
+"fridgify::view::popups::no_item_found_popup.dart::_NoItemFoundPopUpState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::popups::no_item_found_popup.dart::_NoItemFoundPopUpState"
+
+class "fridgify::view::popups::overseer_popup.dart::OverseerPopUp" {
+  +User target
+  +dynamic perm
+  +Fridge fridge
+  -UserController _controller
+  +_OverseerPopUpState createState()
+}
+
+"fridgify::view::popups::overseer_popup.dart::OverseerPopUp" o-- "fridgify::model::user.dart::User"
+"fridgify::view::popups::overseer_popup.dart::OverseerPopUp" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::view::popups::overseer_popup.dart::OverseerPopUp" o-- "fridgify::controller::user_controller.dart::UserController"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::popups::overseer_popup.dart::OverseerPopUp"
+
+class "fridgify::view::popups::overseer_popup.dart::_OverseerPopUpState" {
+  +User target
+  +List<User> users
+  +dynamic perm
+  +Fridge fridge
+  +TextStyle style
+  -UserController _controller
+  +Widget build()
+}
+
+"fridgify::view::popups::overseer_popup.dart::_OverseerPopUpState" o-- "fridgify::model::user.dart::User"
+"fridgify::view::popups::overseer_popup.dart::_OverseerPopUpState" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::view::popups::overseer_popup.dart::_OverseerPopUpState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"fridgify::view::popups::overseer_popup.dart::_OverseerPopUpState" o-- "fridgify::controller::user_controller.dart::UserController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::popups::overseer_popup.dart::_OverseerPopUpState"
+
+class "fridgify::view::popups::owner_popup.dart::OwnerPopUp" {
+  +User target
+  +dynamic perm
+  +Fridge fridge
+  -UserController _controller
+  +_OwnerPopUpState createState()
+}
+
+"fridgify::view::popups::owner_popup.dart::OwnerPopUp" o-- "fridgify::model::user.dart::User"
+"fridgify::view::popups::owner_popup.dart::OwnerPopUp" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::view::popups::owner_popup.dart::OwnerPopUp" o-- "fridgify::controller::user_controller.dart::UserController"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::popups::owner_popup.dart::OwnerPopUp"
+
+class "fridgify::view::popups::owner_popup.dart::_OwnerPopUpState" {
+  +User target
+  +List<User> users
+  +dynamic perm
+  +Fridge fridge
+  +TextStyle style
+  -UserController _controller
+  +Widget build()
+}
+
+"fridgify::view::popups::owner_popup.dart::_OwnerPopUpState" o-- "fridgify::model::user.dart::User"
+"fridgify::view::popups::owner_popup.dart::_OwnerPopUpState" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::view::popups::owner_popup.dart::_OwnerPopUpState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"fridgify::view::popups::owner_popup.dart::_OwnerPopUpState" o-- "fridgify::controller::user_controller.dart::UserController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::popups::owner_popup.dart::_OwnerPopUpState"
+
+class "fridgify::view::screens::content_menu_screen.dart::ContentMenuPage" {
+  +String title
+  +_ContentMenuPageState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::screens::content_menu_screen.dart::ContentMenuPage"
+
+class "fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState" {
+  -FridgeRepository _fridgeRepository
+  -AuthenticationService _authenticationService
+  -ContentMenuController _controller
+  -RefreshController _refreshController
+  -Timer _timerLink
+  -Future _handleOptions()
+  -void _onRefresh()
+  -void _onLoading()
+  -void _onChanged()
+  +void initState()
+  +void dispose()
+  +void didChangeAppLifecycleState()
+  +Widget build()
+}
+
+"fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState" o-- "fridgify::data::fridge_repository.dart::FridgeRepository"
+"fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState" o-- "fridgify::service::auth_service.dart::AuthenticationService"
+"fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState" o-- "fridgify::controller::content_menu_controller.dart::ContentMenuController"
+"fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState" o-- "pull_to_refresh::src::smart_refresher.dart::RefreshController"
+"fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState" o-- "dart::async::Timer"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState"
+"flutter::src::widgets::binding.dart::WidgetsBindingObserver" <|-- "fridgify::view::screens::content_menu_screen.dart::_ContentMenuPageState"
+
+class "fridgify::view::screens::fridge_detail_screen.dart::FridgeDetailPage" {
+  +Fridge fridge
+  +_FridgeDetailPageState createState()
+}
+
+"fridgify::view::screens::fridge_detail_screen.dart::FridgeDetailPage" o-- "fridgify::model::fridge.dart::Fridge"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::screens::fridge_detail_screen.dart::FridgeDetailPage"
+
+class "fridgify::view::screens::fridge_detail_screen.dart::_FridgeDetailPageState" {
+  +Fridge fridge
+  -List<ExpandableController> _controllerCollection
+  -FridgeDetailController _controller
+  +Widget build()
+}
+
+"fridgify::view::screens::fridge_detail_screen.dart::_FridgeDetailPageState" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::view::screens::fridge_detail_screen.dart::_FridgeDetailPageState" o-- "fridgify::controller::fridge_detail_controller.dart::FridgeDetailController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::screens::fridge_detail_screen.dart::_FridgeDetailPageState"
+
+class "fridgify::view::screens::fridge_users_screen.dart::UsersPage" {
+  +Map<User, dynamic> users
+  +Fridge fridge
+  +_UsersPageState createState()
+}
+
+"fridgify::view::screens::fridge_users_screen.dart::UsersPage" o-- "fridgify::model::fridge.dart::Fridge"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::screens::fridge_users_screen.dart::UsersPage"
+
+class "fridgify::view::screens::fridge_users_screen.dart::_UsersPageState" {
+  +Map<User, dynamic> users
+  +Fridge fridge
+  -UserService _userService
+  -UserController _controller
+  +dynamic mainPerm
+  +Widget build()
+}
+
+"fridgify::view::screens::fridge_users_screen.dart::_UsersPageState" o-- "fridgify::model::fridge.dart::Fridge"
+"fridgify::view::screens::fridge_users_screen.dart::_UsersPageState" o-- "fridgify::service::user_service.dart::UserService"
+"fridgify::view::screens::fridge_users_screen.dart::_UsersPageState" o-- "fridgify::controller::user_controller.dart::UserController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::screens::fridge_users_screen.dart::_UsersPageState"
+
+class "fridgify::view::screens::login_screen.dart::LoginPage" {
+  +String title
+  +_LoginPageState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::screens::login_screen.dart::LoginPage"
+
+class "fridgify::view::screens::login_screen.dart::_LoginPageState" {
+  +TextStyle style
+  -LoginController _controller
+  +GlobalKey<FormState> key
+  +Widget build()
+}
+
+"fridgify::view::screens::login_screen.dart::_LoginPageState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"fridgify::view::screens::login_screen.dart::_LoginPageState" o-- "fridgify::controller::login_controller.dart::LoginController"
+"fridgify::view::screens::login_screen.dart::_LoginPageState" o-- "flutter::src::widgets::framework.dart::GlobalKey<FormState>"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::screens::login_screen.dart::_LoginPageState"
+
+class "fridgify::view::screens::register_screen.dart::RegisterPage" {
+  +String title
+  +_RegisterPageState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::screens::register_screen.dart::RegisterPage"
+
+class "fridgify::view::screens::register_screen.dart::_RegisterPageState" {
+  +TextStyle style
+  +GlobalKey<FormState> key
+  -RegisterController _controller
+  -void _updateForm()
+  +Widget build()
+}
+
+"fridgify::view::screens::register_screen.dart::_RegisterPageState" o-- "flutter::src::painting::text_style.dart::TextStyle"
+"fridgify::view::screens::register_screen.dart::_RegisterPageState" o-- "flutter::src::widgets::framework.dart::GlobalKey<FormState>"
+"fridgify::view::screens::register_screen.dart::_RegisterPageState" o-- "fridgify::controller::register_controller.dart::RegisterController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::screens::register_screen.dart::_RegisterPageState"
+
+class "fridgify::view::widgets::form_elements.dart::FormElements" {
+  {static} +SizedBox textField()
+  {static} +SizedBox autocompleteTextForm()
+  {static} +SizedBox numberField()
+  {static} +Material button()
+  {static} +SizedBox datePickerText()
+  {static} +Container label()
+}
+
+class "fridgify::view::widgets::item_circular_slider.dart::ItemCircularSlider" {
+  +Content content
+  +_ItemCircularSliderState createState()
+}
+
+"fridgify::view::widgets::item_circular_slider.dart::ItemCircularSlider" o-- "fridgify::model::content.dart::Content"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::widgets::item_circular_slider.dart::ItemCircularSlider"
+
+class "fridgify::view::widgets::item_circular_slider.dart::_ItemCircularSliderState" {
+  +Content content
+  -TextEditingController _controller
+  -FocusNode _focusNode
+  +ValueKey<DateTime> forceRebuild
+  +int max
+  -void _updateLabels()
+  -void _checkValue()
+  -void _updateSlider()
+  +Widget build()
+}
+
+"fridgify::view::widgets::item_circular_slider.dart::_ItemCircularSliderState" o-- "fridgify::model::content.dart::Content"
+"fridgify::view::widgets::item_circular_slider.dart::_ItemCircularSliderState" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"fridgify::view::widgets::item_circular_slider.dart::_ItemCircularSliderState" o-- "flutter::src::widgets::focus_manager.dart::FocusNode"
+"fridgify::view::widgets::item_circular_slider.dart::_ItemCircularSliderState" o-- "flutter::src::foundation::key.dart::ValueKey<DateTime>"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::widgets::item_circular_slider.dart::_ItemCircularSliderState"
+
+class "fridgify::view::widgets::loader.dart::Loader" {
+  +Color color1
+  +Color color2
+  +Color color3
+  +_LoaderState createState()
+  {static} +Future showLoadingDialog()
+  {static} +Future showSimpleLoadingDialog()
+}
+
+"fridgify::view::widgets::loader.dart::Loader" o-- "dart::ui::Color"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::widgets::loader.dart::Loader"
+
+class "fridgify::view::widgets::loader.dart::_LoaderState" {
+  +Animation<double> animation1
+  +Animation<double> animation2
+  +Animation<double> animation3
+  +AnimationController controller1
+  +AnimationController controller2
+  +AnimationController controller3
+  +void initState()
+  +Widget build()
+  +void dispose()
+}
+
+"fridgify::view::widgets::loader.dart::_LoaderState" o-- "flutter::src::animation::animation.dart::Animation<double>"
+"fridgify::view::widgets::loader.dart::_LoaderState" o-- "flutter::src::animation::animation_controller.dart::AnimationController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::widgets::loader.dart::_LoaderState"
+"flutter::src::widgets::ticker_provider.dart::TickerProviderStateMixin<T>" <|-- "fridgify::view::widgets::loader.dart::_LoaderState"
+
+class "fridgify::view::widgets::loader.dart::Arc1Painter" {
+  +Color color
+  +void paint()
+  +bool shouldRepaint()
+}
+
+"fridgify::view::widgets::loader.dart::Arc1Painter" o-- "dart::ui::Color"
+"flutter::src::rendering::custom_paint.dart::CustomPainter" <|-- "fridgify::view::widgets::loader.dart::Arc1Painter"
+
+class "fridgify::view::widgets::loader.dart::Arc2Painter" {
+  +Color color
+  +void paint()
+  +bool shouldRepaint()
+}
+
+"fridgify::view::widgets::loader.dart::Arc2Painter" o-- "dart::ui::Color"
+"flutter::src::rendering::custom_paint.dart::CustomPainter" <|-- "fridgify::view::widgets::loader.dart::Arc2Painter"
+
+class "fridgify::view::widgets::loader.dart::Arc3Painter" {
+  +Color color
+  +void paint()
+  +bool shouldRepaint()
+}
+
+"fridgify::view::widgets::loader.dart::Arc3Painter" o-- "dart::ui::Color"
+"flutter::src::rendering::custom_paint.dart::CustomPainter" <|-- "fridgify::view::widgets::loader.dart::Arc3Painter"
+
+class "fridgify::view::widgets::loader.dart::ColorLoader" {
+  +List<Color> colors
+  +Duration duration
+  +_ColorLoaderState createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "fridgify::view::widgets::loader.dart::ColorLoader"
+
+class "fridgify::view::widgets::loader.dart::_ColorLoaderState" {
+  +List<Color> colors
+  +Duration duration
+  +Timer timer
+  +List<ColorTween> tweenAnimations
+  +int tweenIndex
+  +AnimationController controller
+  +List<Animation<Color>> colorAnimations
+  +void initState()
+  +Widget build()
+  +void dispose()
+}
+
+"fridgify::view::widgets::loader.dart::_ColorLoaderState" o-- "dart::async::Timer"
+"fridgify::view::widgets::loader.dart::_ColorLoaderState" o-- "flutter::src::animation::animation_controller.dart::AnimationController"
+"flutter::src::widgets::framework.dart::State<T>" <|-- "fridgify::view::widgets::loader.dart::_ColorLoaderState"
+"flutter::src::widgets::ticker_provider.dart::SingleTickerProviderStateMixin<T>" <|-- "fridgify::view::widgets::loader.dart::_ColorLoaderState"
+
+class "fridgify::view::widgets::menu_elements.dart::MenuElements" {
+  {static} +List<Color> colorList
+  {static} +TextStyle style
+  {static} +int current
+  {static} +Widget pieChart()
+  {static} +Widget fridgeCard()
+  {static} +List cardStack()
+  {static} +Widget carousel()
+  {static} +List map()
+  {static} -Future _navigateToNextFridge()
+}
+
+"fridgify::view::widgets::menu_elements.dart::MenuElements" o-- "flutter::src::painting::text_style.dart::TextStyle"
+
+class "fridgify::view::widgets::popup.dart::Popups" {
+  {static} +Future errorPopup()
+  {static} +Future confirmationPopup()
+  {static} +Future addFridge()
+}
+
+
+@enduml

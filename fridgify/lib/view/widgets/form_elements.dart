@@ -115,8 +115,9 @@ class FormElements {
             DatePicker.showDatePicker(context,
                 showTitleActions: true,
                 minTime: DateTime(1900, 1, 1),
-                maxTime: max ?? DateTime(DateTime.now().year,
-                    DateTime.now().month, DateTime.now().day),
+                maxTime: max ??
+                    DateTime(DateTime.now().year, DateTime.now().month,
+                        DateTime.now().day),
                 theme: DatePickerTheme(
                     headerColor: Colors.white,
                     backgroundColor: Colors.white,
@@ -126,7 +127,8 @@ class FormElements {
                         fontSize: 18),
                     doneStyle: TextStyle(color: Colors.purple, fontSize: 16)),
                 onChanged: (date) {}, onConfirm: (date) {
-              controller.text = "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day}";
+              controller.text =
+                  "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day}";
             }, currentTime: DateTime.now(), locale: LocaleType.en)
           },
           readOnly: true,
@@ -143,7 +145,7 @@ class FormElements {
         ));
   }
 
-  static Container label({String text, void Function() onPressed}) {
+  static Container label({String text, void Function() onPressed, Key key}) {
     return Container(
       margin: const EdgeInsets.only(top: 20.0),
       padding: const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -154,6 +156,7 @@ class FormElements {
                 shape: new RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
                 color: Colors.transparent,
+                key: key,
                 child: Container(
                   padding: const EdgeInsets.only(left: 20.0),
                   alignment: Alignment.center,

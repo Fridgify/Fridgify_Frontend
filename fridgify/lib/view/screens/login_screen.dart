@@ -68,6 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     FormElements.label(
                         text: "DON'T HAVE AN ACCOUNT?",
+                        key: Key('register'),
                         onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(

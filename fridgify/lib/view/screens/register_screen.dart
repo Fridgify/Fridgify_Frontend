@@ -25,48 +25,50 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: Key('registerPage'),
         body: SingleChildScrollView(
-      child: Center(
-        child: Container(
-          color: Colors.white,
-          height: MediaQuery.of(context).size.height,
-          child: Padding(
-              padding: const EdgeInsets.all(36.0),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: key,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 155.0,
-                        child: Image.asset(
-                          "assets/images/logo_full.png",
-                          fit: BoxFit.contain,
-                        ),
+          child: Center(
+            child: Container(
+              color: Colors.white,
+              height: MediaQuery.of(context).size.height,
+              child: Padding(
+                  padding: const EdgeInsets.all(36.0),
+                  child: SingleChildScrollView(
+                    child: Form(
+                      key: key,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 155.0,
+                            child: Image.asset(
+                              "assets/images/logo_full.png",
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          SizedBox(height: 45.0),
+                          for (var widget in _controller.interactiveForm)
+                            widget,
+                          SizedBox(height: 35.0),
+                          FormElements.button(
+                              text: "Next",
+                              onPressed: () =>
+                                  _updateForm(_controller, key, context),
+                              context: this.context,
+                              style: this.style),
+                          SizedBox(
+                            height: 15.0,
+                          ),
+                          FormElements.label(
+                              text: "ALREADY OWN AN ACCOUNT?",
+                              onPressed: () => Navigator.pop(context)),
+                        ],
                       ),
-                      SizedBox(height: 45.0),
-                      for (var widget in _controller.interactiveForm) widget,
-                      SizedBox(height: 35.0),
-                      FormElements.button(
-                          text: "Next",
-                          onPressed: () =>
-                              _updateForm(_controller, key, context),
-                          context: this.context,
-                          style: this.style),
-                      SizedBox(
-                        height: 15.0,
-                      ),
-                      FormElements.label(
-                          text: "ALREADY OWN AN ACCOUNT?",
-                          onPressed: () => Navigator.pop(context)),
-                    ],
-                  ),
-                ),
-              )),
-        ),
-      ),
-    ));
+                    ),
+                  )),
+            ),
+          ),
+        ));
   }
 }

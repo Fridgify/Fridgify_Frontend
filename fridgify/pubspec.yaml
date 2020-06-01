@@ -32,6 +32,11 @@ dependencies:
   sortedmap: "^0.4.2+1"
   expandable: "^4.1.3"
   autocomplete_textfield: "^1.7.3"
+  firebase_core: "^0.4.0"
+  firebase_auth: "^0.11.1+6"
+  cloud_firestore: "^0.12.5"
+
+  firebase_messaging: "^5.0.2"
   firebase_dynamic_links: "^0.5.0+11"
   pie_chart:
     git:

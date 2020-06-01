@@ -1,12 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
-import 'package:fridgify/exception/not_unique_exception.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/validator.dart';
-import 'package:fridgify/view/screens/content_menu_screen.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
@@ -39,6 +35,7 @@ class RegisterController {
   RegisterController() {
     this.interactiveForm = [
       FormTextField(
+          key: Key('registerUsername'),
           style: this.style,
           obscureText: false,
           controller: textInputControllerUser,
@@ -46,6 +43,7 @@ class RegisterController {
           validator: Validator.validateUser),
       SizedBox(height: 25.0),
       FormTextField(
+          key: Key('email'),
           style: this.style,
           obscureText: false,
           controller: textInputControllerMail,
@@ -79,9 +77,7 @@ class RegisterController {
 
     try {
       await _authService.initiateRepositories();
-    }
-    catch(exception) {
-
+    } catch (exception) {
       Navigator.of(context, rootNavigator: true).pop();
       return Popups.errorPopup(context, exception.errMsg());
     }
@@ -107,7 +103,7 @@ class RegisterController {
     var checks = await _userService.checkUsernameEmail(
         textInputControllerUser.text, textInputControllerMail.text);
 
-    if(checks['user'] || checks['mail']) {
+    if (checks['user'] || checks['mail']) {
       _logger.i(
           'RegisterController => NOT UNIQUE USER: ${checks['user']} EMAIL: ${checks['mail']}');
 
@@ -133,7 +129,6 @@ class RegisterController {
     _logger.e(
         "RegisterController => VALIDATING INPUT 2 DO NOT MATCH: ${Validator.doNotMatch}");
 
-
     return key.currentState.validate();
   }
 
@@ -150,6 +145,7 @@ class RegisterController {
     if (_phase == 1 && await validateSecondForm(key, context)) {
       this.interactiveForm = [
         FormTextField(
+          key: Key('firstName'),
           style: this.style,
           obscureText: false,
           controller: textInputControllerSur,
@@ -158,6 +154,7 @@ class RegisterController {
         ),
         SizedBox(height: 25.0),
         FormTextField(
+          key: Key('lastName'),
           style: this.style,
           obscureText: false,
           controller: textInputControllerName,
@@ -166,6 +163,7 @@ class RegisterController {
         ),
         SizedBox(height: 25.0),
         DatePickerText(
+          key: Key('birthDate'),
           style: this.style,
           obscureText: false,
           controller: textInputControllerDate,
@@ -183,6 +181,7 @@ class RegisterController {
     if (_phase == 0 && await validateFirstForm(key, context)) {
       this.interactiveForm = [
         FormTextField(
+          key: Key('registerPassword'),
           style: this.style,
           obscureText: true,
           controller: textInputControllerPass,
@@ -191,6 +190,7 @@ class RegisterController {
         ),
         SizedBox(height: 25.0),
         FormTextField(
+            key: Key('RegisterRepeatPassword'),
             style: this.style,
             obscureText: true,
             hintText: "Repeat Password",

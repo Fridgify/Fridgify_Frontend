@@ -21,7 +21,9 @@ class RequestCache {
 
   factory RequestCache() {
     _cache.initConnectivity();
-    _cache._connectivitySubscription = _cache._connectivity.onConnectivityChanged.listen(_cache._setConnectionStatus);
+    _cache._connectivitySubscription = _cache
+        ._connectivity.onConnectivityChanged
+        .listen(_cache._setConnectionStatus);
     _cache.initCache();
     return _cache;
   }
@@ -34,9 +36,14 @@ class RequestCache {
 
     logger.i('Read cache from $directory/cache.txt');
 
+    if (!await file.exists()) {
+      return;
+    }
+
     List<dynamic> content = jsonDecode(await file.readAsString());
     content.forEach((element) {
-      Response response = Response(data: element['value']['data'], statusCode: element['value']['code']);
+      Response response = Response(
+          data: element['value']['data'], statusCode: element['value']['code']);
       _responseStorage.putIfAbsent(element['key'], () => response);
     });
   }
@@ -49,10 +56,7 @@ class RequestCache {
     _responseStorage.forEach((key, value) {
       data.add({
         'key': key,
-        'value': {
-          'data': value.data,
-          'code': value.statusCode
-        }
+        'value': {'data': value.data, 'code': value.statusCode}
       });
     });
     file.writeAsString(json.encode(data));
@@ -65,12 +69,12 @@ class RequestCache {
   }
 
   Response cached(RequestOptions request) {
-    if(_connectivityStatus != ConnectivityResult.none) {
+    if (_connectivityStatus != ConnectivityResult.none) {
       return null;
     }
 
     String key = '${request.method}:${request.path}:${request.data.toString()}';
-    if(_responseStorage.containsKey(key)) {
+    if (_responseStorage.containsKey(key)) {
       logger.i("Request cached. Use response from cache.");
       return _responseStorage[key];
     }
@@ -78,8 +82,9 @@ class RequestCache {
   }
 
   void cache(Response response) {
-    String key = "${response.request.method}:${response.request.path}:${response.request.data.toString()}";
-    if(!_responseStorage.containsKey(key)) {
+    String key =
+        "${response.request.method}:${response.request.path}:${response.request.data.toString()}";
+    if (!_responseStorage.containsKey(key)) {
       _responseStorage.putIfAbsent(key, () => response);
     } else {
       _responseStorage.update(key, (value) => response);
@@ -103,5 +108,4 @@ class RequestCache {
     logger.i('Connectivity changed. New connection type is $result');
     this._connectivityStatus = result;
   }
-
 }

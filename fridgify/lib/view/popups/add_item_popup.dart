@@ -15,13 +15,14 @@ class AddItemPopUp extends StatefulWidget {
   final BuildContext context;
   final Item item;
   final Function parentSetState;
+  final String barcode;
 
   AddItemPopUp(this.repo, this.item,
-      this.context, this.parentSetState);
+      this.context, this.parentSetState, this.barcode);
 
   @override
   _AddItemPopUpState createState() =>
-      _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState);
+      _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState, this.barcode);
 }
 
 class _AddItemPopUpState extends State<AddItemPopUp> {
@@ -33,19 +34,20 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
   int startValue;
   Content content;
   Item item;
+  String barcode;
 
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 16.0);
 
-  _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState) {
-    this._controller = AddItemController(contentRepository: this.repo);
+  _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState, this.barcode) {
+    this._controller = AddItemController(contentRepository: this.repo, item: item);
   }
 
   Future<void> _addItem() async {
     Loader.showSimpleLoadingDialog(context);
     try {
-      await _controller.addContent();
+      await _controller.addContent(barcode);
     }
-    catch(exception)
+     catch(exception)
     {
       Navigator.of(context).pop();
       Popups.errorPopup(context, "Failed to Add item $exception");
@@ -104,7 +106,7 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
                   obscureText: false,
                   hintText: 'Store',
                   validator: Validator.validateUser,
-                  suggestions: _storeRepository.getAllWithName().values.toList(),
+                  suggestions: _storeRepository.getAllWithName().values.toSet().toList(),
 
               ),
             ],

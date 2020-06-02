@@ -34,12 +34,29 @@ class ItemRepository implements Repository<Item, int> {
   
   
   int addSync(item) {
-    logger.i("ItemRepository => ADDING ITEM ${item.name}");
+    logger.i("ItemRepository => ADDING ITEM ${item.name} ${item.itemId}");
     this.items[item.itemId] = item;
     return item.itemId;
   }
 
-  Future<Item> barcode(String barcode) {
+  Future<Item> barcode(String barcode) async {
+    var url = "${itemApi}barcode/$barcode";
+
+    logger.i('ItemRepository => FETCHIN FROM BARCODE URL: $url');
+
+    var response = await dio.get(url,
+        options: Options(headers: Repository.getHeaders())
+    );
+
+    logger.i('ItemRepository => FETCHING BARCODE ITEM: ${response.data}');
+
+    if (response.statusCode == 200) {
+      var item = response.data;
+
+      logger.i('ItemRepository => $item');
+
+      return Item.fromJson(item);
+    }
     return null;
   }
 

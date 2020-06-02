@@ -157,7 +157,7 @@ class DatePickerText extends StatelessWidget {
                     doneStyle: TextStyle(color: Colors.purple, fontSize: 16)),
                 onChanged: (date) {}, onConfirm: (date) {
               controller.text =
-                  "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day}";
+                  "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day < 10 ? "0${date.day}" : date.day}";
             }, currentTime: DateTime.now(), locale: LocaleType.en)
           },
           readOnly: true,

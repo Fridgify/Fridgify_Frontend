@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -11,10 +8,9 @@ import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/model/user.dart';
+import 'package:fridgify/service/firebase_service.dart';
 import 'package:fridgify/service/user_service.dart';
-import 'package:fridgify/view/widgets/popup.dart';
 import 'package:logger/logger.dart';
-import 'package:http/http.dart';
 
 /// This Authentication Service handles login, registration and token fetching
 /// It works with the cache "Repository.sharedPreferences" and keeps it all time updated
@@ -187,6 +183,7 @@ class AuthenticationService {
   }
 
   Future<bool> initiateRepositories() async {
+    FirebaseService firebaseService = FirebaseService();
     StoreRepository storeRepository = StoreRepository();
     ItemRepository itemRepository = ItemRepository();
     FridgeRepository fridgeRepository = FridgeRepository();
@@ -194,6 +191,7 @@ class AuthenticationService {
 
     try {
       logger.i('MainController => FETCHING ALL REPOSITORIES');
+      firebaseService.initState();
       await Future.wait(
           [
             fridgeRepository.fetchAll(),
@@ -202,6 +200,7 @@ class AuthenticationService {
             userService.fetchUser(),
           ]
       );
+
     }
     catch(exception) {
       logger.e('MainController => FAILED TO FETCH REPOSITORY $exception');

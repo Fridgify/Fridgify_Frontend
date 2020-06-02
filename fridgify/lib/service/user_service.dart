@@ -7,11 +7,8 @@ import 'package:fridgify/exception/failed_to_fetch_qr_exception.dart';
 import 'package:fridgify/exception/failed_to_patch_user_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
-import 'package:http/http.dart';
-import 'package:fridgify/model/user.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fridgify/utils/permission_helper.dart';
 
 class UserService {
   static const String userApi = "${Repository.baseURL}users/";
@@ -174,5 +171,32 @@ class UserService {
 
     throw FailedToFetchQrException();
 
+  }
+
+  Future<bool> registerNotificationToken(String token) async {
+    var sharePref = Repository.sharedPreferences;
+
+    if(sharePref.get('notification') != null) {
+      logger.i("UserService => FOUND TOKEN IN CACHE");
+      return true;
+    }
+
+    var url = "${Repository.baseURL}messaging/register/";
+
+    logger.i("UserService => REGISTER NOTIFICATIONS $url");
+
+    var response = await dio.post(url, options: Options(headers: Repository.getHeaders()),
+                                  data: jsonEncode({"client_token": token}));
+
+
+    logger.i("UserService => RESPONSE FROM ${response.data} ${response.statusCode}");
+
+    if(response.statusCode == 201) {
+      logger.i("UserService => WROTE TOKEN");
+      sharePref.setBool('notification', true);
+      return true;
+    }
+
+    throw FailedToFetchQrException();
   }
 }

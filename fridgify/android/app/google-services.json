@@ -35,7 +35,8 @@
               "client_id": "146913505256-r931v138i0p7b0qfg3b4mnnf27nbbt6r.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.fridgify.fridgify"
+                "bundle_id": "com.fridgify.fridgify",
+                "app_store_id": "962194608"
               }
             }
           ]

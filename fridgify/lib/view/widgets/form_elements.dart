@@ -197,6 +197,7 @@ class Label extends StatelessWidget {
                 shape: new RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
                 color: Colors.transparent,
+                key: key,
                 child: Container(
                   padding: const EdgeInsets.only(left: 20.0),
                   alignment: Alignment.center,

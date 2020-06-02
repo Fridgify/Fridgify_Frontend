@@ -50,6 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       for (var widget in _controller.interactiveForm) widget,
                       SizedBox(height: 35.0),
                       FormButton(
+                          key: Key('nextButton'),
                           text: "Next",
                           onPressed: () =>
                               _updateForm(_controller, key, context),

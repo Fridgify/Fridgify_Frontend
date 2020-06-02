@@ -21,20 +21,21 @@ class AddItemController {
   TextEditingController itemUnitController = TextEditingController();
   TextEditingController itemStoreController = TextEditingController();
   String barcode = "";
+  Item item;
 
-  AddItemController({this.contentRepository}) {
-    itemNameController.text = "TestName";
-    expirationDateController.text = "2020-05-09";
-    itemCountController.text = "1";
-    itemAmountController.text = "1000";
-    itemUnitController.text = "ml";
-    itemStoreController.text = "Lidl";
+  AddItemController({this.contentRepository, this.item}) {
+    itemNameController.text = this.item != null ? this.item.name : "";
+    expirationDateController.text = "";
+    itemCountController.text = "";
+    itemAmountController.text = "";
+    itemUnitController.text = "";
+    itemStoreController.text = this.item != null ? this.item.store : "";
   }
 
 
-  Future<Content> addContent() async {
+  Future<Content> addContent(String barcode) async {
     _logger.i("AddItemController => ADDING ITEM ${itemNameController.text} ${expirationDateController.text} ${itemCountController.text}"
-        "${itemAmountController.text} ${itemUnitController.text} ${itemStoreController.text}");
+        "${itemAmountController.text} ${itemUnitController.text} ${itemStoreController.text} and Barcode $barcode");
 
 
     Content c = Content.create(
@@ -43,13 +44,14 @@ class AddItemController {
         unit: itemUnitController.text,
         count: int.parse(itemCountController.text),
         item: Item.create(name: itemNameController.text,
-            store: await _storeRepository.getByName(itemStoreController.text))
+            store: await _storeRepository.getByName(itemStoreController.text), barcode: barcode ?? "")
     );
 
     try {
       _logger.i("AddItemController => ADDING CONTENT $c");
       await this.contentRepository.add(c);
       await this._itemRepository.fetchAll();
+      this.contentRepository.group();
       return c;
     }
     catch(exception) {

@@ -60,7 +60,12 @@ class Content {
 
   void setItemState() {
     var date = DateTime.parse(this.expirationDate);
-    _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item} AND DATE: $date / ${this.expirationDate}');
+    if(this.item == null)
+    {
+      _logger.e("CONTENTMODEL -> ITEM NOT FOUND ERROR");
+      return;
+    }
+    _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item.name} ${this.item.barcode} AND DATE: $date / ${this.expirationDate}');
 
     if(date.isAfter(DateTime.now().add(Duration(days: 5)))) {
       _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item} FRESH');
@@ -87,7 +92,8 @@ class Content {
       "amount": this.amount,
       "unit": this.unit,
       "store": this.item != null ? this.item.store.name : "",
-      "contend_id": this.contentId != null ? this.contentId : "",
+      "content_id": this.contentId != null ? this.contentId : "",
+      "barcode": this.item != null ? this.item.barcode ?? "" : "",
     });
   }
 }

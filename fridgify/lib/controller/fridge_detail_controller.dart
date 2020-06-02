@@ -88,7 +88,7 @@ class FridgeDetailController {
           context: context,
           barrierDismissible: false, // user must tap button!
           builder: (BuildContext context) {
-            return AddItemPopUp(this.fridge.contentRepository, item, context, setState);
+            return AddItemPopUp(this.fridge.contentRepository, item, context, setState, getBarcode(result));
           });
     }
     if(string == Constants.showMembers) {
@@ -111,7 +111,17 @@ class FridgeDetailController {
     _logger.i("DetailController => LOCATING ITEM ${result.rawContent}");
     if(isValidBarcode(result.format)) {
       _logger.i("DetailController => FORMAT ${result.format}");
-      return await _itemRepository.barcode(result.rawContent);
+      return await _itemRepository.barcode(result.rawContent.toString());
+    }
+    return null;
+  }
+
+  String getBarcode(ScanResult result) {
+    _logger.i("DetailController => LOCATING ITEM ${result.rawContent}");
+    if(isValidBarcode(result.format)) {
+      _logger.i("DetailController => FORMAT ${result.format}");
+
+      return result.rawContent.toString();
     }
     return null;
   }

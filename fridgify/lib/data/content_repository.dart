@@ -49,8 +49,8 @@ class ContentRepository implements Repository<Content, String> {
       itemRepository.addSync(Item.create(
         name: content.item.name,
         store: content.item.store,
-        barcode: "",
-        itemId: c[0]['item'],
+        barcode: content.item.barcode ?? "",
+        itemId: c[0]['item_id'],
       ));
 
       this.contents.addAll(Map.fromIterable(c, key: (k) => k['content_id'],
@@ -68,7 +68,7 @@ class ContentRepository implements Repository<Content, String> {
   Future<bool> delete(String id) async {
     var response =
         await dio.delete("$contentApi$id", options: Options(headers: Repository.getHeaders()));
-
+  //2304814144140
     logger.i(
         'ContentRepository => DELETING CONTENT: ${response.data} ${response.statusCode} ON URL $contentApi$id');
 

@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/model/content.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/widgets/item_circular_slider.dart';
 import 'package:fridgify/view/widgets/popup.dart';
-import 'package:logger/logger.dart';
 
 class EditValuePopUp extends StatefulWidget {
   final ContentRepository repo;
@@ -24,7 +24,7 @@ class _EditValuePopUpState extends State<EditValuePopUp> {
   final Content content;
   final BuildContext context;
   final Function parentSetState;
-  final Logger _logger = Logger();
+  final Logger _logger = Logger('EditValuePopUp');
   int startValue;
 
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
@@ -36,7 +36,7 @@ class _EditValuePopUpState extends State<EditValuePopUp> {
   Future<void> _updateItem() async {
     if(startValue <= content.amount)
       {
-        _logger.e("EditValuePopUp => FAILED TO UPDATE ITEM ${content.amount} is not smaller than $startValue");
+        _logger.e("FAILED TO UPDATE ITEM ${content.amount} is not smaller than $startValue");
         await Popups.errorPopup(this.context, "FAILED TO UPDATE ITEM ${content.amount} is not smaller than $startValue");
         return;
       }
@@ -44,7 +44,7 @@ class _EditValuePopUpState extends State<EditValuePopUp> {
       await this.repo.withdraw(content, startValue - content.amount);
     }
     catch(exception) {
-      _logger.e("EditValuePopUp => FAILED TO UPDATE ITEM $exception");
+      _logger.e("FAILED TO UPDATE ITEM $exception");
       await Popups.errorPopup(this.context, "EditValuePopUp => FAILED TO UPDATE ITEM $exception");
     }
     this.parentSetState(() {});

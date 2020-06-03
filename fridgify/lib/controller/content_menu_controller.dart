@@ -4,17 +4,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/constants.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/popups/invite_user_popup.dart';
 import 'package:fridgify/view/popups/join_fridge_popup.dart';
 import 'package:fridgify/view/screens/fridge_users_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
 import 'package:fridgify/view/widgets/popup.dart';
-import 'package:logger/logger.dart';
+
 
 class ContentMenuController {
   AuthenticationService _authService = AuthenticationService();
@@ -25,7 +25,7 @@ class ContentMenuController {
   Function setState;
   BuildContext context;
 
-  Logger _logger = Logger();
+  Logger _logger = Logger('ContentMenuController');
 
   Future<void> choiceAction(String choice, BuildContext context, Function onChange) async {
     if(choice == Constants.logout) {
@@ -72,7 +72,7 @@ class ContentMenuController {
       );
     }
     catch(exception) {
-      _logger.e("ContentMenuController => FAILED TO FETCH QR");
+      _logger.e("FAILED TO FETCH QR");
       Navigator.of(context).pop();
     }
 
@@ -81,7 +81,7 @@ class ContentMenuController {
   }
 
   Future<void> createFridge(GlobalKey<FormState> key, BuildContext context, Function onChange) async {
-    _logger.i("ContentMenuController => CREATING FRIDGE");
+    _logger.i("CREATING FRIDGE");
     if(key.currentState.validate()) {
       try {
         await _fridgeRepository.add(Fridge.create(name: nameController.text));

@@ -9,13 +9,13 @@ import 'package:fridgify/exception/failed_to_fetch_fridges_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/utils/permission_helper.dart';
-import 'package:http/http.dart';
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FridgeRepository implements Repository<Fridge, int> {
-  Logger logger = Repository.logger;
+
+  Logger _logger = Logger('FridgeRepository');
 
   UserService _userService = UserService();
 
@@ -45,12 +45,12 @@ class FridgeRepository implements Repository<Fridge, int> {
         options: Options(headers: Repository.getHeaders())
     );
 
-    logger.i('FridgeRepository => CREATING FRIDGE: ${response.data}');
+    _logger.i('CREATING FRIDGE: ${response.data}');
 
     if (response.statusCode == 201) {
       var f = response.data;
       var fridge = Fridge.create(fridgeId: f["fridge_id"], name: f["name"]);
-      logger.i("FridgeRepository => CREATED SUCCESSFUL $fridge");
+      _logger.i("CREATED SUCCESSFUL $fridge");
 
       fridge.content = {
         'total': 0,
@@ -77,10 +77,10 @@ class FridgeRepository implements Repository<Fridge, int> {
         options: Options(headers: Repository.getHeaders())
     );
 
-    logger.i('FridgeRepository => DELETING FRIDGE: ${response.data}');
+    _logger.i('DELETING FRIDGE: ${response.data}');
 
     if (response.statusCode == 200) {
-      logger.i('FridgeRepository => DELETED FRIDGE');
+      _logger.i('DELETED FRIDGE');
       this.fridges.remove(id);
       return true;
     }
@@ -103,18 +103,18 @@ class FridgeRepository implements Repository<Fridge, int> {
     var response = await dio.get(fridgeAPI,
         options: Options(headers: Repository.getHeaders())
     );
-    logger.i('FridgeRepository => FETCHING FRIDGES: ${response.data}');
+    _logger.i('FETCHING FRIDGES: ${response.data}');
 
     if (response.statusCode == 200) {
       List fridges = response.data;
 
-      logger.i('FridgeRepository => $fridges');
+      _logger.i('$fridges');
 
       Iterable<Future<Fridge>> temp = fridges.map((e) async => await initFridge(e));
       this.fridges = Map.fromIterable(await Future.wait(temp), key: (e) => e.fridgeId, value: (e) => e);
 
 
-      logger.i("FridgeRepository => FETCHED ${this.fridges.length} FRIDGES");
+      _logger.i("FETCHED ${this.fridges.length} FRIDGES");
 
       return this.fridges;
     }
@@ -136,30 +136,30 @@ class FridgeRepository implements Repository<Fridge, int> {
     var userUrl = "$userManagementApi$fridgeId/users";
 
 
-    logger.i('UserService => FETCHING USERS FROM URL: $userUrl');
+    _logger.i('FETCHING USERS FROM URL: $userUrl');
 
     var response = await dio.get('$userUrl', options: Options(headers: Repository.getHeaders()));
 
-    logger.i(
-        'UserService => FETCHING USERS FOR FRIDGE $fridgeId: ${response.data}');
+    _logger.i(
+        'FETCHING USERS FOR FRIDGE $fridgeId: ${response.data}');
 
     if (response.statusCode == 200) {
       var users = response.data;
 
       usersList = Map.fromIterable(users, key: (e) => User.fromJson(e['user']), value: (e) => Permissions.user.byName(e['role']));
 
-      logger.i('UserService => ${usersList.length}');
+      _logger.i('${usersList.length}');
       return usersList;
     }
     throw new FailedToFetchContentException();
   }
 
   Future<Fridge> joinByUrl(Uri url) async {
-    logger.i('FridgeRepository => JOINING FRIDGE VIA INVITE URL $url');
+    _logger.i('JOINING FRIDGE VIA INVITE URL $url');
 
     var response = await dio.get(url.toString(), options: Options(headers: Repository.getHeaders()));
 
-    logger.i('UserService => JOINED FRIDGE ${response.data}');
+    _logger.i('JOINED FRIDGE ${response.data}');
 
     if(response.statusCode == 201){
       var fridge = response.data;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/main_controller.dart';
-import 'package:fridgify/service/firebase_service.dart';
 import 'package:fridgify/view/screens/content_menu_screen.dart';
 import 'package:fridgify/view/screens/login_screen.dart';
 import 'package:fridgify/view/screens/register_screen.dart';

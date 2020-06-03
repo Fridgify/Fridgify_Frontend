@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
-import 'package:fridgify/data/content_repository.dart';
-import 'package:fridgify/model/content.dart';
-import 'package:fridgify/view/widgets/form_elements.dart';
 
 
 class Popups {

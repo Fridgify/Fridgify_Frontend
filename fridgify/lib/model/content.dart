@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/utils/item_state_helper.dart';
-import 'package:logger/logger.dart';
+import 'package:fridgify/utils/logger.dart';
 
 import 'fridge.dart';
 import 'item.dart';
@@ -19,7 +19,7 @@ class Content {
   Item item;
   ItemState state;
 
-  Logger _logger = Logger();
+  Logger _logger = Logger('Content');
 
 
   factory Content.fromJson(dynamic json, Fridge f) {
@@ -62,21 +62,21 @@ class Content {
     var date = DateTime.parse(this.expirationDate);
     if(this.item == null)
     {
-      _logger.e("CONTENTMODEL -> ITEM NOT FOUND ERROR");
+      _logger.e("ITEM NOT FOUND ERROR");
       return;
     }
-    _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item.name} ${this.item.barcode} AND DATE: $date / ${this.expirationDate}');
+    _logger.i('SET ITEMSTATE FOR ITEM ${this.item.name} ${this.item.barcode} AND DATE: $date / ${this.expirationDate}');
 
     if(date.isAfter(DateTime.now().add(Duration(days: 5)))) {
-      _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item} FRESH');
+      _logger.i('SET ITEMSTATE FOR ITEM ${this.item} FRESH');
       this.state = ItemState.fresh;
     }
     else if(date.isBefore(DateTime.now().add(Duration(days: 5))) && date.isAfter(DateTime.now())) {
-      _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item} DUE SOON');
+      _logger.i('SET ITEMSTATE FOR ITEM ${this.item} DUE SOON');
       this.state = ItemState.dueSoon;
     }
     else {
-      _logger.i('CONTENTMODEL -> SET ITEMSTATE FOR ITEM ${this.item} OVER DUE');
+      _logger.i('SET ITEMSTATE FOR ITEM ${this.item} OVER DUE');
       this.state = ItemState.overDue;
     }
   }

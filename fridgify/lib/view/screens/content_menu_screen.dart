@@ -1,13 +1,11 @@
 import 'dart:async';
 
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/utils/constants.dart';
-import 'package:fridgify/view/widgets/popup.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
 

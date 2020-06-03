@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
-import 'package:logger/logger.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
 class RequestCache {
@@ -17,7 +17,7 @@ class RequestCache {
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
   ConnectivityResult _connectivityStatus;
 
-  Logger logger = Logger();
+  Logger _logger = Logger('RequestCache');
 
   factory RequestCache() {
     _cache.initConnectivity();
@@ -34,7 +34,7 @@ class RequestCache {
     final directory = await _localPath;
     File file = File("$directory/cache.txt");
 
-    logger.i('Read cache from $directory/cache.txt');
+    _logger.i('Read cache from $directory/cache.txt');
 
     if (!await file.exists()) {
       return;
@@ -75,7 +75,7 @@ class RequestCache {
 
     String key = '${request.method}:${request.path}:${request.data.toString()}';
     if (_responseStorage.containsKey(key)) {
-      logger.i("Request cached. Use response from cache.");
+      _logger.i("Request cached. Use response from cache.");
       return _responseStorage[key];
     }
     return null;
@@ -105,7 +105,7 @@ class RequestCache {
   }
 
   void _setConnectionStatus(ConnectivityResult result) {
-    logger.i('Connectivity changed. New connection type is $result');
+    _logger.i('Connectivity changed. New connection type is $result');
     this._connectivityStatus = result;
   }
 }

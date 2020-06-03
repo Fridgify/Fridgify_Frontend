@@ -1,17 +1,17 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:fridgify/cache/cache_interceptor.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
-import 'package:logger/logger.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 abstract class Repository<Item, Key> {
-  static const baseURL = "https://fridgapi-dev.donkz.dev/";
+  static const baseURL = "https://api-dev.fridgify.com/";
   static SharedPreferences sharedPreferences;
-  static Logger logger = Logger();
   static bool isTest = false;
+
+
+  static Logger _logger = Logger('Repository');
 
   static Dio getDio([Dio mockDio]) {
     if (isTest && mockDio == null) {
@@ -29,7 +29,7 @@ abstract class Repository<Item, Key> {
   static dynamic getToken() {
     var token = sharedPreferences.get("apiToken") ?? null;
     if (token == null) {
-      logger.e("FridgeRepository => NO API TOKEN FOUND IN CACHE");
+      _logger.e("NO API TOKEN FOUND IN CACHE");
       throw FailedToFetchApiTokenException();
     }
     return token;

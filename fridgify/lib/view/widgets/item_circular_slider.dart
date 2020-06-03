@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:fridgify/model/content.dart';
-import 'package:fridgify/utils/item_state_helper.dart';
 
 
 

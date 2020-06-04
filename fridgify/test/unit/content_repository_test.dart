@@ -82,7 +82,7 @@ void main() async {
     });
 
     test('getAsGroup, gets all groups', () async {
-      expect(3, contentRepository.grouped.length);
+      expect(3, contentRepository.getAsGroup().length);
     });
   });
 

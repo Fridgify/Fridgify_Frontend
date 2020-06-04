@@ -40,12 +40,74 @@ void main() async {
           return testUtil.handleKickUserRequest(request);
         case 'Fetch deep link':
           return testUtil.handleFetchDeepLinkRequest(request);
+        case 'Patch user':
+          return testUtil.handlePatchUserRequest(request);
+        case 'Register notification token':
+          return testUtil.handleRegisterNotificationTokenRequest(request);
         default:
           return Response(data: 'Not implemented', statusCode: 201);
       }
     }));
 
     userService = UserService(mockDio);
+  });
+
+  group('patch user', () {
+    setUp(() {
+      testUtil.setTestCase('Patch user');
+    });
+
+    test('throws an error', () async {
+      testUtil.setId('Error case patch user');
+
+      expect(
+          () async => completion(await userService.patchUser(
+              Fridge.create(fridgeId: 1, name: 'awdawd'),
+              User.loginUser(username: 'asd', password: '123456'),
+              2)),
+          throwsA(predicate((error) => error is FailedToPatchUserException)));
+    });
+
+    test('returns new role', () async {
+      testUtil.setId('Return new role');
+
+      expect(
+          Future.value('Fridge Owner'),
+          completion(await userService.patchUser(
+              Fridge.create(fridgeId: 1, name: 'awdawd'),
+              User.loginUser(username: 'asd', password: '123456'),
+              2)));
+    });
+  });
+
+  group('registerNotificationToken', () {
+    setUp(() {
+      testUtil.setTestCase('Register notification token');
+    });
+
+    test('throws an error', () async {
+      testUtil.setId('Error case register notification token');
+      Repository.sharedPreferences.remove('notification');
+
+      expect(
+          () async =>
+              completion(await userService.registerNotificationToken('token')),
+          throwsA(predicate((error) => error is FailedToFetchQrException)));
+    });
+
+    test('register notification', () async {
+      testUtil.setId('Register notification');
+
+      expect(Future.value(true),
+          completion(await userService.registerNotificationToken('token')));
+    });
+
+    test('has token already saved', () async {
+      Repository.sharedPreferences.setBool('notification', true);
+
+      expect(Future.value(true),
+          completion(await userService.registerNotificationToken('token')));
+    });
   });
 
   group('fetch user', () {
@@ -237,6 +299,39 @@ class UserServiceTestUtil extends TestUtil {
         return Response(data: 'Error case fetch deep link', statusCode: 404);
       case 'Return link':
         return Response(data: {'dynamic_link': "link 123"}, statusCode: 201);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handleRegisterNotificationTokenRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case register notification token':
+        return Response(
+            data: 'Error case register notification link', statusCode: 404);
+      case 'Register notification':
+        return Response(statusCode: 201);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
+  }
+
+  Response handlePatchUserRequest(RequestOptions request) {
+    switch (request.extra['id']) {
+      case 'Error case patch':
+        return Response(data: 'Error case patch', statusCode: 404);
+      case 'Return new role':
+        return Response(data: {
+          'role': 'Fridge Owner',
+          'user': {
+            'user_id': 2,
+            'username': 'testUser',
+            'name': 'User',
+            'surname': 'test',
+            'email': 'test@test.de',
+            'birth_date': '01.01.1969',
+          }
+        }, statusCode: 200);
       default:
         return Response(data: 'Not implemented', statusCode: 500);
     }

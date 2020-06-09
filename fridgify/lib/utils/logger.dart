@@ -11,7 +11,7 @@ class Logger {
 
   static final _logger = _Logger.Logger();
 
-  static final Map<String, Logger> cached = Map();
+  static final Map<String, Logger> _cached = Map();
 
   static final FirebaseAnalytics _analytics = FirebaseAnalytics();
 
@@ -20,11 +20,11 @@ class Logger {
   static String _deviceID;
 
   factory Logger(String named) {
-    if(cached.containsKey(named)) {
-      return cached[named];
+    if(_cached.containsKey(named)) {
+      return _cached[named];
     }
-    cached[named] = Logger._internal(named);
-    return cached[named];
+    _cached[named] = Logger._internal(named);
+    return _cached[named];
   }
 
   Logger._internal(String named) {
@@ -34,7 +34,7 @@ class Logger {
   void i(String msg, {bool upload}) {
     if(Logger.level.value() > LogLevels.info.value()) return;
     _logger.i("${this._name} -> $msg");
-    if(upload ?? false) {
+    if(_errorHandler.ctxNotNull() && upload ?? false) {
       _uploadLog('info', msg);
     }
   }
@@ -43,9 +43,7 @@ class Logger {
     if(Logger.level.value() > LogLevels.error.value()) return;
     _logger.e("${this._name} -> $msg ${exception ?? ""}");
     if(popup && _errorHandler.ctxNotNull()) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
-    if(upload ?? false) {
-      _uploadLog('error', msg);
-    }
+    _uploadLog('error', msg);
   }
 
   Future<void> _uploadLog(String type, String msg) async {

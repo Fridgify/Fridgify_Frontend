@@ -43,7 +43,9 @@ class Logger {
     if(Logger.level.value() > LogLevels.error.value()) return;
     _logger.e("${this._name} -> $msg ${exception ?? ""}");
     if(popup && _errorHandler.ctxNotNull()) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
-    _uploadLog('error', msg);
+    if(_errorHandler.ctxNotNull() &&  upload ?? false) {
+      _uploadLog('error', msg);
+    }
   }
 
   Future<void> _uploadLog(String type, String msg) async {

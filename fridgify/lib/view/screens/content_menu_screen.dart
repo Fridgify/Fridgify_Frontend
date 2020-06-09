@@ -57,6 +57,7 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
   }
 
   void _onChanged() {
+    print("Parent call");
     setState(() {
 
     });

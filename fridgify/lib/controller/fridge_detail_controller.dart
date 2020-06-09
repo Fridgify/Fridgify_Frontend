@@ -201,8 +201,6 @@ class FridgeDetailController {
   Future<bool> _deleteItems() async {
     Loader.showSimpleLoadingDialog(this.context);
     try {
-      print("Selected => ${this._selected}");
-      print("Selected => ${fridge.contentRepository.getAll()}");
       await Future.wait(
         this._selected.map((e) => fridge.contentRepository.delete(e.contentId))
       );

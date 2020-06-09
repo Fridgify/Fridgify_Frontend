@@ -59,7 +59,7 @@ class RequestCache {
         }
       });
     } catch (e) {
-      logger.e(e.toString());
+      _logger.e(e.toString());
     }
   }
 

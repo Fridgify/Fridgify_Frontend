@@ -34,7 +34,7 @@ class Logger {
   void i(String msg, {bool upload}) {
     if(Logger.level.value() > LogLevels.info.value()) return;
     _logger.i("${this._name} -> $msg");
-    if(_errorHandler.ctxNotNull() && upload ?? false) {
+    if(_errorHandler.ctxNotNull() && (upload ?? false)) {
       _uploadLog('info', msg);
     }
   }
@@ -43,7 +43,7 @@ class Logger {
     if(Logger.level.value() > LogLevels.error.value()) return;
     _logger.e("${this._name} -> $msg ${exception ?? ""}");
     if(popup && _errorHandler.ctxNotNull()) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
-    if(_errorHandler.ctxNotNull() &&  upload ?? false) {
+    if(_errorHandler.ctxNotNull() &&  (upload ?? false)) {
       _uploadLog('error', msg);
     }
   }

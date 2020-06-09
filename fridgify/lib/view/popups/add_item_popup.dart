@@ -92,7 +92,8 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
                   controller: _controller.itemCountController,
                   obscureText: false,
                   hintText: 'Count',
-                  validator: Validator.validateUser),
+                  validator: Validator.validateUser,
+              maxNumber: 100,),
               NumberField(
                   style: style,
                   controller: _controller.itemAmountController,

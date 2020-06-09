@@ -2,19 +2,17 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fridgify/utils/logger.dart';
+import 'package:fridgify/model/item.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sortedmap/sortedmap.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/model/item.dart';
-import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sortedmap/sortedmap.dart';
 
 class ContentRepository implements Repository<Content, String> {
-
   Logger _logger = Logger('ContentRepository');
 
   Fridge fridge;
@@ -55,12 +53,14 @@ class ContentRepository implements Repository<Content, String> {
         itemId: c[0]['item_id'],
       ));
 
-      this.contents.addAll(Map.fromIterable(c,
-          key: (k) => k['content_id'],
-          value: (v) => Content.fromJson(v, this.fridge)));
+      Map<String, Content> contentList = Map.fromIterable(c, key: (k) => k['content_id'], value: (v) => Content.fromJson(v, this.fridge));
 
-      group();
+      this.contents.addAll(contentList);
 
+      /** ToDO: Replace by addToGroup **/
+      //group();
+      print(c);
+      addListToGroup(contentList.values.toList());
       return "Added";
     }
 
@@ -106,6 +106,8 @@ class ContentRepository implements Repository<Content, String> {
 
       _logger.i("FETCHED ${this.contents.length} CONTENTS");
       group();
+
+
       return this.contents;
     }
     throw new FailedToFetchContentException();
@@ -192,6 +194,19 @@ class ContentRepository implements Repository<Content, String> {
       List<Content> tmp = List<Content>();
       tmp.add(c);
       grouped[c.item.name] = tmp;
+    }
+  }
+
+  void addListToGroup(List<Content> c) {
+    if(c.length == 0) return;
+    if(grouped.containsKey(c.first.item.name)) {
+      grouped[c.first.item.name].addAll(c);
+    }
+    else
+    {
+      List<Content> tmp = List<Content>();
+      tmp.addAll(c);
+      grouped[c.first.item.name] = tmp;
     }
   }
 

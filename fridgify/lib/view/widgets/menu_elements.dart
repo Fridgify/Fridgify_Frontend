@@ -58,7 +58,7 @@ class MenuElements {
       ContentMenuController controller) {
 
     return GestureDetector(
-      onTap: () async => await MenuElements._navigateToNextFridge(fridge, context),
+      onTap: () async => await MenuElements._navigateToNextFridge(fridge, context, onChanged),
       child: Padding(
           padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 0.0),
           child: Card(
@@ -209,7 +209,7 @@ class MenuElements {
     return result;
   }
   
-  static Future<void> _navigateToNextFridge(Fridge fridge, BuildContext context) async {
+  static Future<void> _navigateToNextFridge(Fridge fridge, BuildContext context, Function onChanged) async {
     Loader.showSimpleLoadingDialog(context);
     await fridge.contentRepository.fetchAll();
 
@@ -217,7 +217,9 @@ class MenuElements {
         context,
         MaterialPageRoute(
         builder: (context) => FridgeDetailPage(fridge: fridge),
-    ));
+    )).then((value) {
+        onChanged();
+      });
   }
 }
 

@@ -108,10 +108,19 @@ void main() async {
     });
 
     test('gets a return type other than 201', () async {
+      testUtil.setId('Error case register');
+
       expect(
           () async => completion(await authService.register()),
           throwsA(predicate(
               (error) => error is FailedToFetchClientTokenException)));
+    });
+
+    test('registers', () async {
+      testUtil.setId('Register');
+
+      expect(Future.value(null),
+          completion(await Repository.sharedPreferences.get('apiKey')));
     });
   });
 
@@ -176,7 +185,19 @@ class AuthServiceTestUtil extends TestUtil {
   AuthServiceTestUtil(Dio dio) : super(dio);
 
   Response handleRegisterRequest(RequestOptions request) {
-    return Response(data: 'No register', statusCode: 402);
+    switch (request.extra['id']) {
+      case 'Error case register':
+        return Response(data: 'No register', statusCode: 402);
+      case 'Register':
+        Response response =
+            Response(data: {'token': 'Api token'}, statusCode: 201);
+        setId('Register - Login successfully');
+        return response;
+      case 'Register - Login successfully':
+        return Response(data: {'token': 'Api token'}, statusCode: 200);
+      default:
+        return Response(data: 'Not implemented', statusCode: 500);
+    }
   }
 
   Response handleLoginRequests(RequestOptions request) {

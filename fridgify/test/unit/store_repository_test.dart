@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fridgify/data/repository.dart';
@@ -18,7 +16,6 @@ void main() async {
   Dio mockDio;
   Store store;
   Repository.isTest = true;
-
 
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
@@ -43,7 +40,21 @@ void main() async {
 
     storeRepository = StoreRepository(mockDio);
     store = Store(storeId: 2, name: 'Ikea');
+  });
 
+  group('Standard repository function', () {
+    test('delete, does nothing', () async {
+      expect(null, storeRepository.delete(1));
+    });
+
+    test('getAll, has 3 stores', () async {
+      storeRepository.stores.clear();
+      for (int i = 0; i < 3; i++) {
+        storeRepository.stores[i] = Store(storeId: i, name: 'Ikea No.$i');
+      }
+
+      expect(3, storeRepository.getAll().length);
+    });
   });
 
   group('get by name', () {
@@ -65,7 +76,6 @@ void main() async {
       Store newStore = await storeRepository.getByName('Ikea 2');
       expect(newStore.name, 'Ikea 2');
     });
-
   });
 
   group('add', () {
@@ -86,7 +96,6 @@ void main() async {
       expect(Future.value(2), completion(await storeRepository.add(store)));
       expect(true, storeRepository.stores.containsKey(2));
     });
-    
   });
 
   group('fetchAll', () {
@@ -98,7 +107,7 @@ void main() async {
       testUtil.setId('Error case fetch all');
 
       expect(
-              () async => completion(await storeRepository.fetchAll()),
+          () async => completion(await storeRepository.fetchAll()),
           throwsA(
               predicate((error) => error is FailedToFetchContentException)));
     });
@@ -114,7 +123,6 @@ void main() async {
       }
     });
   });
-
 }
 
 class StoreRepositoryTestUtil extends TestUtil {
@@ -151,7 +159,8 @@ class StoreRepositoryTestUtil extends TestUtil {
       case 'Error case fetch all':
         return Response(data: 'Error case fetch all', statusCode: 404);
       case 'Add content':
-        Response response = Response(data: createStoreObjects(123), statusCode: 200);
+        Response response =
+            Response(data: createStoreObjects(123), statusCode: 200);
         return response;
       default:
         return Response(data: 'Not implemented', statusCode: 500);
@@ -170,5 +179,4 @@ class StoreRepositoryTestUtil extends TestUtil {
 
     return stores;
   }
-
 }

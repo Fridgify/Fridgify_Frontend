@@ -68,7 +68,7 @@ class RegisterController {
       await _authService.fetchApiToken();
     } catch (exception) {
       _logger
-          .e("FAILED TO LOG IN ${exception.toString()}");
+          .e("FAILED TO LOG IN", exception: exception.toString());
       if (exception is FailedToFetchClientTokenException) {
         Navigator.of(context, rootNavigator: true).pop();
         return Popups.errorPopup(context, exception.errMsg());

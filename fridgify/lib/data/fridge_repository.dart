@@ -68,7 +68,7 @@ class FridgeRepository implements Repository<Fridge, int> {
       return fridge.fridgeId;
     }
 
-    throw FailedToCreateNewFridgeException();
+    throw FailedToCreateNewFridgeException(response.data);
   }
 
   @override
@@ -175,7 +175,7 @@ class FridgeRepository implements Repository<Fridge, int> {
       return f;
     }
 
-    throw new FailedToCreateNewFridgeException();
+    throw FailedToCreateNewFridgeException(response.data);
 
   }
 }

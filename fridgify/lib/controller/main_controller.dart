@@ -30,7 +30,7 @@ class MainController {
       validToken = await _authService.validateToken();
     }
     catch(exception) {
-      _logger.e("Exception while trying to validateToken ${exception.toString()}");
+      _logger.e("Exception while trying to validateToken" , exception: exception.toString());
       await Popups.errorPopup(context, exception.toString());
       return false;
     }

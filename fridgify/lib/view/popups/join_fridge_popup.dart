@@ -39,8 +39,7 @@ class _JoinFridgePopUpState extends State<JoinFridgePopUp> {
     catch(exception) {
       Navigator.of(context).pop();
       Navigator.of(context).pop();
-      Popups.errorPopup(context, "Failed to join fridge, please request a new url");
-      _logger.e('FAILED TO JOIN FRIDGE $exception');
+      _logger.e('FAILED TO JOIN FRIDGE', exception: exception);
     }
   }
 

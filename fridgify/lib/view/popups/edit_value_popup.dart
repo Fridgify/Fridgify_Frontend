@@ -36,16 +36,14 @@ class _EditValuePopUpState extends State<EditValuePopUp> {
   Future<void> _updateItem() async {
     if(startValue <= content.amount)
       {
-        _logger.e("FAILED TO UPDATE ITEM ${content.amount} is not smaller than $startValue");
-        await Popups.errorPopup(this.context, "FAILED TO UPDATE ITEM ${content.amount} is not smaller than $startValue");
+        Popups.errorPopup(context, "Failed to update item ${content.amount} is not smaller than $startValue");
         return;
       }
     try {
       await this.repo.withdraw(content, startValue - content.amount);
     }
     catch(exception) {
-      _logger.e("FAILED TO UPDATE ITEM $exception");
-      await Popups.errorPopup(this.context, "EditValuePopUp => FAILED TO UPDATE ITEM $exception");
+      _logger.e("FAILED TO UPDATE ITEM", exception: exception, popup: false);
     }
     this.parentSetState(() {});
     Navigator.of(context).pop();

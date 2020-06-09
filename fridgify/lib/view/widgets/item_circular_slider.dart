@@ -58,12 +58,14 @@ class _ItemCircularSliderState extends State<ItemCircularSlider> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
         key: forceRebuild,
-        child: Container(child: SingleCircularSlider(300, (this.content.amount / this.content.maxAmount * 300).toInt(),
+        child: Container(child:
+        SingleCircularSlider(300, (this.content.amount / this.content.maxAmount * 300).toInt(),
           baseColor: Colors.purple.withAlpha(80),
           handlerColor: Colors.purple.shade600,
           selectionColor: Colors.purple,

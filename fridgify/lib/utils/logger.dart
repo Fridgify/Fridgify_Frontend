@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:device_id/device_id.dart';
+import 'error_handler.dart';
 import 'package:logger/logger.dart' as _Logger;
 
 class Logger {
@@ -13,6 +14,8 @@ class Logger {
   static final Map<String, Logger> cached = Map();
 
   static final FirebaseAnalytics _analytics = FirebaseAnalytics();
+
+  ErrorHandler _errorHandler = ErrorHandler();
 
   static String _deviceID;
 
@@ -36,9 +39,10 @@ class Logger {
     }
   }
 
-  void e(String msg, {bool upload}) {
+  void e(String msg, {bool upload, dynamic exception, bool popup = true}) {
     if(Logger.level.value() > LogLevels.error.value()) return;
-    _logger.e("${this._name} -> $msg");
+    _logger.e("${this._name} -> $msg ${exception ?? ""}");
+    if(popup) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
     if(upload ?? false) {
       _uploadLog('error', msg);
     }

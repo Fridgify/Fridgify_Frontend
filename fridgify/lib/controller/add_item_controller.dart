@@ -55,8 +55,8 @@ class AddItemController {
       return c;
     }
     catch(exception) {
-      _logger.e("FAILED TO ADD ITEM $exception");
-      throw FailedToAddContentException;
+      _logger.e("FAILED TO ADD ITEM", exception: exception);
+      throw FailedToAddContentException(exe: exception);
     }
   }
 

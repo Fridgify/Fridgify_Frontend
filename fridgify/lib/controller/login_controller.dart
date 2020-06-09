@@ -29,14 +29,8 @@ class LoginController {
       await _authService.login();
       await _authService.fetchApiToken();
     } catch (exception) {
-      _logger.e("FAILED TO LOG IN ${exception.toString()}");
+      _logger.e("FAILED TO LOG IN", exception: exception.toString());
       Navigator.of(context, rootNavigator: true).pop();
-      if (exception is FailedToFetchClientTokenException) {
-        return Popups.errorPopup(context, exception.errMsg());
-      }
-      else {
-        return Popups.errorPopup(context, exception.toString());
-      }
     }
 
     try {

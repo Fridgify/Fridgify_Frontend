@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/utils/permission_helper.dart';
 import 'package:fridgify/view/popups/overseer_popup.dart';
@@ -15,7 +16,6 @@ class UserController {
   Map<User, Permissions> users;
 
   Logger _logger = Logger('UserController');
-
 
   UserService _userService = UserService();
 
@@ -50,7 +50,7 @@ class UserController {
       this.users[u] = Permissions.user;
     }
     catch(exception) {
-      _logger.e("REMOVE ADMIN FAILED $exception");
+      _logger.e("REMOVE ADMIN FAILED", exception: exception);
     }
   }
 
@@ -60,7 +60,7 @@ class UserController {
       this.users[u] = Permissions.overseer;
     }
     catch(exception) {
-      _logger.e("ADDING ADMIN FAILED $exception");
+      _logger.e("ADDING ADMIN FAILED", exception: exception);
     }
   }
   Future<void> managePermissionAsOverseer(User target, BuildContext context) async {
@@ -88,7 +88,7 @@ class UserController {
       users.remove(target);
     }
     catch(exception) {
-      _logger.e("REMOVING FAILED $exception");
+      _logger.e("REMOVING FAILED", exception: exception);
     }
 
     this.setState(() {});

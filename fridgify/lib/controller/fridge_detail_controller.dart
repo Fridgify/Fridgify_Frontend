@@ -212,7 +212,7 @@ class FridgeDetailController {
       return true;
     }
     catch (exception) {
-      _logger.e("FridgeDetailController => FAILED TO DELETE ITEMS $exception");
+      _logger.e("FAILED TO DELETE ITEMS", exception: exception);
       cancelSelection();
       Navigator.of(this.context).pop();
       return false;

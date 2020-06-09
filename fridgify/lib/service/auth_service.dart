@@ -203,7 +203,7 @@ class AuthenticationService {
 
     }
     catch(exception) {
-      _logger.e('FAILED TO FETCH REPOSITORY $exception');
+      _logger.e('FAILED TO FETCH REPOSITORY', exception: exception);
       return false;
     }
     return true;

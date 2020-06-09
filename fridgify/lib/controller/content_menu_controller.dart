@@ -3,10 +3,12 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/fridge_repository.dart';
+import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/constants.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/popups/invite_user_popup.dart';
 import 'package:fridgify/view/popups/join_fridge_popup.dart';
@@ -26,6 +28,7 @@ class ContentMenuController {
   BuildContext context;
 
   Logger _logger = Logger('ContentMenuController');
+  ErrorHandler _errorHandler = ErrorHandler();
 
   Future<void> choiceAction(String choice, BuildContext context, Function onChange) async {
     if(choice == Constants.logout) {
@@ -89,13 +92,20 @@ class ContentMenuController {
         onChange();
       }
       catch (exception) {
-        Popups.errorPopup(context, exception.toString());
+        _logger.e('SOMETHING WENT WRONG WHILE CREATING FRIDGE', exception: exception);
       }
       Navigator.pop(context);
     }
   }
 
   Future<void> showPopUp(Uri url) async {
+
+    if(Repository.sharedPreferences.containsKey(url.toString())) {
+      return;
+    }
+
+    await Repository.sharedPreferences.setBool(url.toString(), true);
+
     return showDialog<void>(
         context: context,
         barrierDismissible: false, // user must tap button!

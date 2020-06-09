@@ -23,4 +23,8 @@ class ErrorHandler {
   void errorMessage(String msg) {
     Popups.errorPopup(_currentCtx, msg);
   }
+
+  bool ctxNotNull() {
+    return _currentCtx != null;
+  }
 }

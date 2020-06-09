@@ -42,7 +42,7 @@ class Logger {
   void e(String msg, {bool upload, dynamic exception, bool popup = true}) {
     if(Logger.level.value() > LogLevels.error.value()) return;
     _logger.e("${this._name} -> $msg ${exception ?? ""}");
-    if(popup) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
+    if(popup && _errorHandler.ctxNotNull()) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
     if(upload ?? false) {
       _uploadLog('error', msg);
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/login_controller.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/screens/register_screen.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
@@ -15,10 +16,12 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   LoginController _controller = LoginController();
+  ErrorHandler _errorHandler = ErrorHandler();
   final key = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    _errorHandler.setContext(context);
     return Scaffold(
         body: SingleChildScrollView(
       child: Center(

@@ -42,7 +42,7 @@ class AutocompleteTextForm extends StatelessWidget {
   }
 }
 
-class NumberField extends StatelessWidget {
+class NumberField extends StatefulWidget {
   const NumberField({
     Key key,
     @required this.style,
@@ -50,14 +50,21 @@ class NumberField extends StatelessWidget {
     @required this.obscureText,
     @required this.hintText,
     @required this.validator,
+    int max, this.maxNumber,
   }) : super(key: key);
 
+  final int maxNumber;
   final TextStyle style;
   final TextEditingController controller;
   final bool obscureText;
   final String hintText;
   final Function(String p1) validator;
 
+  @override
+  _NumberFieldState createState() => _NumberFieldState();
+}
+
+class _NumberFieldState extends State<NumberField> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -67,17 +74,27 @@ class NumberField extends StatelessWidget {
           inputFormatters: <TextInputFormatter>[
             WhitelistingTextInputFormatter.digitsOnly,
           ],
-          obscureText: obscureText ?? false,
-          style: style,
-          controller: controller ?? TextEditingController(),
+          obscureText: widget.obscureText ?? false,
+          style: widget.style,
+          controller: widget.controller ?? TextEditingController(),
           //_controller.textInputControllerUser,
-          validator: (value) => validator(value),
+          validator: (value) => widget.validator(value),
+          onChanged: (text) => widget.maxNumber != null ? _checkValue(text) : () => {},
           decoration: InputDecoration(
               contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-              hintText: hintText ?? "", //"Username",
+              hintText: widget.hintText ?? "", //"Username",
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(32.0))),
         ));
+  }
+
+  void _checkValue(String txt) {
+    if(int.parse(widget.controller.text) > widget.maxNumber)
+    {
+      widget.controller.text = widget.maxNumber.toString();
+    }
+    setState(() {
+    });
   }
 }
 

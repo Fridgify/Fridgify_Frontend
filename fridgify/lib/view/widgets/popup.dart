@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
-import 'package:fridgify/data/content_repository.dart';
-import 'package:fridgify/model/content.dart';
-import 'package:fridgify/view/widgets/form_elements.dart';
 
 
 class Popups {
@@ -63,6 +60,36 @@ class Popups {
             RaisedButton(
               color: Colors.purple,
               child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<void> infoPopup(BuildContext context, String title, String msg) async {
+    TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(),
+          title: Text(title, style: style),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(msg),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            RaisedButton(
+              color: Colors.purple,
+              child: Text('Okay'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

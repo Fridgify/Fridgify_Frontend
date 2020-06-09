@@ -2,19 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:fridgify/service/user_service.dart';
-import 'package:logger/logger.dart';
+import 'package:fridgify/utils/logger.dart';
 
 class FirebaseService {
   final FirebaseMessaging _fcm = FirebaseMessaging();
   StreamSubscription iosSubscription;
 
-  Logger logger = Logger();
+  Logger _logger = Logger('FirebaseService');
 
 
   void initState() {
-    logger.i("FirebaseService => INITIALISING STATE");
+    _logger.i("INITIALISING STATE");
 
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
@@ -45,7 +44,7 @@ class FirebaseService {
     UserService _userService = UserService();
 
     String fcmToken = await fcm.getToken();
-    logger.i("FirebaseService => GOT TOKEN $fcmToken");
+    _logger.i("GOT TOKEN $fcmToken");
 
     // Save it to Firestore
     if (fcmToken != null) {

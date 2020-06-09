@@ -6,10 +6,10 @@ import 'package:fridgify/model/user.dart';
 import 'package:fridgify/utils/permission_helper.dart';
 
 class OverseerPopUp extends StatefulWidget {
-  User target;
-  Permissions perm;
-  Fridge fridge;
-  UserController _controller;
+  final User target;
+  final Permissions perm;
+  final Fridge fridge;
+  final UserController _controller;
 
 
   OverseerPopUp(this._controller, this.target, this.perm, this.fridge);

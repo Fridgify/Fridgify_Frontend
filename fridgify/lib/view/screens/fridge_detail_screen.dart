@@ -1,9 +1,11 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/fridge_detail_controller.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/utils/constants.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/item_state_helper.dart';
 
 class FridgeDetailPage extends StatefulWidget {
@@ -18,6 +20,7 @@ class FridgeDetailPage extends StatefulWidget {
 class _FridgeDetailPageState extends State<FridgeDetailPage> {
   final Fridge fridge;
   final List<ExpandableController> _controllerCollection = List();
+  ErrorHandler _errorHandler = ErrorHandler();
 
   FridgeDetailController _controller;
 
@@ -27,6 +30,7 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    _errorHandler.setContext(context);
     _controller.contents = fridge.contentRepository.getAll().values.toList();
 
 
@@ -90,17 +94,13 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
               header: ListTile(
                 onLongPress: () => _controller.selectGroup(group),
                 onTap: () => _controller.groupTap(group, _controllerCollection[index]),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(key,
-                        style: TextStyle(
-                            fontFamily: 'Montserrat', fontSize: 20.0)),
-                    Text('x${group.length}',
-                        style: TextStyle(
-                            fontFamily: 'Montserrat', fontSize: 20.0)),
-                  ],
-                ),
+                title: AutoSizeText(key,
+                    style: TextStyle(
+                        fontFamily: 'Montserrat', fontSize: 20.0), maxLines: 2,),
+                trailing:
+                Text('x${group.length}',
+                    style: TextStyle(
+                        fontFamily: 'Montserrat', fontSize: 20.0)),
               ),
               expanded: ListView.builder(
                   shrinkWrap: true,
@@ -108,18 +108,14 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
                   physics: BouncingScrollPhysics(),
                   itemBuilder: (context, index2) {
                     return ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(group[index2].item.name,
-                              style: TextStyle(
-                                  fontFamily: 'Montserrat', fontSize: 16.0)),
-                          Text(
-                              '${group[index2].amount.toString()} ${group[index2].unit.toString()}',
-                              style: TextStyle(
-                                  fontFamily: 'Montserrat', fontSize: 16.0)),
-                        ],
-                      ),
+                      title: AutoSizeText(group[index2].item.name,
+                          style: TextStyle(
+                              fontFamily: 'Montserrat', fontSize: 16.0), maxLines: 2,),
+                      trailing:
+                      Text(
+                          '${group[index2].amount.toString()} ${group[index2].unit.toString()}',
+                          style: TextStyle(
+                              fontFamily: 'Montserrat', fontSize: 16.0)),
                       onTap: () => _controller.tileTapped(
                           fridge.contentRepository, group[index2], context),
                       isThreeLine: true,

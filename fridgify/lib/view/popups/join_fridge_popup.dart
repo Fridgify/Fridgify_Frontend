@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/fridge_repository.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
-import 'package:logger/logger.dart';
 
 class JoinFridgePopUp extends StatefulWidget {
   final Uri url;
@@ -22,7 +22,7 @@ class _JoinFridgePopUpState extends State<JoinFridgePopUp> {
 
   FridgeRepository _fridgeRepository = FridgeRepository();
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-  final Logger _logger = Logger();
+  final Logger _logger = Logger('JoinFridgePopUp');
 
   _JoinFridgePopUpState(this.url, this.parentSetState);
 
@@ -39,8 +39,7 @@ class _JoinFridgePopUpState extends State<JoinFridgePopUp> {
     catch(exception) {
       Navigator.of(context).pop();
       Navigator.of(context).pop();
-      Popups.errorPopup(context, "Failed to join fridge, please request a new url");
-      _logger.e('JoinFridgePopUp => FAILED TO JOIN FRIDGE $exception');
+      _logger.e('FAILED TO JOIN FRIDGE', exception: exception);
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/item.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 import 'package:fridgify/view/widgets/loader.dart';
@@ -30,6 +31,9 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
   final BuildContext context;
   final StoreRepository _storeRepository = StoreRepository();
   final Function parentSetState;
+
+  Logger _logger = Logger('AddItemPopUp');
+
   AddItemController _controller;
   int startValue;
   Content content;
@@ -50,7 +54,8 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
      catch(exception)
     {
       Navigator.of(context).pop();
-      Popups.errorPopup(context, "Failed to Add item $exception");
+
+      _logger.e("FAILED TO ADD ITEM", exception: exception);
       return;
     }
     Navigator.of(context).pop();
@@ -87,7 +92,8 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
                   controller: _controller.itemCountController,
                   obscureText: false,
                   hintText: 'Count',
-                  validator: Validator.validateUser),
+                  validator: Validator.validateUser,
+              maxNumber: 100,),
               NumberField(
                   style: style,
                   controller: _controller.itemAmountController,

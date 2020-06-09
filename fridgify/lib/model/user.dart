@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:fridgify/utils/permission_helper.dart';
 
 class User {
   String username;

@@ -3,18 +3,21 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/fridge_repository.dart';
+import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/auth_service.dart';
+import 'package:fridgify/service/hopper_service.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/constants.dart';
+import 'package:fridgify/utils/error_handler.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/popups/invite_user_popup.dart';
 import 'package:fridgify/view/popups/join_fridge_popup.dart';
 import 'package:fridgify/view/screens/fridge_users_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
 import 'package:fridgify/view/widgets/popup.dart';
-import 'package:logger/logger.dart';
+
 
 class ContentMenuController {
   AuthenticationService _authService = AuthenticationService();
@@ -25,7 +28,8 @@ class ContentMenuController {
   Function setState;
   BuildContext context;
 
-  Logger _logger = Logger();
+  Logger _logger = Logger('ContentMenuController');
+  HopperService _hopperService = HopperService();
 
   Future<void> choiceAction(String choice, BuildContext context, Function onChange) async {
     if(choice == Constants.logout) {
@@ -36,6 +40,14 @@ class ContentMenuController {
     }
     if(choice == Constants.addFridge) {
       Popups.addFridge(context, this, onChange);
+    }
+    if(choice == Constants.hopper) {
+      if(Repository.sharedPreferences.containsKey('hopper')) {
+        Popups.infoPopup(context, 'Hopper', 'Already added notifications');
+      }
+      else {
+        await _hopperService.requestToken();
+      }
     }
   }
 
@@ -72,7 +84,7 @@ class ContentMenuController {
       );
     }
     catch(exception) {
-      _logger.e("ContentMenuController => FAILED TO FETCH QR");
+      _logger.e("FAILED TO FETCH QR");
       Navigator.of(context).pop();
     }
 
@@ -81,7 +93,7 @@ class ContentMenuController {
   }
 
   Future<void> createFridge(GlobalKey<FormState> key, BuildContext context, Function onChange) async {
-    _logger.i("ContentMenuController => CREATING FRIDGE");
+    _logger.i("CREATING FRIDGE");
     if(key.currentState.validate()) {
       try {
         await _fridgeRepository.add(Fridge.create(name: nameController.text));
@@ -89,13 +101,20 @@ class ContentMenuController {
         onChange();
       }
       catch (exception) {
-        Popups.errorPopup(context, exception.toString());
+        _logger.e('SOMETHING WENT WRONG WHILE CREATING FRIDGE', exception: exception);
       }
       Navigator.pop(context);
     }
   }
 
   Future<void> showPopUp(Uri url) async {
+
+    if(Repository.sharedPreferences.containsKey(url.toString())) {
+      return;
+    }
+
+    await Repository.sharedPreferences.setBool(url.toString(), true);
+
     return showDialog<void>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -109,10 +128,17 @@ class ContentMenuController {
     final PendingDynamicLinkData data = await FirebaseDynamicLinks.instance.getInitialLink();
     final Uri deepLink = data?.link;
 
-    print("deep $deepLink");
+
+    _logger.i("FOUND DEEP LINK $deepLink");
 
     if (deepLink != null) {
-      showPopUp(deepLink);
+      if(deepLink.queryParameters.containsKey('id')) {
+        _hopperService.registerToken(deepLink.queryParameters['id'], context);
+        return;
+      }
+      else {
+        showPopUp(deepLink);
+      }
       //Navigator.pushNamed(context, deepLink.path);
     }
 
@@ -120,10 +146,17 @@ class ContentMenuController {
         onSuccess: (PendingDynamicLinkData dynamicLink) async {
           final Uri deepLink = dynamicLink?.link;
 
-          print("deep $deepLink");
+
+          _logger.i("FOUND DEEP LINK 2 $deepLink");
           if (deepLink != null) {
-            showPopUp(deepLink);
-            //Navigator.pushNamed(context, deepLink.path);
+            if(deepLink.queryParameters.containsKey('id')) {
+              _hopperService.registerToken(deepLink.queryParameters['id'], context);
+              return;
+            }
+            else {
+              _logger.i("FOUND QUERY PARAMETERS 2 ${deepLink.queryParameters}");
+              showPopUp(deepLink);
+            }//Navigator.pushNamed(context, deepLink.path);
           }
         },
         onError: (OnLinkErrorException e) async {

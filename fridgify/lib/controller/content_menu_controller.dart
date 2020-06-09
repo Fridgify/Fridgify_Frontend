@@ -6,6 +6,7 @@ import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/service/auth_service.dart';
+import 'package:fridgify/service/hopper_service.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/constants.dart';
 import 'package:fridgify/utils/error_handler.dart';
@@ -28,7 +29,7 @@ class ContentMenuController {
   BuildContext context;
 
   Logger _logger = Logger('ContentMenuController');
-  ErrorHandler _errorHandler = ErrorHandler();
+  HopperService _hopperService = HopperService();
 
   Future<void> choiceAction(String choice, BuildContext context, Function onChange) async {
     if(choice == Constants.logout) {
@@ -39,6 +40,14 @@ class ContentMenuController {
     }
     if(choice == Constants.addFridge) {
       Popups.addFridge(context, this, onChange);
+    }
+    if(choice == Constants.hopper) {
+      if(Repository.sharedPreferences.containsKey('hopper')) {
+        Popups.infoPopup(context, 'Hopper', 'Already added notifications');
+      }
+      else {
+        await _hopperService.requestToken();
+      }
     }
   }
 
@@ -119,10 +128,17 @@ class ContentMenuController {
     final PendingDynamicLinkData data = await FirebaseDynamicLinks.instance.getInitialLink();
     final Uri deepLink = data?.link;
 
-    print("deep $deepLink");
+
+    _logger.i("FOUND DEEP LINK $deepLink");
 
     if (deepLink != null) {
-      showPopUp(deepLink);
+      if(deepLink.queryParameters.containsKey('id')) {
+        _hopperService.registerToken(deepLink.queryParameters['id'], context);
+        return;
+      }
+      else {
+        showPopUp(deepLink);
+      }
       //Navigator.pushNamed(context, deepLink.path);
     }
 
@@ -130,10 +146,17 @@ class ContentMenuController {
         onSuccess: (PendingDynamicLinkData dynamicLink) async {
           final Uri deepLink = dynamicLink?.link;
 
-          print("deep $deepLink");
+
+          _logger.i("FOUND DEEP LINK 2 $deepLink");
           if (deepLink != null) {
-            showPopUp(deepLink);
-            //Navigator.pushNamed(context, deepLink.path);
+            if(deepLink.queryParameters.containsKey('id')) {
+              _hopperService.registerToken(deepLink.queryParameters['id'], context);
+              return;
+            }
+            else {
+              _logger.i("FOUND QUERY PARAMETERS 2 ${deepLink.queryParameters}");
+              showPopUp(deepLink);
+            }//Navigator.pushNamed(context, deepLink.path);
           }
         },
         onError: (OnLinkErrorException e) async {

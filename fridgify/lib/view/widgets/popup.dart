@@ -70,6 +70,36 @@ class Popups {
     );
   }
 
+  static Future<void> infoPopup(BuildContext context, String title, String msg) async {
+    TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(),
+          title: Text(title, style: style),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(msg),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            RaisedButton(
+              color: Colors.purple,
+              child: Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   static Future<void> addFridge(BuildContext context, ContentMenuController _controller, Function onChange) async {
     TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
     GlobalKey<FormState> key = GlobalKey();

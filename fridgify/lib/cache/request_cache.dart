@@ -20,17 +20,23 @@ class RequestCache {
   Logger _logger = Logger('RequestCache');
 
   factory RequestCache() {
-    _cache.initConnectivity();
-    _cache._connectivitySubscription = _cache
-        ._connectivity.onConnectivityChanged
-        .listen(_cache._setConnectionStatus);
-    _cache.initCache();
+    if (_cache._connectivityStatus == null) {
+      _cache.initRequestCache();
+    }
     return _cache;
   }
 
   RequestCache._internal();
 
-  void initCache() async {
+  void initRequestCache() {
+    _cache.initConnectivity();
+    _cache._connectivitySubscription = _cache
+        ._connectivity.onConnectivityChanged
+        .listen(_cache._setConnectionStatus);
+    _cache.loadCache();
+  }
+
+  void loadCache() async {
     final directory = await _localPath;
     File file = File("$directory/cache.txt");
 
@@ -40,12 +46,30 @@ class RequestCache {
       return;
     }
 
-    List<dynamic> content = jsonDecode(await file.readAsString());
-    content.forEach((element) {
-      Response response = Response(
-          data: element['value']['data'], statusCode: element['value']['code']);
-      _responseStorage.putIfAbsent(element['key'], () => response);
-    });
+    try {
+      List<dynamic> content = jsonDecode(await file.readAsString());
+      content.forEach((element) {
+        if (!outdated(element['date'])) {
+          Response response = Response(
+              extra: new Map<String, dynamic>(),
+              data: element['value']['data'],
+              statusCode: element['value']['code']);
+          response.extra.putIfAbsent('date', () => element['date']);
+          _responseStorage.putIfAbsent(element['key'], () => response);
+        }
+      });
+    } catch (e) {
+      logger.e(e.toString());
+    }
+  }
+
+  bool outdated(String date) {
+    List<String> parts = date.split(':');
+    DateTime now = DateTime.now();
+    DateTime savedDate =
+        DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+    Duration difference = now.difference(savedDate);
+    return difference.inDays > 3;
   }
 
   void saveToFile() async {
@@ -54,7 +78,11 @@ class RequestCache {
 
     List<Map<String, dynamic>> data = [];
     _responseStorage.forEach((key, value) {
+      DateTime now = new DateTime.now();
       data.add({
+        'date': value.extra.containsKey('date')
+            ? value.extra['date']
+            : '${now.year}:${now.month}:${now.day}',
         'key': key,
         'value': {'data': value.data, 'code': value.statusCode}
       });

@@ -18,7 +18,6 @@ void main() async {
   Fridge fridge;
   Repository.isTest = true;
 
-
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     Repository.sharedPreferences = await SharedPreferences.getInstance();
@@ -46,8 +45,24 @@ void main() async {
 
     fridgeRepository = FridgeRepository(mockDio);
 
-    fridge = Fridge.create(
-        fridgeId: 69, name: 'Test fridge');
+    fridge = Fridge.create(fridgeId: 69, name: 'Test fridge');
+  });
+
+  group('Standard repository function', () {
+    setUp(() {
+      fridgeRepository.fridges.clear();
+      Fridge fridge2 = Fridge.create(fridgeId: 88, name: 'Test fridge 2');
+      fridgeRepository.fridges.putIfAbsent(fridge.fridgeId, () => fridge);
+      fridgeRepository.fridges.putIfAbsent(fridge2.fridgeId, () => fridge2);
+    });
+
+    test('get, gets Test fridge', () async {
+      expect('Test fridge', fridgeRepository.get(69).name);
+    });
+
+    test('getAll, gets two fridges', () async {
+      expect(2, fridgeRepository.getAll().length);
+    });
   });
 
   group('add', () {
@@ -88,8 +103,8 @@ void main() async {
       testUtil.setId('Delete');
 
       fridgeRepository.fridges[123] = Fridge.create(
-          fridgeId: 123,
-          name: 'Fridge to delete',
+        fridgeId: 123,
+        name: 'Fridge to delete',
       );
 
       expect(
@@ -125,17 +140,14 @@ void main() async {
   });
 
   group('getUsersForFridge', () {
-    setUp(() => {
-      testUtil.setTestCase('Get users for fridge')
-    });
-
+    setUp(() => {testUtil.setTestCase('Get users for fridge')});
 
     test('throws an error', () async {
       testUtil.setId('Error case get fridge members');
 
       expect(
-          () async =>
-              completion(await fridgeRepository.getUsersForFridge(fridge.fridgeId)),
+          () async => completion(
+              await fridgeRepository.getUsersForFridge(fridge.fridgeId)),
           throwsA(
               predicate((error) => error is FailedToFetchContentException)));
     });
@@ -155,17 +167,13 @@ void main() async {
   });
 
   group('joinByUrl', () {
-    setUp(() => {
-      testUtil.setTestCase('Join by url')
-    });
-
+    setUp(() => {testUtil.setTestCase('Join by url')});
 
     test('throws an error', () async {
       testUtil.setId('Error case join');
 
       expect(
-              () async =>
-              completion(await fridgeRepository.joinByUrl(Uri())),
+          () async => completion(await fridgeRepository.joinByUrl(Uri())),
           throwsA(
               predicate((error) => error is FailedToCreateNewFridgeException)));
     });
@@ -194,12 +202,7 @@ class FridgeRepositoryTestUtil extends TestUtil {
         Response response = Response(data: {
           'id': 123,
           'name': 'G',
-          'content': {
-            "total": 10,
-            "fresh": 0,
-            "dueSoon": 0,
-            "overDue": 10
-          },
+          'content': {"total": 10, "fresh": 0, "dueSoon": 0, "overDue": 10},
         }, statusCode: 201);
         this.setId('Join fridge handle get user for fridge');
         return response;
@@ -219,10 +222,8 @@ class FridgeRepositoryTestUtil extends TestUtil {
       case 'Error case add content':
         return Response(data: 'Error case add fridge', statusCode: 404);
       case 'Create fridge':
-        return Response(data: {
-          'fridge_id': 69,
-          'name': 'Test fridge'
-        }, statusCode: 201);
+        return Response(
+            data: {'fridge_id': 69, 'name': 'Test fridge'}, statusCode: 201);
       default:
         return Response(data: 'Not implemented', statusCode: 500);
     }
@@ -244,11 +245,13 @@ class FridgeRepositoryTestUtil extends TestUtil {
       case 'Error case fetch all':
         return Response(data: 'Error case fetch all', statusCode: 404);
       case 'Add fridges':
-        Response response = Response(data: createFridgeObjects(13), statusCode: 200);
+        Response response =
+            Response(data: createFridgeObjects(13), statusCode: 200);
         setId('Return member in fetch all');
         return response;
       case 'Return member in fetch all':
-        Response response = Response(data: createMemberObjects(13), statusCode: 200);
+        Response response =
+            Response(data: createMemberObjects(13), statusCode: 200);
         setId('Add content in fetch all');
         return response;
       case 'Add content in fetch all':
@@ -273,15 +276,16 @@ class FridgeRepositoryTestUtil extends TestUtil {
     List<Map<String, dynamic>> member = List();
 
     for (int i = 0; i < amount; i++) {
-      member.add({'user': {
-        'username': 'Mr. Mock No.$i',
-        'name': 'Dieter No.$i',
-        'surname': 'Mock No.$i',
-        'email': 'dieter.mockNo.$i@gmail.de',
-        'birth_date': '01.01.1969',
-        'id': null,
-      },
-        'role' : 'Fridge Owner'
+      member.add({
+        'user': {
+          'username': 'Mr. Mock No.$i',
+          'name': 'Dieter No.$i',
+          'surname': 'Mock No.$i',
+          'email': 'dieter.mockNo.$i@gmail.de',
+          'birth_date': '01.01.1969',
+          'id': null,
+        },
+        'role': 'Fridge Owner'
       });
     }
     return member;

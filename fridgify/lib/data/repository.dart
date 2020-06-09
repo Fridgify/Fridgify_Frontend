@@ -4,7 +4,6 @@ import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 abstract class Repository<Item, Key> {
   static const baseURL = "https://api-dev.fridgify.com/";
   static SharedPreferences sharedPreferences;
@@ -17,7 +16,7 @@ abstract class Repository<Item, Key> {
     if (isTest && mockDio == null) {
       return null;
     }
-    if(mockDio != null) {
+    if (mockDio != null) {
       return mockDio;
     } else {
       Dio dio = new Dio();

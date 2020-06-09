@@ -1,17 +1,17 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:fridgify/model/item.dart';
 import 'package:fridgify/utils/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sortedmap/sortedmap.dart';
-
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
+import 'package:fridgify/model/item.dart';
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sortedmap/sortedmap.dart';
 
 class ContentRepository implements Repository<Content, String> {
 
@@ -38,7 +38,8 @@ class ContentRepository implements Repository<Content, String> {
     var body = content.toString();
     _logger.i('Requesting $contentApi with $body');
 
-    var response = await dio.post(contentApi, options: Options(headers: Repository.getHeaders()), data: body);
+    var response = await dio.post(contentApi,
+        options: Options(headers: Repository.getHeaders()), data: body);
 
     _logger.i('CREATING CONTENT: ${response.data}');
 
@@ -54,7 +55,8 @@ class ContentRepository implements Repository<Content, String> {
         itemId: c[0]['item_id'],
       ));
 
-      this.contents.addAll(Map.fromIterable(c, key: (k) => k['content_id'],
+      this.contents.addAll(Map.fromIterable(c,
+          key: (k) => k['content_id'],
           value: (v) => Content.fromJson(v, this.fridge)));
 
       group();
@@ -72,6 +74,7 @@ class ContentRepository implements Repository<Content, String> {
     _logger.i(
         'DELETING CONTENT: ${response.data} ${response.statusCode} ON URL $contentApi$id');
 
+
     if (response.statusCode == 200) {
       _logger.i('DELETED CONTENT');
       removeFromGroup(this.get(id));
@@ -87,8 +90,8 @@ class ContentRepository implements Repository<Content, String> {
     _logger.i('FETCHIN FROM URL: $contentApi');
     this.grouped = SortedMap(Ordering.byKey());
 
-    var response =
-        await dio.get(contentApi, options: Options(headers: Repository.getHeaders()));
+    var response = await dio.get(contentApi,
+        options: Options(headers: Repository.getHeaders()));
 
     _logger.i('FETCHING CONTENT: ${response.data}');
 
@@ -98,7 +101,8 @@ class ContentRepository implements Repository<Content, String> {
       _logger.i('$contents');
 
       this.contents = Map.fromIterable(contents,
-          key: (e) => e['content_id'], value: (e) => Content.fromJson(e, this.fridge));
+          key: (e) => e['content_id'],
+          value: (e) => Content.fromJson(e, this.fridge));
 
       _logger.i("FETCHED ${this.contents.length} CONTENTS");
       group();
@@ -121,10 +125,11 @@ class ContentRepository implements Repository<Content, String> {
     _logger.i(
         'WITHDRAWING $amount FROM ${content.item.name} ${content.amount} FROM URL: $contentApi');
 
-    var response = await dio.patch('$contentApi${content.contentId}', options: Options(headers: Repository.getHeaders()), data: jsonEncode({'withdraw': amount}));
+    var response = await dio.patch('$contentApi${content.contentId}',
+        options: Options(headers: Repository.getHeaders()),
+        data: jsonEncode({'withdraw': amount}));
 
     _logger.i('WITHDRAWING CONTENT: ${response.data}');
-
 
     if (response.statusCode == 200) {
       var contents = response.data;
@@ -135,8 +140,7 @@ class ContentRepository implements Repository<Content, String> {
         _logger.i("Empty delete");
         this.contents.remove(content.contentId);
         removeFromGroup(content);
-      }
-      else {
+      } else {
         this.contents[content.contentId] = content;
       }
       return content;
@@ -149,10 +153,11 @@ class ContentRepository implements Repository<Content, String> {
     _logger.i(
         'UPDATING CONTENT $attribute with $parameter FROM URL: $contentApi');
 
-    var response = await dio.patch('$contentApi${content.item.itemId}', options: Options(headers: Repository.getHeaders()), data: jsonEncode({attribute: parameter}));
+    var response = await dio.patch('$contentApi${content.item.itemId}',
+        options: Options(headers: Repository.getHeaders()),
+        data: jsonEncode({attribute: parameter}));
 
     _logger.i('PATCHING CONTENT: ${response.data}');
-
 
     if (response.statusCode == 200) {
       var contents = response.data;
@@ -165,7 +170,6 @@ class ContentRepository implements Repository<Content, String> {
   }
 
   void group() {
-
     this.grouped = SortedMap();
 
     this.getAll().forEach((key, value) =>
@@ -178,14 +182,13 @@ class ContentRepository implements Repository<Content, String> {
       }
     });
     _logger.i("CREATED GROUP ${this.grouped.length}");
+
   }
 
   void addToGroup(Content c) {
-    if(grouped.containsKey(c.item.name)) {
+    if (grouped.containsKey(c.item.name)) {
       grouped[c.item.name].add(c);
-    }
-    else
-    {
+    } else {
       List<Content> tmp = List<Content>();
       tmp.add(c);
       grouped[c.item.name] = tmp;
@@ -193,12 +196,11 @@ class ContentRepository implements Repository<Content, String> {
   }
 
   void removeFromGroup(Content c) {
-    if(grouped.containsKey(c.item.name)) {
+    if (grouped.containsKey(c.item.name)) {
       grouped[c.item.name].remove(c);
-      if(grouped[c.item.name].length == 0)
-        {
-          grouped.remove(c.item.name);
-        }
+      if (grouped[c.item.name].length == 0) {
+        grouped.remove(c.item.name);
+      }
     }
   }
 

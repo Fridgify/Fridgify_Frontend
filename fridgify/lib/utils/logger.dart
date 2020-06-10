@@ -1,6 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:device_id/device_id.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:uuid/uuid.dart';
 import 'error_handler.dart';
 import 'package:logger/logger.dart' as _Logger;
 
@@ -51,7 +51,7 @@ class Logger {
 
   Future<void> _uploadLog(String type, String msg) async {
     if(_deviceID == null) {
-      _deviceID = await DeviceId.getID;
+      _deviceID = Uuid().v1();
     }
     await _analytics.logEvent(name: _name,
         parameters: <String, String> {

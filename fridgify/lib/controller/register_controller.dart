@@ -90,7 +90,7 @@ class RegisterController {
 
   Future<bool> validateFirstForm(
       GlobalKey<FormState> key, BuildContext context) async {
-    _logger.e("VALIDATING INPUT");
+    _logger.i("VALIDATING INPUT");
 
     // Reset last validation
     Validator.userNotUnique = false;
@@ -117,7 +117,7 @@ class RegisterController {
       return false;
     }
 
-    _logger.e("UNIQUE");
+    _logger.i("UNIQUE");
 
     Navigator.of(context, rootNavigator: true).pop();
     return true;
@@ -127,7 +127,7 @@ class RegisterController {
       GlobalKey<FormState> key, BuildContext context) async {
     Validator.doNotMatch =
         textInputControllerPass.text != textInputControllerRepeatPass.text;
-    _logger.e(
+    _logger.i(
         "VALIDATING INPUT 2 DO NOT MATCH: ${Validator.doNotMatch}");
 
     return key.currentState.validate();

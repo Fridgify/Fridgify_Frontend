@@ -30,8 +30,10 @@ class LoginController {
       await _authService.login();
       await _authService.fetchApiToken();
     } catch (exception) {
-      _logger.e("FAILED TO LOG IN", exception: exception.toString());
       Navigator.of(context, rootNavigator: true).pop();
+      _logger.e("FAILED TO LOG IN", exception: exception.toString(), popup: false);
+      Popups.errorPopup(context, 'Failed to login: ${exception.toString()}');
+      return;
     }
 
     try {

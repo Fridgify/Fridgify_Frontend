@@ -11,8 +11,8 @@ import 'package:fridgify/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
-  static const String userApi = "${Repository.baseURL}users/";
-  static const String userManagementApi = "${Repository.baseURL}fridge/management/";
+  static final String userApi = "${Repository.baseURL}users/";
+  static final String userManagementApi = "${Repository.baseURL}fridge/management/";
 
   Dio dio;
 

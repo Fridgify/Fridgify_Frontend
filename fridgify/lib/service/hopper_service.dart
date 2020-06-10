@@ -8,12 +8,12 @@ import 'package:fridgify/view/widgets/popup.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HopperService {
-  static const String _fetchApiUrl = "${Repository.baseURL}messaging/subscribe?service=2";
-  static const String _registerApiUrl = "${Repository.baseURL}messaging/register/";
+  static final String _fetchApiUrl = "${Repository.baseURL}messaging/subscribe?service=2";
+  static final String _registerApiUrl = "${Repository.baseURL}messaging/register/";
 
   Dio dio;
 
-  Logger _logger = Logger('UserService');
+  Logger _logger = Logger('HopperService');
 
   static final HopperService _hopperService = HopperService._internal();
 

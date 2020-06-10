@@ -193,19 +193,22 @@ class DatePickerText extends StatelessWidget {
 }
 
 class Label extends StatelessWidget {
-  const Label({
+  Label({
     Key key,
     @required this.text,
     @required this.onPressed,
+    this.topVal,
   }) : super(key: key);
 
+  double topVal = 0.0;
   final String text;
   final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
+    double x = topVal;
     return Container(
-      margin: const EdgeInsets.only(top: 20.0),
+      margin: const EdgeInsets.only(top: 0.0),
       padding: const EdgeInsets.only(left: 20.0, right: 20.0),
       child: new Row(
         children: <Widget>[

@@ -72,13 +72,20 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       height: 15.0,
                     ),
-                    Label(
-                        text: "DON'T HAVE AN ACCOUNT?",
-                        key: Key('registerButton'),
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RegisterPage()))),
+                    Column(
+                      children: <Widget>[
+                        Label(
+                            text: "DON'T HAVE AN ACCOUNT?",
+                            key: Key('registerButton'),
+                            onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => RegisterPage()))),
+                        Label(
+                            text: "DATAPRIVACY",
+                            onPressed: () async => await _controller.launchPrivacy()),
+                      ],
+                    ),
                   ],
                 ),
               ),

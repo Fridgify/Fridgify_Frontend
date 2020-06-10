@@ -62,9 +62,18 @@ class _RegisterPageState extends State<RegisterPage> {
                       SizedBox(
                         height: 15.0,
                       ),
-                      Label(
-                          text: "ALREADY OWN AN ACCOUNT?",
-                          onPressed: () => Navigator.pop(context)),
+                      Column(
+                        children: <Widget>[
+                          Label(
+                              text: "ALREAEDY OWN AN ACCOUNT?",
+                              key: Key('registerButton'),
+                              onPressed: () => Navigator.pop(context)
+                          ),
+                          Label(
+                              text: "DATAPRIVACY",
+                              onPressed: () async => await _controller.launchPrivacy()),
+                        ],
+                      ),
                     ],
                   ),
                 ),

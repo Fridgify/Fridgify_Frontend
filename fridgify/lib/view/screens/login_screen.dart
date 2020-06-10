@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/login_controller.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/screens/register_screen.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
@@ -15,10 +16,12 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   LoginController _controller = LoginController();
+  ErrorHandler _errorHandler = ErrorHandler();
   final key = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    _errorHandler.setContext(context);
     return Scaffold(
         body: SingleChildScrollView(
       child: Center(
@@ -42,14 +45,16 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 45.0),
-                    FormElements.textField(
+                    FormTextField(
+                        key: Key('loginUsername'),
                         style: style,
                         controller: _controller.textInputControllerUser,
                         obscureText: false,
                         hintText: 'Username',
                         validator: Validator.validateUser),
                     SizedBox(height: 25.0),
-                    FormElements.textField(
+                    FormTextField(
+                        key: Key('loginPassword'),
                         style: style,
                         controller: _controller.textInputControllerPass,
                         obscureText: true,
@@ -58,7 +63,8 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       height: 35.0,
                     ),
-                    FormElements.button(
+                    FormButton(
+                        key: Key('loginButton'),
                         context: context,
                         style: style,
                         onPressed: () => _controller.login(context, key),
@@ -66,8 +72,9 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       height: 15.0,
                     ),
-                    FormElements.label(
+                    Label(
                         text: "DON'T HAVE AN ACCOUNT?",
+                        key: Key('registerButton'),
                         onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(

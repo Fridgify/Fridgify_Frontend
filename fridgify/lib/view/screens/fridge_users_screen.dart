@@ -4,6 +4,7 @@ import 'package:fridgify/controller/user_controller.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/permission_helper.dart';
 
 class UsersPage extends StatefulWidget {
@@ -22,6 +23,7 @@ class _UsersPageState extends State<UsersPage> {
   final UserService _userService = UserService();
   UserController _controller;
   Permissions mainPerm = Permissions.user;
+  ErrorHandler _errorHandler = ErrorHandler();
 
   _UsersPageState(this.users, this.fridge) {
     this._controller = UserController(this.fridge, this.users, setState);
@@ -30,6 +32,7 @@ class _UsersPageState extends State<UsersPage> {
 
   @override
   Widget build(BuildContext context) {
+    _errorHandler.setContext(context);
     return Scaffold(
         appBar: new AppBar(
           title: new Text("Fridgify"),

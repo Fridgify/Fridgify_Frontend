@@ -1,18 +1,16 @@
-import 'dart:math';
-
 import 'package:dio/dio.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
+import 'package:fridgify/utils/logger.dart';
 
-import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ItemRepository implements Repository<Item, int> {
   Fridge fridge;
-  Logger logger = Repository.logger;
+  Logger _logger = Logger('ItemRepository');
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   StoreRepository storeRepository = StoreRepository();
   Dio dio;
@@ -30,17 +28,33 @@ class ItemRepository implements Repository<Item, int> {
 
   ItemRepository._internal();
 
-  @override
-  Future<int> add(item) async {
-    if(items.containsValue(item)) {
-      return this.items.values.firstWhere((element) => element == item).itemId;
-    }
-    int id = 100000 + Random().nextInt(1000);
-    items[id] = item;
-    return id;
+  
+  
+  
+  int addSync(item) {
+    _logger.i("ADDING ITEM ${item.name} ${item.itemId}");
+    this.items[item.itemId] = item;
+    return item.itemId;
   }
 
-  Future<Item> barcode(String barcode) {
+  Future<Item> barcode(String barcode) async {
+    var url = "${itemApi}barcode/$barcode";
+
+    _logger.i('FETCHIN FROM BARCODE URL: $url');
+
+    var response = await dio.get(url,
+        options: Options(headers: Repository.getHeaders())
+    );
+
+    _logger.i('FETCHING BARCODE ITEM: ${response.data}');
+
+    if (response.statusCode == 200) {
+      var item = response.data;
+
+      _logger.i('$item');
+
+      return Item.fromJson(item);
+    }
     return null;
   }
 
@@ -52,30 +66,24 @@ class ItemRepository implements Repository<Item, int> {
 
   @override
   Future<Map<int, Item>> fetchAll() async {
-    logger.i('ItemRepository => FETCHIN FROM URL: $itemApi');
+    _logger.i('FETCHIN FROM URL: $itemApi');
 
     var response = await dio.get(itemApi,
         options: Options(headers: Repository.getHeaders())
     );
 
-    logger.i('ItemRepository => FETCHING ITEMS: ${response.data}');
+    _logger.i('FETCHING ITEMS: ${response.data}');
 
     if (response.statusCode == 200) {
       var items = response.data;
 
-      logger.i('ItemRepository => $items');
+      _logger.i('$items');
 
-      for (var item in items) {
-        logger.i("ItemRepository => FETCHED ITEMS: ${item.toString()}");
-        Item i = Item(
-            itemId: item['item_id'],
-            barcode: item['barcode'],
-            name: item['name'],
-            store: storeRepository.get(item['store']));
-        this.items[i.itemId] = i;
-      }
+      this.items = Map.fromIterable(items,
+          key: (e) => e['item_id'], value: (e) => Item.fromJson(e));
 
-      logger.i("ItemRepository => FETCHED ${this.items.length} ITEMS");
+
+      _logger.i("FETCHED ${this.items.length} ITEMS");
       return this.items;
     }
     throw new FailedToFetchContentException();
@@ -89,5 +97,11 @@ class ItemRepository implements Repository<Item, int> {
   @override
   Map<int, Item> getAll() {
     return this.items;
+  }
+
+  @override
+  Future<int> add(Item item) {
+    // TODO: implement add
+    throw UnimplementedError();
   }
 }

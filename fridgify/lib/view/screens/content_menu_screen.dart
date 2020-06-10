@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/utils/constants.dart';
-import 'package:fridgify/view/widgets/popup.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
 
@@ -24,6 +23,7 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
   AuthenticationService _authenticationService = AuthenticationService();
   ContentMenuController _controller = ContentMenuController();
   RefreshController _refreshController =  RefreshController(initialRefresh: false);
+  ErrorHandler _errorHandler = ErrorHandler();
 
   Timer _timerLink;
 
@@ -57,6 +57,7 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
   }
 
   void _onChanged() {
+    print("Parent call");
     setState(() {
 
     });
@@ -65,6 +66,7 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _controller.retrieveDynamicLink();
   }
 
   @override
@@ -85,6 +87,7 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
+    _errorHandler.setContext(context);
     _controller.context = context;
     _controller.setState = setState;
     return Scaffold(

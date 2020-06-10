@@ -1,10 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
 
 import 'package:fridgify/model/fridge.dart';
-import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/view/screens/fridge_detail_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
@@ -60,7 +58,7 @@ class MenuElements {
       ContentMenuController controller) {
 
     return GestureDetector(
-      onTap: () async => await MenuElements._navigateToNextFridge(fridge, context),
+      onTap: () async => await MenuElements._navigateToNextFridge(fridge, context, onChanged),
       child: Padding(
           padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 0.0),
           child: Card(
@@ -211,7 +209,7 @@ class MenuElements {
     return result;
   }
   
-  static Future<void> _navigateToNextFridge(Fridge fridge, BuildContext context) async {
+  static Future<void> _navigateToNextFridge(Fridge fridge, BuildContext context, Function onChanged) async {
     Loader.showSimpleLoadingDialog(context);
     await fridge.contentRepository.fetchAll();
 
@@ -219,7 +217,9 @@ class MenuElements {
         context,
         MaterialPageRoute(
         builder: (context) => FridgeDetailPage(fridge: fridge),
-    ));
+    )).then((value) {
+        onChanged();
+      });
   }
 }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:fridgify/utils/permission_helper.dart';
 
 class User {
   String username;
@@ -37,6 +36,17 @@ class User {
     @required this.birthDate,
     @required this.userId,
   });
+
+  factory User.fromJson(dynamic json) {
+    return User.noPassword(
+      username: json['username'],
+      name: json['name'],
+      surname: json['surname'],
+      email: json['email'],
+      birthDate: json['birth_date'],
+      userId: json['user_id'],
+    );
+  }
 
   @override
   String toString() {

@@ -7,11 +7,8 @@ import 'package:fridgify/exception/failed_to_fetch_qr_exception.dart';
 import 'package:fridgify/exception/failed_to_patch_user_exception.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
-import 'package:http/http.dart';
-import 'package:fridgify/model/user.dart';
-import 'package:logger/logger.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fridgify/utils/permission_helper.dart';
 
 class UserService {
   static const String userApi = "${Repository.baseURL}users/";
@@ -21,7 +18,7 @@ class UserService {
 
   User user;
 
-  Logger logger = Logger();
+  Logger _logger = Logger('UserService');
 
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
 
@@ -35,13 +32,13 @@ class UserService {
   UserService._internal();
 
   Future<User> fetchUser() async {
-    logger.i('UserService => FETCHING USER FROM URL: $userApi');
+    _logger.i('FETCHING USER FROM URL: $userApi');
 
     var response = await dio.get(userApi, options: Options(
       headers: Repository.getHeaders())
     );
 
-    logger.i('UserService => FETCHING USER DATA: ${response.data}');
+    _logger.i('FETCHING USER DATA: ${response.data}');
 
     if (response.statusCode == 200) {
       var user = response.data;
@@ -55,7 +52,7 @@ class UserService {
 
       this.user = u;
 
-      logger.i('UserService => $user');
+      _logger.i('$user');
 
       return this.user;
     }
@@ -67,8 +64,8 @@ class UserService {
   }
 
   Future<User> update(User user, String parameter, dynamic attribute) async {
-    logger.i(
-        'UserService => UPDATING $parameter with $attribute FROM URL: $userApi');
+    _logger.i(
+        'UPDATING $parameter with $attribute FROM URL: $userApi');
 
     var response = await dio.patch(userApi,
         data: jsonEncode({parameter: attribute}),
@@ -76,11 +73,11 @@ class UserService {
           headers: Repository.getHeaders())
     );
 
-    logger.i('UserService => PATCHING USER: ${response.statusCode}');
+    _logger.i('PATCHING USER: ${response.statusCode}');
 
     if (response.statusCode == 200) {
       var us = response.data;
-      logger.i('UserService => UPDATED SUCCESSFUL $user');
+      _logger.i('UPDATED SUCCESSFUL $user');
 
       User u = User.newUser(
           username: us['username'],
@@ -98,8 +95,8 @@ class UserService {
 
   Future<Map<String, bool>> checkUsernameEmail(String user, String mail) async {
 
-    logger.i(
-        'UserService => CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
+    _logger.i(
+        'CHECKING IF $user and $mail ARE UNIQUE FROM URL: ${userApi}duplicate/');
 
     var response = await dio.post("${userApi}duplicate/",
         data: jsonEncode({
@@ -110,11 +107,11 @@ class UserService {
             headers: {"Content-Type": "application/json"})
     );
 
-    logger.i('UserService => CHECKING FOR DUPLICATE USER: ${response.data}');
+    _logger.i('CHECKING FOR DUPLICATE USER: ${response.data}');
     Map<String, dynamic> res = response.data;
 
     if (response.statusCode == 200) {
-      logger.i('UserService => EMAIL USER UNIQUE ${response.data}');
+      _logger.i('EMAIL USER UNIQUE ${response.data}');
       return {"user": false, "mail": false};
     }
 
@@ -126,11 +123,11 @@ class UserService {
 
     var userUrl = "$userManagementApi${f.fridgeId}/users/${u.userId}/";
 
-    logger.i("UserService => PATCHING USER ${u.username} FOR FRIDGE ${f.fridgeId} NEW ROLE $role URL $userUrl");
+    _logger.i("PATCHING USER ${u.username} FOR FRIDGE ${f.fridgeId} NEW ROLE $role URL $userUrl");
 
     var response = await dio.patch(userUrl, options: Options(headers: Repository.getHeaders()), data: jsonEncode({"role": role}));
 
-    logger.i('UserService => PATCHED USER ${response.data}');
+    _logger.i('PATCHED USER ${response.data}');
 
     if(response.statusCode == 200) {
       return response.data['role'];
@@ -144,11 +141,11 @@ class UserService {
 
     var userUrl = "$userManagementApi${f.fridgeId}/users/${u.userId}/";
 
-    logger.i("UserService => REMOVING USER ${u.username} FOR FRIDGE ${f.fridgeId} URL $userUrl");
+    _logger.i("REMOVING USER ${u.username} FOR FRIDGE ${f.fridgeId} URL $userUrl");
 
     var response = await dio.delete(userUrl, options: Options(headers: Repository.getHeaders()),);
 
-    logger.i('UserService => REMOVED USER ${response.data}');
+    _logger.i('REMOVED USER ${response.data}');
 
     if(response.statusCode == 200) {
       return true;
@@ -161,12 +158,12 @@ class UserService {
   Future<String> fetchDeepLink(Fridge f) async {
     var fridgeUrl = "$userManagementApi/${f.fridgeId}/qr-code";
 
-    logger.i("UserService => FETCHIGN QR FROM $fridgeUrl");
+    _logger.i("FETCHIGN QR FROM $fridgeUrl");
 
     var response = await dio.get(fridgeUrl, options: Options(headers: Repository.getHeaders()));
 
 
-    logger.i("UserService => RESPONSE FROM ${response.data}");
+    _logger.i("RESPONSE FROM ${response.data}");
 
     if(response.statusCode == 201) {
       return response.data["dynamic_link"];
@@ -174,5 +171,32 @@ class UserService {
 
     throw FailedToFetchQrException();
 
+  }
+
+  Future<bool> registerNotificationToken(String token) async {
+    var sharePref = Repository.sharedPreferences;
+
+    if(sharePref.get('notification') != null) {
+      _logger.i("FOUND TOKEN IN CACHE");
+      return true;
+    }
+
+    var url = "${Repository.baseURL}messaging/register/";
+
+    _logger.i("REGISTER NOTIFICATIONS $url");
+
+    var response = await dio.post(url, options: Options(headers: Repository.getHeaders()),
+                                  data: jsonEncode({"client_token": token}));
+
+
+    _logger.i("RESPONSE FROM ${response.data} ${response.statusCode}");
+
+    if(response.statusCode == 201) {
+      _logger.i("WROTE TOKEN");
+      sharePref.setBool('notification', true);
+      return true;
+    }
+
+    throw FailedToFetchQrException();
   }
 }

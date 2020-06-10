@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
@@ -11,10 +8,9 @@ import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/model/user.dart';
+import 'package:fridgify/service/firebase_service.dart';
 import 'package:fridgify/service/user_service.dart';
-import 'package:fridgify/view/widgets/popup.dart';
-import 'package:logger/logger.dart';
-import 'package:http/http.dart';
+import 'package:fridgify/utils/logger.dart';
 
 /// This Authentication Service handles login, registration and token fetching
 /// It works with the cache "Repository.sharedPreferences" and keeps it all time updated
@@ -23,7 +19,7 @@ class AuthenticationService {
 
   User user;
 
-  Logger logger = Logger();
+  Logger _logger = Logger('AuthenticationService');
 
   Dio dio;
 
@@ -46,14 +42,14 @@ class AuthenticationService {
         email: email,
         birthDate: birthDate);
     this.dio = Repository.getDio();
-    logger.i("AuthService => NEW USER: ${user.toString()}");
+    _logger.i("NEW USER: ${user.toString()}");
   }
 
   /// Constructor for login use case
   AuthenticationService.login(String username, String password) {
     user = User.loginUser(username: username, password: password);
     this.dio = Repository.getDio();
-    logger.i("AuthService => LOGIN: ${user.toString()}");
+    _logger.i("LOGIN: ${user.toString()}");
   }
 
   AuthenticationService([Dio dio]) {
@@ -74,10 +70,10 @@ class AuthenticationService {
         options: Options(headers: {"Content-Type": "application/json"})
     );
 
-    logger.i('AuthService => REGISTER: ${response.data}');
+    _logger.i('REGISTER: ${response.data}');
 
     if (response.statusCode == 201) {
-      logger.i('AuthService => REGISTER SUCCESSFUL ${response.statusCode}');
+      _logger.i('REGISTER SUCCESSFUL ${response.statusCode}');
 
       return await login();
     }
@@ -87,22 +83,22 @@ class AuthenticationService {
 
   /// Login call to fetch client token
   Future<String> login() async {
-    logger.i('AuthService => LOGGING');
+    _logger.i('LOGGING');
 
     var response = await dio.post("$authAPI/login/",
         data: jsonEncode({"username": user.username, "password": user.password}),
         options: Options(headers: {"Content-Type": "application/json"})
     );
 
-    logger.i('AuthService => LOGGING IN: ${response.data}');
+    _logger.i('LOGGING IN: ${response.data}');
 
     if (response.statusCode == 200) {
       var token = response.data["token"];
 
-      logger.i('AuthService => FETCHED CLIENTTOKEN $token');
+      _logger.i('FETCHED CLIENTTOKEN $token');
 
       await Repository.sharedPreferences.setString("clientToken", token);
-      logger.i('AuthService => WROTE TO CACHE');
+      _logger.i('WROTE TO CACHE');
 
       return token;
     }
@@ -116,8 +112,8 @@ class AuthenticationService {
     bool cacheClear =
         await Repository.sharedPreferences.remove("clientToken") && await Repository.sharedPreferences.remove("apiToken");
 
-    logger.i(
-        "AuthService => LOGGING OUT BY CLEARING CACHE FROM TOKENS: $cacheClear");
+    _logger.i(
+        "LOGGING OUT BY CLEARING CACHE FROM TOKENS: $cacheClear");
 
 
     return cacheClear;
@@ -128,7 +124,7 @@ class AuthenticationService {
     final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
 
     if (clientToken == null) {
-      logger.e("AuthService => NO CLIENT TOKEN FOUND IN CACHE");
+      _logger.e("NO CLIENT TOKEN FOUND IN CACHE");
       throw FailedToFetchClientTokenException();
     }
 
@@ -137,24 +133,24 @@ class AuthenticationService {
       headers: {"Authorization": clientToken}));
 
 
-    logger.i('AuthService => FETCHING API TOKEN ${response.data}');
+    _logger.i('FETCHING API TOKEN ${response.data}');
 
     if (response.statusCode == 201) {
       var token = response.data["token"];
       var timer = response.data["validation_time"];
 
-      logger.i("AuthService => FETCHED TOKEN: $token");
+      _logger.i("FETCHED TOKEN: $token");
 
       await Repository.sharedPreferences.setString("apiToken", token);
-      logger.i(
-          "AuthService => WROTE TO CACHE - STARTING TIMER OF $timer SECONDS");
+      _logger.i(
+          "WROTE TO CACHE - STARTING TIMER OF $timer SECONDS", upload: true);
 
       /*
         Starting timer with the Token live time and fetch a new token if timer
         expires -> Maybe outsource to extra function?
        */
       Timer(Duration(seconds: 60/*timer*/), () async {
-        logger.i("AuthService => API TOKEN DIED FETCH NEW");
+        _logger.i("API TOKEN DIED FETCH NEW");
         if (await Repository.sharedPreferences.remove("apiToken")) {
           await fetchApiToken();
         }
@@ -170,14 +166,14 @@ class AuthenticationService {
     final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
 
     if (clientToken == null) {
-      logger.e("AuthService => NO CLIENT TOKEN FOUND IN CACHE");
+      _logger.e("NO CLIENT TOKEN FOUND IN CACHE");
       throw FailedToFetchClientTokenException();
     }
 
     var response = await dio.post("$authAPI/login/", options: Options(
         headers: {"Authorization": clientToken}));
 
-    logger.i('AuthService => VALIDATING TOKEN: ${response.data}');
+    _logger.i('VALIDATING TOKEN: ${response.data}');
 
     if(response.statusCode == 200) {
       return true;
@@ -187,13 +183,15 @@ class AuthenticationService {
   }
 
   Future<bool> initiateRepositories() async {
+    FirebaseService firebaseService = FirebaseService();
     StoreRepository storeRepository = StoreRepository();
     ItemRepository itemRepository = ItemRepository();
     FridgeRepository fridgeRepository = FridgeRepository();
     UserService userService = UserService();
 
     try {
-      logger.i('MainController => FETCHING ALL REPOSITORIES');
+      _logger.i('FETCHING ALL REPOSITORIES', upload: true);
+      firebaseService.initState();
       await Future.wait(
           [
             fridgeRepository.fetchAll(),
@@ -202,9 +200,10 @@ class AuthenticationService {
             userService.fetchUser(),
           ]
       );
+
     }
     catch(exception) {
-      logger.e('MainController => FAILED TO FETCH REPOSITORY $exception');
+      _logger.e('FAILED TO FETCH REPOSITORY', exception: exception);
       return false;
     }
     return true;

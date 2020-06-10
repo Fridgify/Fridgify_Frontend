@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:fridgify/model/content.dart';
-import 'package:fridgify/utils/item_state_helper.dart';
 
 
 
@@ -59,12 +58,14 @@ class _ItemCircularSliderState extends State<ItemCircularSlider> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
         key: forceRebuild,
-        child: Container(child: SingleCircularSlider(300, (this.content.amount / this.content.maxAmount * 300).toInt(),
+        child: Container(child:
+        SingleCircularSlider(300, (this.content.amount / this.content.maxAmount * 300).toInt(),
           baseColor: Colors.purple.withAlpha(80),
           handlerColor: Colors.purple.shade600,
           selectionColor: Colors.purple,

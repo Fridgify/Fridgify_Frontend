@@ -5,6 +5,7 @@ class Constants {
   static const String addFridge = "Add Fridge";
   static const String logout = "Logout";
   static const String settings = "Settings";
+  static const String hopper = "Add Hopper notifications";
 
   static const String addItem = "Add Item";
   static const String showMembers = "Show Members";
@@ -14,6 +15,7 @@ class Constants {
     addFridge,
     logout,
     settings,
+    hopper,
   ];
 
 

@@ -5,6 +5,7 @@ import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/item.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 import 'package:fridgify/view/widgets/loader.dart';
@@ -15,13 +16,14 @@ class AddItemPopUp extends StatefulWidget {
   final BuildContext context;
   final Item item;
   final Function parentSetState;
+  final String barcode;
 
   AddItemPopUp(this.repo, this.item,
-      this.context, this.parentSetState);
+      this.context, this.parentSetState, this.barcode);
 
   @override
   _AddItemPopUpState createState() =>
-      _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState);
+      _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState, this.barcode);
 }
 
 class _AddItemPopUpState extends State<AddItemPopUp> {
@@ -29,26 +31,31 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
   final BuildContext context;
   final StoreRepository _storeRepository = StoreRepository();
   final Function parentSetState;
+
+  Logger _logger = Logger('AddItemPopUp');
+
   AddItemController _controller;
   int startValue;
   Content content;
   Item item;
+  String barcode;
 
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 16.0);
 
-  _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState) {
-    this._controller = AddItemController(contentRepository: this.repo);
+  _AddItemPopUpState(this.repo, this.item, this.context, this.parentSetState, this.barcode) {
+    this._controller = AddItemController(contentRepository: this.repo, item: item);
   }
 
   Future<void> _addItem() async {
     Loader.showSimpleLoadingDialog(context);
     try {
-      await _controller.addContent();
+      await _controller.addContent(barcode);
     }
-    catch(exception)
+     catch(exception)
     {
       Navigator.of(context).pop();
-      Popups.errorPopup(context, "Failed to Add item $exception");
+
+      _logger.e("FAILED TO ADD ITEM", exception: exception);
       return;
     }
     Navigator.of(context).pop();
@@ -65,13 +72,13 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
         child: Form(
           child: Column(
             children: <Widget>[
-              FormElements.textField(
+              FormTextField(
                   style: style,
                   controller: _controller.itemNameController,
                   obscureText: false,
                   hintText: 'Item Name',
                   validator: Validator.validateUser),
-              FormElements.datePickerText(
+              DatePickerText(
                 style: style,
                 context: context,
                 controller: _controller.expirationDateController,
@@ -80,31 +87,32 @@ class _AddItemPopUpState extends State<AddItemPopUp> {
                 validator: Validator.validateDate,
                 max: DateTime.now().add(Duration(days: 10000)),
               ),
-              FormElements.numberField(
+              NumberField(
                   style: style,
                   controller: _controller.itemCountController,
                   obscureText: false,
                   hintText: 'Count',
-                  validator: Validator.validateUser),
-              FormElements.numberField(
+                  validator: Validator.validateUser,
+              maxNumber: 100,),
+              NumberField(
                   style: style,
                   controller: _controller.itemAmountController,
                   obscureText: false,
                   hintText: 'Amount',
                   validator: Validator.validateUser),
-              FormElements.textField(
+              FormTextField(
                   style: style,
                   controller: _controller.itemUnitController,
                   obscureText: false,
                   hintText: 'Unit',
                   validator: Validator.validateUser),
-              FormElements.autocompleteTextForm(
+              AutocompleteTextForm(
                   style: style,
                   controller: _controller.itemStoreController,
                   obscureText: false,
                   hintText: 'Store',
                   validator: Validator.validateUser,
-                  suggestions: _storeRepository.getAllWithName().values.toList(),
+                  suggestions: _storeRepository.getAllWithName().values.toSet().toList(),
 
               ),
             ],

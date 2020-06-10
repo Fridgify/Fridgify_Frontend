@@ -11,6 +11,7 @@ import 'package:fridgify/model/item.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/constants.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/utils/permission_helper.dart';
 import 'package:fridgify/view/popups/add_item_popup.dart';
 import 'package:fridgify/view/popups/edit_value_popup.dart';
@@ -18,19 +19,18 @@ import 'package:fridgify/view/popups/no_item_found_popup.dart';
 import 'package:fridgify/view/screens/fridge_users_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
-import 'package:logger/logger.dart';
 
 class FridgeDetailController {
   Function setState;
   Fridge fridge;
-  Logger _logger = Logger();
+  Logger _logger = Logger('FridgeDetailController');
 
   bool isEditMode = false;
   List<Content> contents;
 
   BuildContext context;
 
-  List<Content> _selected = List();
+  Set<Content> _selected = Set();
 
   ItemRepository _itemRepository = ItemRepository();
 
@@ -55,25 +55,20 @@ class FridgeDetailController {
 
   Future<void> handleOptions(String string, BuildContext context) async {
     if(string == Constants.addItem) {
-      _logger.i("DetailController => ADDING ITEM");
+      _logger.i("ADDING ITEM");
 
       Item item;
 
       var result = await BarcodeScanner.scan();
 
-      print(result.type); // The result type (barcode, cancelled, failed)
-      print(result.rawContent); // The barcode content
-      print(result.format); // The barcode format (as enum)
-      print(result.formatNote); // If a unknown format was scanned this field contains a note
-
-      _logger.i("DetailController => SCANNED BARCODE ${result.type}");
+      _logger.i("SCANNED BARCODE ${result.type}");
 
       if(result.type == ResultType.Barcode || !(result.type == ResultType.Cancelled)) {
         item = await findItem(result);
-        _logger.i("DetailController => FOUND ITEM ${item}");
+        _logger.i("FOUND ITEM $item");
 
         if(item == null) {
-          _logger.i("DetailController => NO ITEM FOUND");
+          _logger.i("NO ITEM FOUND");
           await showDialog<void>(
               context: context,
               barrierDismissible: false, // user must tap button!
@@ -88,7 +83,7 @@ class FridgeDetailController {
           context: context,
           barrierDismissible: false, // user must tap button!
           builder: (BuildContext context) {
-            return AddItemPopUp(this.fridge.contentRepository, item, context, setState);
+            return AddItemPopUp(this.fridge.contentRepository, item, context, setState, getBarcode(result));
           });
     }
     if(string == Constants.showMembers) {
@@ -108,10 +103,20 @@ class FridgeDetailController {
   }
 
   Future<Item> findItem(ScanResult result) async {
-    _logger.i("DetailController => LOCATING ITEM ${result.rawContent}");
+    _logger.i("LOCATING ITEM ${result.rawContent}");
     if(isValidBarcode(result.format)) {
-      _logger.i("DetailController => FORMAT ${result.format}");
-      return await _itemRepository.barcode(result.rawContent);
+      _logger.i("FORMAT ${result.format}");
+      return await _itemRepository.barcode(result.rawContent.toString());
+    }
+    return null;
+  }
+
+  String getBarcode(ScanResult result) {
+    _logger.i("LOCATING ITEM ${result.rawContent}");
+    if(isValidBarcode(result.format)) {
+      _logger.i("FORMAT ${result.format}");
+
+      return result.rawContent.toString();
     }
     return null;
   }
@@ -135,7 +140,7 @@ class FridgeDetailController {
 
   cancelSelection() {
     setState(() {
-      _selected = List();
+      _selected = Set();
       isEditMode = false;
     });
   }
@@ -144,7 +149,7 @@ class FridgeDetailController {
     isEditMode = true;
     _selected.addAll(group);
     setState(() {});
-    print("Long");
+    print("GROUP $group");
   }
 
   groupTap(group, ExpandableController expandableController) {
@@ -194,14 +199,13 @@ class FridgeDetailController {
       await Future.wait(
         this._selected.map((e) => fridge.contentRepository.delete(e.contentId))
       );
-      fridge.contentRepository.group(fridge.contentRepository.getAll());
       setState(() {});
       cancelSelection();
       Navigator.of(this.context).pop();
       return true;
     }
     catch (exception) {
-      _logger.e("FridgeDetailController => FAILED TO DELETE ITEMS $exception");
+      _logger.e("FAILED TO DELETE ITEMS", exception: exception);
       cancelSelection();
       Navigator.of(this.context).pop();
       return false;

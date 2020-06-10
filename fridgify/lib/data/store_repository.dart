@@ -5,13 +5,11 @@ import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/store.dart';
-import 'package:http/http.dart';
-import 'package:logger/logger.dart';
+import 'package:fridgify/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class StoreRepository implements Repository<Store, int> {
-  Logger logger = Repository.logger;
+  Logger _logger = Logger('StoreRepository');
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   Dio dio;
 
@@ -50,12 +48,12 @@ class StoreRepository implements Repository<Store, int> {
         options: Options(headers: Repository.getHeaders())
     );
 
-    logger.i('StoreRepository => ADDING STORE: ${response.data}');
+    _logger.i('ADDING STORE: ${response.data}');
 
     if (response.statusCode == 201) {
       var s = response.data;
       var store = Store(storeId: s['store_id'], name: s['name']);
-      logger.i("StoreRepository => CREATED SUCCESSFUL $store");
+      _logger.i("CREATED SUCCESSFUL $store");
 
       this.stores[store.storeId] = store;
 
@@ -73,32 +71,35 @@ class StoreRepository implements Repository<Store, int> {
 
   @override
   Future<Map<int, Store>> fetchAll() async {
-    logger.i('StoreRepository => FETCHING FROM URL: $storeApi');
+    _logger.i('FETCHING FROM URL: $storeApi');
 
     var response = await dio.get(storeApi,
         options: Options(headers: Repository.getHeaders())
     );
 
-    logger.i('StoreRepository => FETCHING STORES: ${response.data}');
+    _logger.i('FETCHING STORES: ${response.data}');
 
     if (response.statusCode == 200) {
       var stores = response.data;
 
-      logger.i('StoreRepository => $stores');
+      _logger.i('$stores');
+
 
       for (var store in stores) {
-        logger.i("StoreRepository => FETCHED STORES: $store");
-        Store s = Store(storeId: store['store_id'], name: store['name']);
-
+        _logger.i("FETCHED STORES: $store");
+        Store s = Store.fromJson(store);
         this.storeWithNames[s] = s.name;
         this.stores[s.storeId] = s;
+
+
       }
 
-      logger.i("StoreRepository => FETCHED ${this.stores.length} ITEMS");
+      _logger.i("FETCHED ${this.stores.length} ITEMS");
       return this.stores;
     }
     throw new FailedToFetchContentException();
   }
+
 
   @override
   get(int id) {

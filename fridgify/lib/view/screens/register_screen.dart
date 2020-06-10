@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/register_controller.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -14,6 +15,7 @@ class _RegisterPageState extends State<RegisterPage> {
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final key = GlobalKey<FormState>();
   RegisterController _controller = RegisterController();
+  ErrorHandler _errorHandler = ErrorHandler();
 
   void _updateForm(RegisterController _controller, GlobalKey key,
       BuildContext context) async {
@@ -24,6 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    _errorHandler.setContext(context);
     return Scaffold(
         body: SingleChildScrollView(
       child: Center(
@@ -49,7 +52,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       SizedBox(height: 45.0),
                       for (var widget in _controller.interactiveForm) widget,
                       SizedBox(height: 35.0),
-                      FormElements.button(
+                      FormButton(
+                          key: Key('nextButton'),
                           text: "Next",
                           onPressed: () =>
                               _updateForm(_controller, key, context),
@@ -58,7 +62,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       SizedBox(
                         height: 15.0,
                       ),
-                      FormElements.label(
+                      Label(
                           text: "ALREADY OWN AN ACCOUNT?",
                           onPressed: () => Navigator.pop(context)),
                     ],

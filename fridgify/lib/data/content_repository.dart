@@ -1,21 +1,19 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:fridgify/cache/request_cache.dart';
+import 'package:fridgify/utils/logger.dart';
+import 'package:fridgify/model/item.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sortedmap/sortedmap.dart';
 import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/exception/failed_to_add_content_exception.dart';
 import 'package:fridgify/exception/failed_to_fetch_content_exception.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
-import 'package:http/http.dart';
-import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sortedmap/sortedmap.dart';
 
 class ContentRepository implements Repository<Content, String> {
-  Logger logger = Repository.logger;
+  Logger _logger = Logger('ContentRepository');
 
   Fridge fridge;
   SharedPreferences pref = Repository.sharedPreferences;
@@ -35,32 +33,34 @@ class ContentRepository implements Repository<Content, String> {
 
   @override
   Future<String> add(Content content) async {
-    var date = DateTime.now();
-    var body = jsonEncode({
-      "name": content.item.name,
-      "buy_date": "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day}",
-      "expiration_date": content.expirationDate,
-      "count": content.count,
-      "amount": content.amount,
-      "unit": content.unit,
-      "store": content.item.store.name,
-    });
-    logger.i('ContentRepository => Requesting $contentApi with $body');
+    var body = content.toString();
+    _logger.i('Requesting $contentApi with $body');
 
-    var response = await dio.post(contentApi, options: Options(headers: Repository.getHeaders()), data: body);
+    var response = await dio.post(contentApi,
+        options: Options(headers: Repository.getHeaders()), data: body);
 
-    logger.i('ContentRepository => CREATING CONTENT: ${response.data}');
+    _logger.i('CREATING CONTENT: ${response.data}');
 
     if (response.statusCode == 201) {
       var c = response.data;
 
-      logger.i("ContentRepository => CREATED SUCCESSFUL $c");
-      for(var con in c) {
-        Content temp = Content(amount: content.amount, contentId: con['content_id'],
-          expirationDate: content.expirationDate, fridge: content.fridge, item: content.item, maxAmount: content.maxAmount, unit: content.unit,);
-        this.contents[content.contentId] = temp;
-      }
-      group(this.getAll());
+      _logger.i("CREATED SUCCESSFUL $c");
+
+      itemRepository.addSync(Item.create(
+        name: content.item.name,
+        store: content.item.store,
+        barcode: content.item.barcode ?? "",
+        itemId: c[0]['item_id'],
+      ));
+
+      Map<String, Content> contentList = Map.fromIterable(c, key: (k) => k['content_id'], value: (v) => Content.fromJson(v, this.fridge));
+
+      this.contents.addAll(contentList);
+
+      /** ToDO: Replace by addToGroup **/
+      //group();
+      print(c);
+      addListToGroup(contentList.values.toList());
       return "Added";
     }
 
@@ -71,12 +71,13 @@ class ContentRepository implements Repository<Content, String> {
   Future<bool> delete(String id) async {
     var response =
         await dio.delete("$contentApi$id", options: Options(headers: Repository.getHeaders()));
+    _logger.i(
+        'DELETING CONTENT: ${response.data} ${response.statusCode} ON URL $contentApi$id');
 
-    logger.i(
-        'ContentRepository => DELETING CONTENT: ${response.data} ON URL $contentApi$id');
 
     if (response.statusCode == 200) {
-      logger.i('FridgeRepository => DELETED CONTENT');
+      _logger.i('DELETED CONTENT');
+      removeFromGroup(this.get(id));
       this.contents.remove(id);
       return true;
     }
@@ -86,60 +87,30 @@ class ContentRepository implements Repository<Content, String> {
 
   @override
   Future<Map<String, Content>> fetchAll() async {
-    logger.i('ContentRepository => FETCHIN FROM URL: $contentApi');
+    _logger.i('FETCHIN FROM URL: $contentApi');
+    this.grouped = SortedMap(Ordering.byKey());
 
-    var response =
-        await dio.get(contentApi, options: Options(headers: Repository.getHeaders()));
+    var response = await dio.get(contentApi,
+        options: Options(headers: Repository.getHeaders()));
 
-    logger.i('ContentRepository => FETCHING CONTENT: ${response.data}');
+    _logger.i('FETCHING CONTENT: ${response.data}');
 
     if (response.statusCode == 200) {
-      var contents = response.data;
+      var contents = response.data as List;
 
-      logger.i('ContentRepository => $contents');
+      _logger.i('$contents');
 
-      for (var content in contents) {
-        Content c = Content(
-            contentId: content['content_id'],
-            expirationDate: content['expiration_date'],
-            amount: content['amount'],
-            maxAmount: content['max_amount'],
-            unit: content['unit'],
-            fridge: this.fridge,
-            item: itemRepository.get(content['item_id']));
-        this.contents[c.contentId] = c;
-      }
+      this.contents = Map.fromIterable(contents,
+          key: (e) => e['content_id'],
+          value: (e) => Content.fromJson(e, this.fridge));
 
-        logger.i("ContentRepository => FETCHED ${this.contents.length} CONTENTS");
-        group(this.contents);
+      _logger.i("FETCHED ${this.contents.length} CONTENTS");
+      group();
+
+
       return this.contents;
     }
     throw new FailedToFetchContentException();
-  }
-
-  void group(var all) {
-    SortedMap<String, List<Content>> ret = SortedMap(Ordering.byKey());
-    List<Content> tmp = List();
-
-    this.getAll().forEach((key, value) =>
-    {
-      if(value.item != null) {
-
-        if(ret.containsKey(value.item.name)) {
-          ret[value.item.name].add(value),
-        }
-        else
-          {
-            tmp = List(),
-            tmp.add(value),
-            ret[value.item.name] = tmp,
-          }
-      }
-      else {
-        logger.e("ContentRepository => ERROR OCCURED WHILE CREATING GROUP FOR VALUE $value")
-      }
-    });
-    grouped = ret;
   }
 
   @override
@@ -153,25 +124,25 @@ class ContentRepository implements Repository<Content, String> {
   }
 
   Future<Content> withdraw(Content content, int amount) async {
-    logger.i(
-        'ContentRepository => WITHDRAWING $amount FROM ${content.item.name} ${content.amount} FROM URL: $contentApi');
+    _logger.i(
+        'WITHDRAWING $amount FROM ${content.item.name} ${content.amount} FROM URL: $contentApi');
 
-    var response = await dio.patch('$contentApi${content.contentId}', options: Options(headers: Repository.getHeaders()), data: jsonEncode({'withdraw': amount}));
+    var response = await dio.patch('$contentApi${content.contentId}',
+        options: Options(headers: Repository.getHeaders()),
+        data: jsonEncode({'withdraw': amount}));
 
-    logger.i('ContentRepository => WITHDRAWING CONTENT: ${response.data}');
-
+    _logger.i('WITHDRAWING CONTENT: ${response.data}');
 
     if (response.statusCode == 200) {
       var contents = response.data;
 
-      logger.i('ContentRepository => WITHDRAW SUCCESSFUL $contents');
+      _logger.i('WITHDRAW SUCCESSFUL $contents');
       if(content.amount <= 0)
       {
-        logger.i("Empty delete");
+        _logger.i("Empty delete");
         this.contents.remove(content.contentId);
-        group(this.contents);
-      }
-      else {
+        removeFromGroup(content);
+      } else {
         this.contents[content.contentId] = content;
       }
       return content;
@@ -181,22 +152,71 @@ class ContentRepository implements Repository<Content, String> {
 
   Future<Content> update(
       Content content, dynamic attribute, String parameter) async {
-    logger.i(
-        'ContentRepository => UPDATING CONTENT $attribute with $parameter FROM URL: $contentApi');
+    _logger.i(
+        'UPDATING CONTENT $attribute with $parameter FROM URL: $contentApi');
 
-    var response = await dio.patch('$contentApi${content.item.itemId}', options: Options(headers: Repository.getHeaders()), data: jsonEncode({attribute: parameter}));
+    var response = await dio.patch('$contentApi${content.item.itemId}',
+        options: Options(headers: Repository.getHeaders()),
+        data: jsonEncode({attribute: parameter}));
 
-    logger.i('ContentRepository => PATCHING CONTENT: ${response.data}');
-
+    _logger.i('PATCHING CONTENT: ${response.data}');
 
     if (response.statusCode == 200) {
       var contents = response.data;
 
-      logger.i('ContentRepository => UPDATED SUCCESSFUL $contents');
+      _logger.i('UPDATED SUCCESSFUL $contents');
 
       return content;
     }
     throw new FailedToFetchContentException();
+  }
+
+  void group() {
+    this.grouped = SortedMap();
+
+    this.getAll().forEach((key, value) =>
+    {
+      if(value.item != null) {
+        this.addToGroup(value)
+      }
+      else {
+        _logger.e("ERROR OCCURED WHILE CREATING GROUP FOR VALUE $value")
+      }
+    });
+    _logger.i("CREATED GROUP ${this.grouped.length}");
+
+  }
+
+  void addToGroup(Content c) {
+    if (grouped.containsKey(c.item.name)) {
+      grouped[c.item.name].add(c);
+    } else {
+      List<Content> tmp = List<Content>();
+      tmp.add(c);
+      grouped[c.item.name] = tmp;
+    }
+  }
+
+  void addListToGroup(List<Content> c) {
+    if(c.length == 0) return;
+    if(grouped.containsKey(c.first.item.name)) {
+      grouped[c.first.item.name].addAll(c);
+    }
+    else
+    {
+      List<Content> tmp = List<Content>();
+      tmp.addAll(c);
+      grouped[c.first.item.name] = tmp;
+    }
+  }
+
+  void removeFromGroup(Content c) {
+    if (grouped.containsKey(c.item.name)) {
+      grouped[c.item.name].remove(c);
+      if (grouped[c.item.name].length == 0) {
+        grouped.remove(c.item.name);
+      }
+    }
   }
 
   SortedMap<String, List<Content>> getAsGroup() {

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fridgify/controller/main_controller.dart';
+import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/view/screens/content_menu_screen.dart';
 import 'package:fridgify/view/screens/login_screen.dart';
 import 'package:fridgify/view/screens/register_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
+import 'package:global_configuration/global_configuration.dart';
 
 void main() {
   runApp(MyApp());
@@ -43,12 +45,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   MainController _controller = MainController();
+  ErrorHandler _errorHandler = ErrorHandler();
 
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await GlobalConfiguration().loadFromAsset("app_settings.json");
       Loader.showSimpleLoadingDialog(context);
       bool cached = await _controller.initialLaunch(context);
 
@@ -64,12 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    _errorHandler.setContext(context);
+
     return Scaffold(
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by

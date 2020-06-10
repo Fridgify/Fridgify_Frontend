@@ -2,10 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:fridgify/cache/cache_interceptor.dart';
 import 'package:fridgify/exception/failed_to_fetch_api_token_exception.dart';
 import 'package:fridgify/utils/logger.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class Repository<Item, Key> {
-  static const baseURL = "https://api-dev.fridgify.com/";
+  static final baseURL = "https://${GlobalConfiguration().get('host')}/";
   static SharedPreferences sharedPreferences;
   static bool isTest = false;
 

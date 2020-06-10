@@ -15,7 +15,7 @@ class ItemRepository implements Repository<Item, int> {
   StoreRepository storeRepository = StoreRepository();
   Dio dio;
 
-  static const itemApi = "${Repository.baseURL}items/";
+  static final itemApi = "${Repository.baseURL}items/";
 
   Map<int, Item> items = Map();
 

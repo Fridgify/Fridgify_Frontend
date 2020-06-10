@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:device_id/device_id.dart';
+import 'package:global_configuration/global_configuration.dart';
 import 'error_handler.dart';
 import 'package:logger/logger.dart' as _Logger;
 
@@ -32,7 +33,7 @@ class Logger {
   }
 
   void i(String msg, {bool upload}) {
-    if(Logger.level.value() > LogLevels.info.value()) return;
+    if(Logger.level.value() > LogLevels.info.value() || !(GlobalConfiguration().get('logging') ?? true)) return;
     _logger.i("${this._name} -> $msg");
     if(_errorHandler.ctxNotNull() && (upload ?? false)) {
       _uploadLog('info', msg);
@@ -40,7 +41,7 @@ class Logger {
   }
 
   void e(String msg, {bool upload, dynamic exception, bool popup = true}) {
-    if(Logger.level.value() > LogLevels.error.value()) return;
+    if(Logger.level.value() > LogLevels.error.value() || !(GlobalConfiguration().get('logging') ?? true)) return;
     _logger.e("${this._name} -> $msg ${exception ?? ""}");
     if(popup && _errorHandler.ctxNotNull()) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
     if(_errorHandler.ctxNotNull() &&  (upload ?? false)) {

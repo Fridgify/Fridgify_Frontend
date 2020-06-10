@@ -13,7 +13,7 @@ class StoreRepository implements Repository<Store, int> {
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
   Dio dio;
 
-  static const storeApi = "${Repository.baseURL}stores/";
+  static final storeApi = "${Repository.baseURL}stores/";
 
   Map<int, Store> stores = Map();
   Map<Store, String> storeWithNames = Map();

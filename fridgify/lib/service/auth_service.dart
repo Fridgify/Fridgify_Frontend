@@ -15,7 +15,7 @@ import 'package:fridgify/utils/logger.dart';
 /// This Authentication Service handles login, registration and token fetching
 /// It works with the cache "Repository.sharedPreferences" and keeps it all time updated
 class AuthenticationService {
-  static const String authAPI = "${Repository.baseURL}auth/";
+  static final String authAPI = "${Repository.baseURL}auth/";
 
   User user;
 

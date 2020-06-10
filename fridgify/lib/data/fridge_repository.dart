@@ -22,8 +22,8 @@ class FridgeRepository implements Repository<Fridge, int> {
   Map<int, Fridge> fridges = Map();
   Dio dio;
 
-  static const fridgeAPI = "${Repository.baseURL}/fridge/";
-  static const String userManagementApi = "${fridgeAPI}management/";
+  static final fridgeAPI = "${Repository.baseURL}/fridge/";
+  static final String userManagementApi = "${fridgeAPI}management/";
 
   static final FridgeRepository _fridgeRepository =
       FridgeRepository._internal();

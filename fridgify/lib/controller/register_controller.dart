@@ -7,6 +7,7 @@ import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegisterController {
   TextEditingController textInputControllerUser = TextEditingController();
@@ -201,6 +202,15 @@ class RegisterController {
 
       _phase++;
       return;
+    }
+  }
+  Future<void> launchPrivacy() async {
+    String url = "https://blog.fridgify.com/privacy-policy/";
+    if(await canLaunch(url)) {
+      await launch(url);
+    }
+    else {
+      _logger.e("FAILED TO LAUNCH URL $url");
     }
   }
 }

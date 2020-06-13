@@ -58,8 +58,21 @@ class FridgeDetailController {
       _logger.i("ADDING ITEM");
 
       Item item;
+      var result;
 
-      var result = await BarcodeScanner.scan();
+      try {
+         result = await BarcodeScanner.scan();
+      }
+      catch(exception) {
+        _logger.i("CAN'T SCAN IN BROWSER/NO PERMISSION");
+        showDialog<void>(
+            context: context,
+            barrierDismissible: false, // user must tap button!
+            builder: (BuildContext context) {
+              return AddItemPopUp(this.fridge.contentRepository, item, context, setState, null);
+            });
+        return;
+      }
 
       _logger.i("SCANNED BARCODE ${result.type}");
 

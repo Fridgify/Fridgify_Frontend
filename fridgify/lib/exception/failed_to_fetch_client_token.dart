@@ -6,4 +6,9 @@ class FailedToFetchClientTokenException implements Exception {
   FailedToFetchClientTokenException.withErr(this.err);
 
   String errMsg() => err ?? 'Something went wrong while fetching the client token';
+
+  @override
+  String toString() {
+    return errMsg();
+  }
 }

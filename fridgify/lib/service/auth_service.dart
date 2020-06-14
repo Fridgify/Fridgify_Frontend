@@ -165,7 +165,6 @@ class AuthenticationService {
   Future<bool> validateToken() async {
 
     final clientToken = Repository.sharedPreferences.getString("clientToken") ?? null;
-
     if (clientToken == null) {
       _logger.e("NO CLIENT TOKEN FOUND IN CACHE");
       throw FailedToFetchClientTokenException();

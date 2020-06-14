@@ -45,13 +45,17 @@ class Logger {
     if(Logger.level.value() > LogLevels.error.value() || !(GlobalConfiguration().get('logging') ?? true)) return;
     _logger.e("${this._name} -> $msg ${exception ?? ""}");
     if(popup && _errorHandler.ctxNotNull()){
-      Navigator.pushNamedAndRemoveUntil(
-          _errorHandler.getContext(), '/startup', (route) => false);
-      _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
+      _error(msg);
     }
     if(_errorHandler.ctxNotNull() &&  (upload ?? false)) {
       _uploadLog('error', msg);
     }
+  }
+
+  Future<void> _error(String msg) async {
+    _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.",
+        callback: () async => await Navigator.pushNamedAndRemoveUntil(
+            _errorHandler.getContext(), '/startup', (route) => false));
   }
 
   Future<void> _uploadLog(String type, String msg) async {

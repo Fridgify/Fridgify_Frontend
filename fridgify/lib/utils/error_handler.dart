@@ -24,6 +24,10 @@ class ErrorHandler {
     Popups.errorPopup(_currentCtx, msg);
   }
 
+  BuildContext getContext() {
+    return _currentCtx;
+  }
+
   bool ctxNotNull() {
     return _currentCtx != null;
   }

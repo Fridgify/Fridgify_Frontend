@@ -150,6 +150,7 @@ class AuthenticationService {
         expires -> Maybe outsource to extra function?
        */
       Timer(Duration(seconds: 60/*timer*/), () async {
+
         _logger.i("API TOKEN DIED FETCH NEW");
         if (await Repository.sharedPreferences.remove("apiToken")) {
           await fetchApiToken();

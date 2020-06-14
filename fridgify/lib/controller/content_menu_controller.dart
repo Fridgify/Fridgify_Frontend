@@ -34,6 +34,7 @@ class ContentMenuController {
   Future<void> choiceAction(String choice, BuildContext context, Function onChange) async {
     if(choice == Constants.logout) {
       if(await _authService.logout()){
+
         await Navigator.pushNamedAndRemoveUntil(
             context, '/login', (route) => false);
       }

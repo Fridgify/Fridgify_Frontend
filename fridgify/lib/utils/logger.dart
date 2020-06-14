@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 import 'package:global_configuration/global_configuration.dart';
 import 'package:uuid/uuid.dart';
 import 'error_handler.dart';
@@ -43,10 +44,18 @@ class Logger {
   void e(String msg, {bool upload, dynamic exception, bool popup = true}) {
     if(Logger.level.value() > LogLevels.error.value() || !(GlobalConfiguration().get('logging') ?? true)) return;
     _logger.e("${this._name} -> $msg ${exception ?? ""}");
-    if(popup && _errorHandler.ctxNotNull()) _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.");
+    if(popup && _errorHandler.ctxNotNull()){
+      _error(msg);
+    }
     if(_errorHandler.ctxNotNull() &&  (upload ?? false)) {
       _uploadLog('error', msg);
     }
+  }
+
+  Future<void> _error(String msg) async {
+    _errorHandler.errorMessage("Something went wrong: ${msg.toLowerCase()}, please try again later.",
+        callback: () async => await Navigator.pushNamedAndRemoveUntil(
+            _errorHandler.getContext(), '/startup', (route) => false));
   }
 
   Future<void> _uploadLog(String type, String msg) async {

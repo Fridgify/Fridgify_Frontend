@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fridgify/view/widgets/popup.dart';
 
 class ErrorHandler {
@@ -20,8 +21,12 @@ class ErrorHandler {
 
   }
 
-  void errorMessage(String msg) {
-    Popups.errorPopup(_currentCtx, msg);
+  void errorMessage(String msg,{Function callback}) {
+    Popups.errorPopup(_currentCtx, msg, callback: callback);
+  }
+
+  BuildContext getContext() {
+    return _currentCtx;
   }
 
   bool ctxNotNull() {

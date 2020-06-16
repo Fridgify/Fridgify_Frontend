@@ -3,7 +3,7 @@ import 'package:fridgify/controller/content_menu_controller.dart';
 
 
 class Popups {
-  static Future<void> errorPopup(BuildContext context, String msg) async {
+  static Future<void> errorPopup(BuildContext context, String msg, {Function callback}) async {
     TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
     return showDialog<void>(
       context: context,
@@ -24,7 +24,7 @@ class Popups {
               color: Colors.purple,
               child: Text('Okay'),
               onPressed: () {
-                Navigator.of(context).pop();
+                callback != null ? callback() : Navigator.of(context).pop();
               },
             ),
           ],

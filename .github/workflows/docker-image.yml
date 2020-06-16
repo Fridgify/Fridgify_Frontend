@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: 
+      - web
+
+jobs:
+
+  build:
+    name: publish to github docker repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Push to DockerHub
+        uses: docker/build-push-action@v1.1.0
+        with:
+          username: ${{ secrets.DOCKERHUB_FRIDGIFY_USER }}
+          password: ${{ secrets.DOCKERHUB_FRIDGIFY_KEY }}
+          repository: fridgify/fridgify-web
+          tag_with_ref: true
+        

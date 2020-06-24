@@ -24,12 +24,13 @@ class AddItemController {
   Item item;
 
   AddItemController({this.contentRepository, this.item}) {
+    _logger.i('ITEM FOUND => ${this.item.toString()}');
     itemNameController.text = this.item != null ? this.item.name : "";
     expirationDateController.text = "";
     itemCountController.text = "";
     itemAmountController.text = "";
     itemUnitController.text = "";
-    itemStoreController.text = this.item != null ? this.item.store : "";
+    itemStoreController.text = this.item != null ? this.item.store.name : "";
   }
 
 

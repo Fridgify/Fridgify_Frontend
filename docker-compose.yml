@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+    web:
+        container_name: fridgify_web
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - 1420:1420

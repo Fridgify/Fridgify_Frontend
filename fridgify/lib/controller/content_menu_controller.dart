@@ -2,6 +2,7 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/model/fridge.dart';
@@ -161,8 +162,7 @@ class ContentMenuController {
           }
         },
         onError: (OnLinkErrorException e) async {
-          print('onLinkError');
-          print(e.message);
+          _logger.e('onLinkError', exception: e, popup: false);
         }
     );
   }

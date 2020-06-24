@@ -15,7 +15,18 @@ class FirebaseService {
   void initState() {
     _logger.i("INITIALISING STATE");
 
-    if (Platform.isIOS) {
+    // Fix for web application because of known Platform._platform issues
+    bool ios = false;
+
+    try {
+      ios = Platform.isIOS;
+    }
+    catch(exception){
+      print('Error');
+      ios = false;
+    }
+
+    if (ios) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         // save the token  OR subscribe to a topic here
       });

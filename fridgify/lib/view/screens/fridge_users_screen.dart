@@ -45,7 +45,7 @@ class _UsersPageState extends State<UsersPage> {
 
             if (u.username == this._userService.get().username) {
               mainPerm = this.users[u];
-              return SizedBox(height: 0, width: 0,);
+              //return SizedBox(height: 0, width: 0,);
             }
             return ListTile(
                 onTap: () => _controller.userTapped(_userService.get(), u, mainPerm, this.users[u], context),

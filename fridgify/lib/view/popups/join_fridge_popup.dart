@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/fridge_repository.dart';
+import 'package:fridgify/data/item_repository.dart';
+import 'package:fridgify/data/store_repository.dart';
 import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/widgets/loader.dart';
-import 'package:fridgify/view/widgets/popup.dart';
 
 class JoinFridgePopUp extends StatefulWidget {
   final Uri url;
@@ -21,6 +22,8 @@ class _JoinFridgePopUpState extends State<JoinFridgePopUp> {
   final Function parentSetState;
 
   FridgeRepository _fridgeRepository = FridgeRepository();
+  ItemRepository _itemRepository = ItemRepository();
+  StoreRepository _storeRepository = StoreRepository();
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final Logger _logger = Logger('JoinFridgePopUp');
 
@@ -29,6 +32,10 @@ class _JoinFridgePopUpState extends State<JoinFridgePopUp> {
   Future<void> _joinFridgeWithQr() async {
     Loader.showSimpleLoadingDialog(context);
     try {
+      await Future.wait([
+        _itemRepository.fetchAll(),
+        _storeRepository.fetchAll(),
+      ]);
       await _fridgeRepository.joinByUrl(this.url);
       Navigator.of(context).pop();
       Navigator.of(context).pop();

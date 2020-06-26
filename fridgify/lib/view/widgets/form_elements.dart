@@ -141,7 +141,7 @@ class DatePickerText extends StatelessWidget {
     @required this.hintText,
     @required this.context,
     @required this.validator,
-    @required this.max,
+    this.max,
   }) : super(key: key);
 
   final TextStyle style;
@@ -240,7 +240,7 @@ class Label extends StatelessWidget {
 class FormTextField extends StatelessWidget {
   const FormTextField({
     Key key,
-    @required this.style,
+    this.style,
     @required this.controller,
     @required this.obscureText,
     @required this.hintText,
@@ -259,7 +259,7 @@ class FormTextField extends StatelessWidget {
         height: 75.0,
         child: TextFormField(
           obscureText: obscureText ?? false,
-          style: style,
+          style: style ?? TextStyle(),
           controller: controller ?? TextEditingController(),
           //_controller.textInputControllerUser,
           validator: (value) => validator(value),

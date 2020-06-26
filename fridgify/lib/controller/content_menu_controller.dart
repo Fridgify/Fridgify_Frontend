@@ -2,7 +2,6 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/model/fridge.dart';
@@ -10,11 +9,12 @@ import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/service/hopper_service.dart';
 import 'package:fridgify/service/user_service.dart';
 import 'package:fridgify/utils/constants.dart';
-import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/logger.dart';
+import 'package:fridgify/utils/scanner_helper.dart';
 import 'package:fridgify/view/popups/invite_user_popup.dart';
 import 'package:fridgify/view/popups/join_fridge_popup.dart';
 import 'package:fridgify/view/screens/fridge_users_screen.dart';
+import 'package:fridgify/view/screens/settings_screen.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
 import 'package:fridgify/view/widgets/popup.dart';
@@ -24,13 +24,20 @@ class ContentMenuController {
   AuthenticationService _authService = AuthenticationService();
   UserService _userService = UserService();
   FridgeRepository _fridgeRepository = FridgeRepository();
+  ScannerHelper _scannerHelper = ScannerHelper();
+
   TextEditingController nameController = TextEditingController();
+  TextEditingController editNameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   Function setState;
   BuildContext context;
 
   Logger _logger = Logger('ContentMenuController');
   HopperService _hopperService = HopperService();
+
+  Future<void> qrCodeHandler() async {
+    _scannerHelper.scanQr();
+  }
 
   Future<void> choiceAction(String choice, BuildContext context, Function onChange) async {
     if(choice == Constants.logout) {
@@ -51,8 +58,14 @@ class ContentMenuController {
         await _hopperService.requestToken();
       }
     }
+    if(choice == Constants.settings) {
+      Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SettingsScreen(),
+          ));
+    }
   }
-
+  
   Future<void> leaveFridge(Fridge f, BuildContext context, Function onChanged) async {
     Loader.showSimpleLoadingDialog(context);
     await _fridgeRepository.delete(f.fridgeId);
@@ -90,7 +103,6 @@ class ContentMenuController {
       Navigator.of(context).pop();
     }
 
-    print(qr);
 
   }
 
@@ -106,6 +118,23 @@ class ContentMenuController {
         _logger.e('SOMETHING WENT WRONG WHILE CREATING FRIDGE', exception: exception);
       }
       Navigator.pop(context);
+    }
+  }
+  Future<void> updateFridge(GlobalKey<FormState> key, BuildContext context, Function onChange, Fridge f) async {
+    _logger.i("UPDATING FRIDGE");
+    Loader.showSimpleLoadingDialog(context);
+    if(key.currentState.validate()) {
+      try {
+        await _fridgeRepository.update(f, "name", editNameController.text);
+        onChange();
+      }
+      catch (exception) {
+        _logger.e('SOMETHING WENT WRONG WHILE CREATING FRIDGE', exception: exception);
+      }
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Popups.infoPopup(context, "Fridge Renamed", "Fridge successfully renamed");
+      onChange();
     }
   }
 

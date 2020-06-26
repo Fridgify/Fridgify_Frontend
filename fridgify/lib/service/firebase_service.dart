@@ -22,7 +22,7 @@ class FirebaseService {
       ios = Platform.isIOS;
     }
     catch(exception){
-      print('Error');
+      _logger.e('Platform error', exception: exception, popup: false);
       ios = false;
     }
 
@@ -36,14 +36,14 @@ class FirebaseService {
 
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
+        _logger.i("onMessage: $message");
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
+        _logger.i("onLaunch: $message");
         // TODO optional
       },
       onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
+        _logger.i("onResume: $message");
         // TODO optional
       },
     );

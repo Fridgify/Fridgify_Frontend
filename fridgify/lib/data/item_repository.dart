@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/data/store_repository.dart';
@@ -62,6 +64,31 @@ class ItemRepository implements Repository<Item, int> {
   Future<bool> delete(int id) async {
     // TODO: implement delete
     return null;
+  }
+
+  Future<Item> update(
+      Item item, dynamic attribute, String parameter) async {
+    _logger.i(
+        'UPDATING Item $attribute with $parameter FROM URL: ${itemApi}id/${item.itemId}/ FOR ${item.itemId}');
+
+    var response = await dio.patch('${itemApi}id/${item.itemId}',
+        options: Options(headers: Repository.getHeaders()),
+        data: jsonEncode({attribute: parameter, 'item_id':item.itemId}));
+
+    _logger.i('PATCHING Item: ${response.data} ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      var contents = response.data;
+
+      _logger.i('UPDATED SUCCESSFUL $contents');
+
+      item.name = parameter;
+
+      this.items[item.itemId] = item;
+
+      return item;
+    }
+    throw new FailedToFetchContentException();
   }
 
   @override

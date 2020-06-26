@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/user.dart';
 import 'package:fridgify/service/user_service.dart';
-import 'package:fridgify/utils/error_handler.dart';
 import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/utils/permission_helper.dart';
 import 'package:fridgify/view/popups/overseer_popup.dart';

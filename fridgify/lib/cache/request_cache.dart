@@ -126,7 +126,7 @@ class RequestCache {
     try {
       result = await _connectivity.checkConnectivity();
     } on PlatformException catch (e) {
-      print(e.toString());
+      _logger.e("PLATFORM ISSUE", exception: e, popup: false);
     }
 
     return _setConnectionStatus(result);

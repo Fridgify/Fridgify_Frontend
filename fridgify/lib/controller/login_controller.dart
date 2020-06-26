@@ -1,12 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:fridgify/exception/failed_to_fetch_client_token.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/utils/logger.dart';
+import 'package:fridgify/utils/validator.dart';
+import 'package:fridgify/utils/web_helper.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoginController {
   TextEditingController textInputControllerUser = TextEditingController();
@@ -17,6 +15,11 @@ class LoginController {
   Logger _logger = Logger('LoginController');
 
   Future<void> login(BuildContext context, GlobalKey<FormState> key) async {
+
+    // Reset last validation
+    Validator.userNotUnique = false;
+    Validator.mailNotUnique = false;
+
     _authService = AuthenticationService.login(
         textInputControllerUser.text, textInputControllerPass.text);
 
@@ -53,12 +56,7 @@ class LoginController {
   }
 
   Future<void> launchPrivacy() async {
-    String url = "https://blog.fridgify.com/privacy-policy/";
-    if(await canLaunch(url)) {
-      await launch(url);
-    }
-    else {
-    _logger.e("FAILED TO LAUNCH URL $url");
-    }
+    WebHelper _webHelper = WebHelper();
+    await _webHelper.launchUrl("https://blog.fridgify.com/privacy-policy/");
   }
 }

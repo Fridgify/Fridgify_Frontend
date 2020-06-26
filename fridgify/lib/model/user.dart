@@ -34,7 +34,7 @@ class User {
     @required this.surname,
     @required this.email,
     @required this.birthDate,
-    @required this.userId,
+    this.userId,
   });
 
   factory User.fromJson(dynamic json) {

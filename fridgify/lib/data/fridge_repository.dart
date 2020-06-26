@@ -22,8 +22,8 @@ class FridgeRepository implements Repository<Fridge, int> {
   Map<int, Fridge> fridges = Map();
   Dio dio;
 
-  static final fridgeAPI = "${Repository.baseURL}/fridge/";
-  static final String userManagementApi = "${fridgeAPI}management/";
+  static final fridgeAPI = "${Repository.baseURL}fridge/";
+  static final String userManagementApi = "${fridgeAPI}management";
 
   static final FridgeRepository _fridgeRepository =
       FridgeRepository._internal();
@@ -37,6 +37,31 @@ class FridgeRepository implements Repository<Fridge, int> {
   FridgeRepository._internal();
 
   SharedPreferences sharedPreferences = Repository.sharedPreferences;
+
+  Future<Fridge> update(
+      Fridge fridge, dynamic attribute, String parameter) async {
+    _logger.i(
+        'UPDATING FRIDGE $attribute with $parameter FROM URL: $userManagementApi/${fridge.fridgeId}/ FOR ${fridge.fridgeId}');
+
+    var response = await dio.patch('$userManagementApi/${fridge.fridgeId}/',
+        options: Options(headers: Repository.getHeaders()),
+        data: jsonEncode({attribute: parameter, "fridge_id": fridge.fridgeId}));
+
+    _logger.i('PATCHING FRIDGE: ${response.data} ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      var contents = response.data;
+
+      _logger.i('UPDATED SUCCESSFUL $contents');
+
+      fridge.name = parameter;
+
+      this.fridges[fridge.fridgeId] = fridge;
+
+      return fridge;
+    }
+    throw new FailedToFetchContentException();
+  }
 
   @override
   Future<int> add(Fridge f) async {
@@ -133,7 +158,7 @@ class FridgeRepository implements Repository<Fridge, int> {
 
   Future<Map<User, Permissions>> getUsersForFridge(int fridgeId) async {
     Map<User, Permissions> usersList = Map();
-    var userUrl = "$userManagementApi$fridgeId/users";
+    var userUrl = "$userManagementApi/$fridgeId/users";
 
 
     _logger.i('FETCHING USERS FROM URL: $userUrl');

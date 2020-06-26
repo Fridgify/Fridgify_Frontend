@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/content_repository.dart';
+import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/widgets/item_circular_slider.dart';
@@ -25,20 +26,28 @@ class _EditValuePopUpState extends State<EditValuePopUp> {
   final BuildContext context;
   final Function parentSetState;
   final Logger _logger = Logger('EditValuePopUp');
+  final TextEditingController _controller = TextEditingController();
+  final ItemRepository _itemRepository = ItemRepository();
+  String name;
   int startValue;
 
   TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
 
   _EditValuePopUpState(this.repo, this.content, this.context, this.parentSetState) {
+    name = this.content.item.name;
+    _controller.text = this.content.item.name;
     startValue = this.content.amount;
   }
 
   Future<void> _updateItem() async {
-    if(startValue <= content.amount)
+    if(startValue < content.amount)
       {
         Popups.errorPopup(context, "Failed to update item ${content.amount} is not smaller than $startValue");
         return;
       }
+    if(name != _controller.text) {
+      _itemRepository.update(content.item, 'name', _controller.text);
+    }
     try {
       await this.repo.withdraw(content, startValue - content.amount);
     }
@@ -53,7 +62,10 @@ class _EditValuePopUpState extends State<EditValuePopUp> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(),
-      title: Text('Edit Value of ${this.content.item.name}', style: style),
+      title: TextField(
+        controller: _controller,
+        onEditingComplete: () => content.item.name = _controller.text,
+      ),//Text('Edit Value of ${this.content.item.name}', style: style),
       content: SingleChildScrollView(
         child: ItemCircularSlider(content),
       ),

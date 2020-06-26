@@ -33,51 +33,52 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Container(
           color: Colors.white,
           height: MediaQuery.of(context).size.height,
-          child: Padding(
-              padding: const EdgeInsets.all(36.0),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: key,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 155.0,
-                        child: Image.asset(
-                          "assets/images/logo_full.png",
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      SizedBox(height: 45.0),
-                      for (var widget in _controller.interactiveForm) widget,
-                      SizedBox(height: 35.0),
-                      FormButton(
-                          key: Key('nextButton'),
-                          text: "Next",
-                          onPressed: () =>
-                              _updateForm(_controller, key, context),
-                          context: this.context,
-                          style: this.style),
-                      SizedBox(
-                        height: 15.0,
-                      ),
-                      Column(
+          child: Column(
+            children: [
+              Padding(
+                  padding: const EdgeInsets.all(36.0),
+                  child: SingleChildScrollView(
+                    child: Form(
+                      key: key,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Label(
-                              text: "ALREAEDY OWN AN ACCOUNT?",
-                              key: Key('registerButton'),
-                              onPressed: () => Navigator.pop(context)
+                          SizedBox(
+                            height: 155.0,
+                            child: Image.asset(
+                              "assets/images/logo_full.png",
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                          Label(
-                              text: "DATAPRIVACY",
-                              onPressed: () async => await _controller.launchPrivacy()),
+                          SizedBox(height: 20.0),
+                          for (var widget in _controller.interactiveForm) widget,
+                          SizedBox(height: 20.0),
+                          FormButton(
+                              key: Key('nextButton'),
+                              text: "Next",
+                              onPressed: () =>
+                                  _updateForm(_controller, key, context),
+                              context: this.context,
+                              style: this.style),
                         ],
                       ),
-                    ],
+                    ),
+                  )),
+              Column(
+                children: <Widget>[
+                  Label(
+                      text: "ALREAEDY OWN AN ACCOUNT?",
+                      key: Key('registerButton'),
+                      onPressed: () => Navigator.pop(context)
                   ),
-                ),
-              )),
+                  Label(
+                      text: "DATAPRIVACY",
+                      onPressed: () async => await _controller.launchPrivacy()),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     ));

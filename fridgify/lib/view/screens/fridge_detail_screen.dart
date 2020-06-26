@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fridgify/controller/fridge_detail_controller.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/utils/constants.dart';
@@ -36,7 +37,7 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
 
     return Scaffold(
         appBar: new AppBar(
-          title: new Text("Fridgify"),
+          title: new Text(this.fridge.name),
           actions: _controller.isEditMode
               ? <Widget>[
                   IconButton(
@@ -75,6 +76,12 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
                     },
                   )
                 ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _controller.handleOptions(Constants.addItem, context),
+          child: Icon(
+            FontAwesomeIcons.barcode
+          ),
         ),
         body: ListView.separated(
           separatorBuilder: (context, index) => Divider(
@@ -133,6 +140,7 @@ class _FridgeDetailPageState extends State<FridgeDetailPage> {
                           _controller.toggleSelection(group[index2]),
                     );
                   }),
+
             );
           },
         ));

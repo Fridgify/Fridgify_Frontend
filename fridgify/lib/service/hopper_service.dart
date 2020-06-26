@@ -35,6 +35,7 @@ class HopperService {
       return response.data['subscribe_url'];
     }
     _logger.e('AN ERROR OCCURED WHILE SUBSCRIBING ${response.statusMessage}');
+    return null;
   }
 
   Future<void> requestToken() async {

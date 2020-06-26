@@ -44,11 +44,11 @@ class MenuElements {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text(
           'No items found. ',
-          style: Theme.of(context).textTheme.title,
+          style: Theme.of(context).textTheme.headline6,
         ),
         Text(
           'Add items to display them here. ',
-          style: Theme.of(context).textTheme.title,
+          style: Theme.of(context).textTheme.headline6,
         ),
       ]),
     );

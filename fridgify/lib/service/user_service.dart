@@ -75,7 +75,6 @@ class UserService {
     _logger.i('DELETING USER: ${response.statusCode}');
 
     if (response.statusCode == 200) {
-      var us = response.data;
       _logger.i('DELETED SUCCESSFUL $user');
 
       return true;

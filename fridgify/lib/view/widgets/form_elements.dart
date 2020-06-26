@@ -192,6 +192,7 @@ class DatePickerText extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class Label extends StatelessWidget {
   Label({
     Key key,
@@ -206,7 +207,6 @@ class Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double x = topVal;
     return Container(
       margin: const EdgeInsets.only(top: 0.0),
       padding: const EdgeInsets.only(left: 20.0, right: 20.0),

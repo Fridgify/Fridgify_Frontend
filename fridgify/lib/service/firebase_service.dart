@@ -7,6 +7,7 @@ import 'package:fridgify/utils/logger.dart';
 
 class FirebaseService {
   final FirebaseMessaging _fcm = FirebaseMessaging();
+  // ignore: cancel_subscriptions
   StreamSubscription iosSubscription;
 
   Logger _logger = Logger('FirebaseService');

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/service/user_service.dart';
-import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/view/widgets/loader.dart';
 import 'package:fridgify/view/widgets/popup.dart';
 
@@ -20,7 +19,6 @@ class _ChangeEmailPopUpState extends State<ChangeEmailPopUp> {
   final UserService _userService = UserService();
   final BuildContext context;
   final Function parentSetState;
-  final Logger _logger = Logger('ChangeEmailPopUp');
   final TextEditingController _controller = TextEditingController();
   String name;
   int startValue;

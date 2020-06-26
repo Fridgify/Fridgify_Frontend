@@ -8,7 +8,6 @@ import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/service/auth_service.dart';
 import 'package:fridgify/utils/constants.dart';
 import 'package:fridgify/utils/error_handler.dart';
-import 'package:fridgify/utils/scanner_helper.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:fridgify/view/widgets/menu_elements.dart';
 
@@ -24,7 +23,6 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
   FridgeRepository _fridgeRepository = FridgeRepository();
   AuthenticationService _authenticationService = AuthenticationService();
   ContentMenuController _controller = ContentMenuController();
-  ScannerHelper _scannerHelper = ScannerHelper();
   RefreshController _refreshController =  RefreshController(initialRefresh: false);
   ErrorHandler _errorHandler = ErrorHandler();
 

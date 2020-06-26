@@ -3,7 +3,6 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:fridgify/data/content_repository.dart';
 import 'package:fridgify/data/fridge_repository.dart';
-import 'package:fridgify/data/item_repository.dart';
 import 'package:fridgify/model/content.dart';
 import 'package:fridgify/model/fridge.dart';
 import 'package:fridgify/model/item.dart';
@@ -31,8 +30,6 @@ class FridgeDetailController {
   BuildContext context;
 
   Set<Content> _selected = Set();
-
-  ItemRepository _itemRepository = ItemRepository();
 
   FridgeDetailController(this.setState, this.fridge);
 

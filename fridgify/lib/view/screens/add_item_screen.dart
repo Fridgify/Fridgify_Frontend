@@ -108,7 +108,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               isSwitched = value;
               DateTime date = DateTime.now();
               if(!isSwitched) {
-                old = _controller.expirationDateController.text ?? "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day < 10 ? "0${date.day}" : date.day}";;
+                old = _controller.expirationDateController.text ?? "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day < 10 ? "0${date.day}" : date.day}";
                 _controller.expirationDateController.text = "9999-12-12";
               }
               else {

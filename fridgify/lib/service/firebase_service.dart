@@ -7,6 +7,7 @@ import 'package:fridgify/utils/logger.dart';
 
 class FirebaseService {
   final FirebaseMessaging _fcm = FirebaseMessaging();
+  // ignore: cancel_subscriptions
   StreamSubscription iosSubscription;
 
   Logger _logger = Logger('FirebaseService');
@@ -15,7 +16,18 @@ class FirebaseService {
   void initState() {
     _logger.i("INITIALISING STATE");
 
-    if (Platform.isIOS) {
+    // Fix for web application because of known Platform._platform issues
+    bool ios = false;
+
+    try {
+      ios = Platform.isIOS;
+    }
+    catch(exception){
+      _logger.e('Platform error', exception: exception, popup: false);
+      ios = false;
+    }
+
+    if (ios) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         // save the token  OR subscribe to a topic here
       });
@@ -25,14 +37,14 @@ class FirebaseService {
 
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
+        _logger.i("onMessage: $message");
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
+        _logger.i("onLaunch: $message");
         // TODO optional
       },
       onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
+        _logger.i("onResume: $message");
         // TODO optional
       },
     );

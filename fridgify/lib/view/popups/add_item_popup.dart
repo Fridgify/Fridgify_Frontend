@@ -9,7 +9,6 @@ import 'package:fridgify/utils/logger.dart';
 import 'package:fridgify/utils/validator.dart';
 import 'package:fridgify/view/widgets/form_elements.dart';
 import 'package:fridgify/view/widgets/loader.dart';
-import 'package:fridgify/view/widgets/popup.dart';
 
 class AddItemPopUp extends StatefulWidget {
   final ContentRepository repo;

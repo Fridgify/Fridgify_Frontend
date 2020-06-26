@@ -13,9 +13,8 @@ class Constants {
 
   static const List<String> menuOptions = [
     addFridge,
-    logout,
     settings,
-    hopper,
+    logout,
   ];
 
 

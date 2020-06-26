@@ -44,11 +44,11 @@ class MenuElements {
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Text(
           'No items found. ',
-          style: Theme.of(context).textTheme.title,
+          style: Theme.of(context).textTheme.headline6,
         ),
         Text(
           'Add items to display them here. ',
-          style: Theme.of(context).textTheme.title,
+          style: Theme.of(context).textTheme.headline6,
         ),
       ]),
     );
@@ -56,9 +56,11 @@ class MenuElements {
 
   static Widget fridgeCard(Fridge fridge, BuildContext context, onChanged,
       ContentMenuController controller) {
-
     return GestureDetector(
-      onTap: () async => await MenuElements._navigateToNextFridge(fridge, context, onChanged),
+      onLongPress: () async =>
+          await Popups.editPopup(context, controller, onChanged, fridge),
+      onTap: () async =>
+          await MenuElements._navigateToNextFridge(fridge, context, onChanged),
       child: Padding(
           padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 0.0),
           child: Card(
@@ -68,34 +70,31 @@ class MenuElements {
                     child: Stack(
                       children: <Widget>[
                         Positioned(
-                            child: Column(
-                                children: [
+                            child: Column(children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                            Text(
-                              fridge.name ?? " ",
-                              style: TextStyle(
-                                  fontSize: 24, fontFamily: 'Montserrat'),
-                            ),
-                              IconButton(
-                                onPressed: () => {
-                                  controller.getUser(fridge, context)
-                                },
-                                icon: Icon(
-                                  Icons.people,
-                                  color: Colors.purple,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  fridge.name ?? " ",
+                                  style: TextStyle(
+                                      fontSize: 24, fontFamily: 'Montserrat'),
                                 ),
-
-                              )
-                          ]),
+                                IconButton(
+                                  onPressed: () =>
+                                      {controller.getUser(fridge, context)},
+                                  icon: Icon(
+                                    Icons.people,
+                                    color: Colors.purple,
+                                  ),
+                                )
+                              ]),
                           SizedBox(
                             height: 10,
                           ),
                           Row(
                             children: <Widget>[
                               Text(
-                                  "Members: ${fridge.members.length}",
+                                "Members: ${fridge.members.length}",
                                 style: TextStyle(
                                     fontSize: 16,
                                     fontFamily: 'Montserrat',
@@ -103,7 +102,7 @@ class MenuElements {
                               )
                             ],
                           ),
-                          Divider(),
+                          //Divider(),
                           SizedBox(
                             height: 10,
                           ),
@@ -118,16 +117,20 @@ class MenuElements {
                                     RaisedButton(
                                       color: Colors.purple,
                                       child: Text("Invite"),
-                                      onPressed: () async => await controller.generateQr(fridge, context),
+                                      onPressed: () async => await controller
+                                          .generateQr(fridge, context),
                                     ),
                                     FlatButton(
-                                      child: Text("Leave"),
-                                      onPressed: () async {
-                                        await Popups.confirmationPopup(context, "Leave fridge?", "Are you sure you want to leave ${fridge.name}? You can only re-join if you get invited again.", () => controller.leaveFridge(
-                                          fridge, context, onChanged),);
-                                      }
-
-                                    ),
+                                        child: Text("Leave"),
+                                        onPressed: () async {
+                                          await Popups.confirmationPopup(
+                                            context,
+                                            "Leave fridge?",
+                                            "Are you sure you want to leave ${fridge.name}? You can only re-join if you get invited again.",
+                                            () => controller.leaveFridge(
+                                                fridge, context, onChanged),
+                                          );
+                                        }),
                                   ],
                                 )))
                       ],
@@ -208,18 +211,18 @@ class MenuElements {
 
     return result;
   }
-  
-  static Future<void> _navigateToNextFridge(Fridge fridge, BuildContext context, Function onChanged) async {
+
+  static Future<void> _navigateToNextFridge(
+      Fridge fridge, BuildContext context, Function onChanged) async {
     Loader.showSimpleLoadingDialog(context);
     await fridge.contentRepository.fetchAll();
 
     await Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-        builder: (context) => FridgeDetailPage(fridge: fridge),
-    )).then((value) {
-        onChanged();
-      });
+          builder: (context) => FridgeDetailPage(fridge: fridge),
+        )).then((value) {
+      onChanged();
+    });
   }
 }
-

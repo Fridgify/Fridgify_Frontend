@@ -30,10 +30,8 @@ class StoreRepository implements Repository<Store, int> {
 
   Future<Store> getByName(String name) async {
     if(this.getAllWithName().values.contains(name)) {
-      print("Found");
       return this.getAllWithName().keys.firstWhere((element) => element.name == name);
     }
-    print("Not Found");
     Store s = Store.create(name: name);
     stores[await add(s)] = s;
     return s;

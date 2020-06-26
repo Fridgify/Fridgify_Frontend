@@ -51,7 +51,6 @@ class _ItemCircularSliderState extends State<ItemCircularSlider> {
 
   void _updateSlider() {
     _focusNode.unfocus();
-    print('done');
     setState(() {
       this.content.amount = int.parse(_controller.text);
       forceRebuild = ValueKey(DateTime.now());

@@ -31,4 +31,9 @@ class Item {
         name: json['name'],
         store: _storeRepository.get(json['store']));
   }
+
+  @override
+  String toString() {
+    return "id: $itemId, barcode: $barcode, name: $name, store: $store";
+  }
 }

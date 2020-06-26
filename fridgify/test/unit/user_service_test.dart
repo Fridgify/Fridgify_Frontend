@@ -262,7 +262,6 @@ void main() async {
 
       Map<String, bool> response = await userService.checkUsernameEmail(
           'Dieter', 'dieter.baum@gmail.com');
-      print(response);
 
       expect(false, response['user']);
       expect(true, response['mail']);

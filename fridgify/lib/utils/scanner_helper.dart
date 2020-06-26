@@ -43,6 +43,9 @@ class ScannerHelper {
       return null;
     }
     _logger.i("SCANNED BARCODE ${result.type}");
+    if(result.type == ResultType.Cancelled) {
+      return null;
+    }
     return result;
   }
 

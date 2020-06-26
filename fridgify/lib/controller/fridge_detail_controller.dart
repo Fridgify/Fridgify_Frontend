@@ -84,9 +84,10 @@ class FridgeDetailController {
 
       var result = await _scannerHelper.scan();
       if(result == null) {
-        Navigator.of(context).push(
+        _logger.i("CANCELLED OR NOT FOUND");
+        return Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => AddItemScreen(this.fridge.contentRepository, null, context, setState, _scannerHelper.getBarcode(result)),
+              builder: (context) => AddItemScreen(this.fridge.contentRepository, null, context, setState, null),
             ));
         /*return showDialog<void>(
             context: context,

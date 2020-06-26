@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           backgroundColor: Colors.white,
           primarySwatch: Colors.purple,
+          fontFamily: 'Montserrat',
         ),
         home: MyHomePage(
           title: 'Fridgify',

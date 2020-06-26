@@ -152,6 +152,8 @@ class AuthenticationService {
       Timer(Duration(seconds: 60/*timer*/), () async {
 
         _logger.i("API TOKEN DIED FETCH NEW");
+        if(!Repository.sharedPreferences.containsKey("clientToken"))
+          return;
         if (await Repository.sharedPreferences.remove("apiToken")) {
           await fetchApiToken();
         }

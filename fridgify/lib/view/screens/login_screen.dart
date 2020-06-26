@@ -28,68 +28,70 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           color: Colors.white,
           height: MediaQuery.of(context).size.height,
-          child: Padding(
-            padding: const EdgeInsets.all(36.0),
-            child: SingleChildScrollView(
-              child: Form(
-                key: key,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(
-                      height: 155.0,
-                      child: Image.asset(
-                        "assets/images/logo_full.png",
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    SizedBox(height: 45.0),
-                    FormTextField(
-                        key: Key('loginUsername'),
-                        style: style,
-                        controller: _controller.textInputControllerUser,
-                        obscureText: false,
-                        hintText: 'Username',
-                        validator: Validator.validateUser),
-                    SizedBox(height: 25.0),
-                    FormTextField(
-                        key: Key('loginPassword'),
-                        style: style,
-                        controller: _controller.textInputControllerPass,
-                        obscureText: true,
-                        hintText: 'Password',
-                        validator: Validator.validatePassword),
-                    SizedBox(
-                      height: 35.0,
-                    ),
-                    FormButton(
-                        key: Key('loginButton'),
-                        context: context,
-                        style: style,
-                        onPressed: () => _controller.login(context, key),
-                        text: 'Login'),
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    Column(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: key,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Label(
-                            text: "DON'T HAVE AN ACCOUNT?",
-                            key: Key('registerButton'),
-                            onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RegisterPage()))),
-                        Label(
-                            text: "DATAPRIVACY",
-                            onPressed: () async => await _controller.launchPrivacy()),
+                        SizedBox(
+                          height: 155.0,
+                          child: Image.asset(
+                            "assets/images/logo_full.png",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        SizedBox(height: 45.0),
+                        FormTextField(
+                            key: Key('loginUsername'),
+                            style: style,
+                            controller: _controller.textInputControllerUser,
+                            obscureText: false,
+                            hintText: 'Username',
+                            validator: Validator.validateUser),
+                        SizedBox(height: 25.0),
+                        FormTextField(
+                            key: Key('loginPassword'),
+                            style: style,
+                            controller: _controller.textInputControllerPass,
+                            obscureText: true,
+                            hintText: 'Password',
+                            validator: Validator.validatePassword),
+                        SizedBox(
+                          height: 35.0,
+                        ),
+                        FormButton(
+                            key: Key('loginButton'),
+                            context: context,
+                            style: style,
+                            onPressed: () => _controller.login(context, key),
+                            text: 'Login'),
+                        SizedBox(
+                          height: 15.0,
+                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+        Column(
+          children: <Widget>[
+            Label(
+                text: "DON'T HAVE AN ACCOUNT?",
+                key: Key('registerButton'),
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => RegisterPage()))),
+            Label(
+                text: "DATAPRIVACY",
+                onPressed: () async => await _controller.launchPrivacy()),
+            ])],
           ),
         ),
       ),

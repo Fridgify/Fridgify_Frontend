@@ -59,7 +59,6 @@ class ContentRepository implements Repository<Content, String> {
 
       /** ToDO: Replace by addToGroup **/
       //group();
-      print(c);
       addListToGroup(contentList.values.toList());
       return "Added";
     }

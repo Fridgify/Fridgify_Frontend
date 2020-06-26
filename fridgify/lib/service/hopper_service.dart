@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fridgify/data/repository.dart';
 import 'package:fridgify/utils/logger.dart';
+import 'package:fridgify/utils/web_helper.dart';
 import 'package:fridgify/view/widgets/popup.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HopperService {
   static final String _fetchApiUrl = "${Repository.baseURL}messaging/subscribe?service=2";
@@ -35,17 +35,15 @@ class HopperService {
       return response.data['subscribe_url'];
     }
     _logger.e('AN ERROR OCCURED WHILE SUBSCRIBING ${response.statusMessage}');
+    return null;
   }
 
   Future<void> requestToken() async {
+    WebHelper _webHelper = WebHelper();
+
     String url = await _fetchUrl();
 
-    if(await canLaunch(url)) {
-      await launch(url);
-    }
-    else {
-      _logger.e("FAILED TO LAUNCH URL $url");
-    }
+    _webHelper.launchUrl(url);
 
   }
 

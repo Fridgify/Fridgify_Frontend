@@ -24,13 +24,19 @@ class AddItemController {
   Item item;
 
   AddItemController({this.contentRepository, this.item}) {
+    DateTime date = DateTime.now();
     _logger.i('ITEM FOUND => ${this.item.toString()}');
     itemNameController.text = this.item != null ? this.item.name : "";
-    expirationDateController.text = "";
-    itemCountController.text = "";
-    itemAmountController.text = "";
+    expirationDateController.text = "${date.year}-${date.month < 10 ? "0${date.month}" : date.month}-${date.day < 10 ? "0${date.day}" : date.day}";
+    itemCountController.text = "0";
+    itemAmountController.text = "0";
     itemUnitController.text = "";
     itemStoreController.text = this.item != null ? this.item.store.name : "";
+  }
+
+  bool validateController() {
+    _logger.i("VALIDATING INPUT: ${itemNameController.text}, ${expirationDateController.text}, ${itemCountController.text}, ${itemAmountController.text}, ${itemUnitController.text}, ${itemStoreController.text}");
+    return (itemNameController.text.length > 0 && itemCountController.text != "0" && itemAmountController.text != "0" && itemUnitController.text.length > 0 && itemStoreController.text.length > 0);
   }
 
 

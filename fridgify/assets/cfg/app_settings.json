@@ -1,5 +1,5 @@
 {
-  "host": "api.fridgify.com",
+  "host": "api-dev.fridgify.com",
   "logging": true,
   "caching": true,
   "backend_version": "1.0"

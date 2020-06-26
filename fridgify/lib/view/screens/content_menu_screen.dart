@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fridgify/controller/content_menu_controller.dart';
 import 'package:fridgify/data/fridge_repository.dart';
 import 'package:fridgify/service/auth_service.dart';
@@ -37,6 +38,7 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
     });
   }
 
+
   void _onRefresh() async{
     // monitor network fetch
     await _authenticationService.initiateRepositories();
@@ -57,7 +59,6 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
   }
 
   void _onChanged() {
-    print("Parent call");
     setState(() {
 
     });
@@ -106,6 +107,12 @@ class _ContentMenuPageState extends State<ContentMenuPage> with WidgetsBindingOb
               },
             )
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async => await _controller.qrCodeHandler(),
+          child: Icon(
+              FontAwesomeIcons.qrcode,
+          ),
         ),
         body: SmartRefresher(
           enablePullDown: true,

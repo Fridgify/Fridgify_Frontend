@@ -63,6 +63,25 @@ class UserService {
     return this.user;
   }
 
+  Future<bool> delete() async {
+    _logger.i(
+        'DELETING USER FROM URL: $userApi');
+
+    var response = await dio.delete(userApi,
+        options: Options(
+            headers: Repository.getHeaders())
+    );
+
+    _logger.i('DELETING USER: ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      _logger.i('DELETED SUCCESSFUL $user');
+
+      return true;
+    }
+    throw new FailedToFetchContentException();
+  }
+
   Future<User> update(User user, String parameter, dynamic attribute) async {
     _logger.i(
         'UPDATING $parameter with $attribute FROM URL: $userApi');
